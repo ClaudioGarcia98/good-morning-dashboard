@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import ReactPlayer from 'react-player';
-import { useSettings } from '../context/SettingsContext';
+
 
 const DAYS = ['sundays', 'mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays'];
 const DAY_FILTERS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -188,7 +187,7 @@ export default function AnimeSchedule() {
         setTrailerPortal(document.body);
     }, []);
 
-    const { volume, hasInteracted } = useSettings();
+
     const [previewTrailer, setPreviewTrailer] = useState(null);
     const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
     const hoverTimer = useRef(null);
@@ -366,19 +365,13 @@ export default function AnimeSchedule() {
                 onMouseLeave={handleTrailerMouseLeave}
                 >
                     <div style={{ borderRadius: '12px', overflow: 'hidden', width: '300px', height: '169px' }}>
-                        <ReactPlayer 
-                            url={`https://www.youtube.com/watch?v=${previewTrailer}`} 
-                            playing={true} 
-                            muted={!hasInteracted}
-                            controls={false}
-                            volume={volume}
-                            width="300px" 
-                            height="169px" 
-                            config={{
-                                youtube: {
-                                    playerVars: { modestbranding: 1, showinfo: 0, rel: 0 }
-                                }
-                            }}
+                        <iframe
+                            src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&mute=1&modestbranding=1&showinfo=0&rel=0&controls=0&playsinline=1`}
+                            width="300"
+                            height="169"
+                            style={{ border: 'none', display: 'block' }}
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
                         />
                     </div>
                 </div>

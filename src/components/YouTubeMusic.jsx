@@ -10,6 +10,7 @@ function YouTubeMusic() {
     const [hasError, setHasError] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [showVideo, setShowVideo] = useState(false);
     const playerRef = useRef(null);
 
     const currentUrl = musicUrl || 'https://www.youtube.com/watch?v=5qap5aO4i9A';
@@ -19,6 +20,9 @@ function YouTubeMusic() {
         if (!currentUrl) return;
         setSongTitle('');
         setHasError(false);
+        setIsPlaying(false);
+        setProgress(0);
+        setDuration(0);
 
         const fetchTitle = async () => {
             try {
@@ -30,7 +34,7 @@ function YouTubeMusic() {
                     if (data.title) setSongTitle(data.title);
                 }
             } catch (e) {
-                // Silently fail, title is just a nice-to-have
+                // Silently fail
             }
         };
         fetchTitle();
@@ -41,7 +45,6 @@ function YouTubeMusic() {
     };
 
     const togglePlay = () => {
-        if (!hasInteracted) return;
         setIsPlaying(prev => !prev);
     };
 
@@ -78,14 +81,14 @@ function YouTubeMusic() {
 
     const handleSeek = (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
-        const fraction = (e.clientX - rect.left) / rect.width;
+        const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
         if (playerRef.current) {
             playerRef.current.seekTo(fraction, 'fraction');
         }
     };
 
     return (
-        <div style={{
+        <div className="opacity-transition yt-music-box" style={{
             marginTop: '30px',
             background: 'rgba(0,0,0,0.4)',
             borderRadius: '24px',
@@ -98,27 +101,31 @@ function YouTubeMusic() {
             display: 'flex',
             flexDirection: 'column',
             gap: '8px'
-        }} className="opacity-transition yt-music-box">
+        }}>
 
-            {/* Hidden player - use position absolute + overflow hidden instead of display:none */}
+            {/* 
+                YouTube REQUIRES the iframe to be visible for playback.
+                We show a tiny 1x1 player that expands when toggled.
+                The player must remain in the DOM and visible (not display:none or off-screen).
+            */}
             <div style={{
-                position: 'absolute',
-                width: '1px',
-                height: '1px',
+                width: showVideo ? '100%' : '1px',
+                height: showVideo ? '160px' : '1px',
                 overflow: 'hidden',
-                opacity: 0,
-                pointerEvents: 'none',
-                left: '-9999px'
+                borderRadius: showVideo ? '12px' : 0,
+                transition: 'all 0.3s ease',
+                marginBottom: showVideo ? '4px' : 0,
+                opacity: showVideo ? 1 : 0.01
             }}>
                 <ReactPlayer
                     ref={playerRef}
                     url={currentUrl}
                     playing={isPlaying}
-                    controls={false}
+                    controls={showVideo}
                     volume={volume}
-                    muted={!hasInteracted}
-                    width="200px"
-                    height="200px"
+                    muted={false}
+                    width="100%"
+                    height={showVideo ? '160px' : '1px'}
                     onReady={handleReady}
                     onError={handleError}
                     onProgress={handleProgress}
@@ -132,7 +139,8 @@ function YouTubeMusic() {
                                 modestbranding: 1,
                                 rel: 0,
                                 showinfo: 0,
-                                origin: window.location.origin
+                                origin: window.location.origin,
+                                playsinline: 1
                             }
                         }
                     }}
@@ -146,7 +154,7 @@ function YouTubeMusic() {
                     disabled={hasError}
                     title={hasError ? 'Unable to play this URL' : (isPlaying ? 'Pause' : 'Play')}
                     style={{
-                        background: hasError ? 'rgba(255,100,100,0.6)' : 'var(--theme-color, #00ffcc)',
+                        background: hasError ? 'rgba(255,100,100,0.6)' : 'var(--accent-color, #00ffcc)',
                         border: 'none',
                         borderRadius: '50%',
                         width: '36px',
@@ -157,7 +165,7 @@ function YouTubeMusic() {
                         cursor: hasError ? 'not-allowed' : 'pointer',
                         color: '#000',
                         flexShrink: 0,
-                        boxShadow: hasError ? 'none' : '0 4px 15px rgba(0, 255, 204, 0.4)',
+                        boxShadow: hasError ? 'none' : '0 4px 15px var(--accent-glow, rgba(0,255,204,0.4))',
                         transition: 'all 0.2s ease'
                     }}
                 >
@@ -216,7 +224,6 @@ function YouTubeMusic() {
                         }} />
                     </div>
 
-                    {/* Time display */}
                     {duration > 0 && (
                         <div style={{
                             display: 'flex',
@@ -230,6 +237,36 @@ function YouTubeMusic() {
                         </div>
                     )}
                 </div>
+
+                {/* Toggle video visibility */}
+                <button
+                    onClick={() => setShowVideo(v => !v)}
+                    title={showVideo ? 'Hide video' : 'Show video'}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'rgba(255,255,255,0.5)',
+                        padding: '4px',
+                        flexShrink: 0,
+                        transition: 'color 0.2s'
+                    }}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        {showVideo ? (
+                            <>
+                                <path d="M18 15l5-3-5-3v6z" />
+                                <path d="M2 8v8a2 2 0 002 2h12V6H4a2 2 0 00-2 2z" />
+                                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" />
+                            </>
+                        ) : (
+                            <>
+                                <path d="M23 7l-7 5 7 5V7z" />
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                            </>
+                        )}
+                    </svg>
+                </button>
             </div>
 
             {/* Volume row */}
