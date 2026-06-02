@@ -356,6 +356,7 @@ body {
 }
 .weather-chevron {
     font-size: 0.72rem; color: var(--text-secondary);
+    display: inline-block;
     transition: var(--transition-standard);
 }
 .weather-widget.expanded .weather-chevron {
