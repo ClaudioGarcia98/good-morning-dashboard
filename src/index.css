@@ -561,16 +561,15 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;
 }
 .as-close {
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.7);
-    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--surface-30); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-secondary);
+    width: 36px; height: 36px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
-    line-height: 1;
+    cursor: pointer; transition: var(--transition-standard);
 }
 .as-close:hover { 
-    background: #ff6b6b; color: white; border-color: #ff6b6b;
-    transform: scale(1.1); box-shadow: 0 0 10px rgba(255,107,107,0.4);
+    background: rgba(255, 80, 80, 0.15); color: #ff6b6b; border-color: rgba(255, 80, 80, 0.3);
+    transform: scale(1.1); box-shadow: 0 0 15px rgba(255,107,107,0.2);
 }
 .as-days {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
