@@ -7,13 +7,11 @@
     <style>
         /* ── Reset ─────────────────────────────────────────── */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
             --accent-color: #FFD26A;
             --accent-glow:  rgba(255, 210, 106, 0.2);
             --ui-opacity:   1;
         }
-
         /* ── Load Animations ───────────────────────────────── */
         @keyframes fadeSlideIn {
             from { opacity: 0; transform: translateY(16px); }
@@ -23,7 +21,6 @@
             from { opacity: 0; transform: translateY(-14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-
         /* ── Body ──────────────────────────────────────────── */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -34,14 +31,12 @@
             background-size: cover;
             padding-left: 8%;
         }
-
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(90deg,
                 rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%);
             z-index: 1;
         }
-
         /* ── Interactive UI Layer ──────────────────────────── */
         .interactive-ui {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -49,26 +44,24 @@
             opacity: var(--ui-opacity);
             transition: opacity 0.8s ease-in-out;
             pointer-events: none;
+            display: flex; align-items: center; justify-content: flex-start;
         }
-
         /* ── Main Container ────────────────────────────────── */
-       .container {
-            position: absolute; left: 8%; top: 50%;
-            transform: translateY(-50%);
-            max-width: 500px; width: 100%;
-            max-height: 85vh; /* Fixes the cut-off issue */
-            overflow-y: auto; /* Allows scrolling inside if it gets too tall */
-            scrollbar-width: none; /* Hides the scrollbar for a clean look */
+        .container {
+            margin-left: 8%;
+            max-width: 460px; width: 100%;
+            max-height: 90vh;
+            display: flex; flex-direction: column;
             pointer-events: auto;
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.05) 100%);
             padding: 30px; border-radius: 24px;
             border: 1px solid rgba(255,255,255,0.05);
             animation: fadeSlideIn 0.55s ease both;
-            display: flex;
-            flex-direction: column;
+        }
+        #greeting, .clock-row, #date, .search-container, .speed-dial, #quote {
+            flex-shrink: 0;
         }
         .container::-webkit-scrollbar { display: none; }
-
         /* ── Greeting ──────────────────────────────────────── */
         #greeting {
             font-size: 1.3rem; font-weight: 600;
@@ -78,114 +71,36 @@
             transition: color 0.5s ease;
             animation: fadeSlideIn 0.5s ease 0.08s both;
         }
-
         /* ── Clock Row (digital + optional analog) ─────────── */
         .clock-row {
             display: flex; align-items: center; gap: 16px;
             margin-bottom: 10px;
             animation: fadeSlideIn 0.5s ease 0.13s both;
         }
-
         #time {
             font-size: 6rem; font-weight: 700;
             letter-spacing: -3px; line-height: 0.95;
             text-shadow: 0 4px 15px rgba(0,0,0,0.6);
             transition: font-size 0.3s ease;
         }
-
         /* Clock mode: digital = default */
         #analogWrap                         { display: none; flex-shrink: 0; }
         .clock-row.mode-analog  #time       { display: none; }
         .clock-row.mode-analog  #analogWrap { display: flex; align-items: center; justify-content: center; }
         .clock-row.mode-both    #time       { font-size: 4.5rem; }
         .clock-row.mode-both    #analogWrap { display: flex; align-items: center; }
-
         #analogCanvas { display: block; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
-
         #date {
-            font-size: 1.3rem; margin-bottom: 20px; opacity: 0.9;
+            font-size: 1.3rem; margin-bottom: 25px; opacity: 0.9;
             text-shadow: 0 2px 8px rgba(0,0,0,0.5);
             animation: fadeSlideIn 0.5s ease 0.18s both;
         }
-
-        /* ── Anime Dashboard Section ────────────────────────── */
-        .anime-dashboard-section {
-            margin-bottom: 20px;
-            animation: fadeSlideIn 0.5s ease 0.2s both;
-        }
-        .anime-dashboard-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-color);
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
-        .anime-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .anime-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 8px 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.25s ease;
-        }
-        .anime-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(4px);
-        }
-        .anime-card.is-watching {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-glow);
-            background: rgba(255, 255, 255, 0.07);
-        }
-        .anime-thumb {
-            width: 36px;
-            height: 48px;
-            object-fit: cover;
-            border-radius: 6px;
-            background: rgba(0,0,0,0.2);
-        }
-        .anime-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .anime-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .anime-meta {
-            font-size: 0.75rem;
-            opacity: 0.6;
-            margin-top: 2px;
-        }
-        .anime-badge-watching {
-            font-size: 0.65rem;
-            background: var(--accent-color);
-            color: #000;
-            padding: 1px 6px;
-            border-radius: 8px;
-            font-weight: 700;
-            margin-left: 6px;
-            text-transform: uppercase;
-        }
-
         /* ── Search ────────────────────────────────────────── */
         .search-container {
             position: relative; margin-bottom: 8px; width: 100%;
-            z-index: 50;
+            z-index: 50; /* must be above speed-dial and quote */
             animation: fadeSlideIn 0.5s ease 0.23s both;
         }
-
         .search-container input {
             width: 100%; padding: 14px 20px 14px 52px;
             font-size: 1rem; font-family: inherit;
@@ -205,7 +120,7 @@
             backdrop-filter: blur(12px);
             box-shadow: 0 4px 20px var(--accent-glow);
         }
-
+        /* magnifier icon */
         .search-icon {
             position: absolute; top: 24px; left: 22px;
             transform: translateY(-50%);
@@ -219,7 +134,7 @@
             background: rgba(255,255,255,0.85);
             transform: rotate(-45deg);
         }
-
+        /* engine badge (shown when prefix detected) */
         .engine-badge {
             position: absolute; top: 50%; left: 46px;
             transform: translateY(-50%);
@@ -229,20 +144,56 @@
             white-space: nowrap; display: none;
         }
         .engine-badge.show { display: block; }
-
-        .search-hint {
-            font-size: 0.7rem; opacity: 0.3;
-            padding-left: 6px; margin-bottom: 20px;
+        /* ── Shortcuts & Prefixes Styling ────────────────── */
+        .shortcut-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            opacity: 0.85;
             line-height: 1.6;
-            animation: fadeSlideIn 0.5s ease 0.26s both;
         }
-        .search-hint kbd {
-            background: rgba(255,255,255,0.12);
-            padding: 1px 5px; border-radius: 4px;
-            font-size: 0.72rem; font-family: inherit;
+        .shortcut-item kbd {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-family: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
         }
-        .search-hint code { opacity: 0.8; font-family: monospace; font-size: 0.8rem; }
-
+        .prefix-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 0.78rem;
+            opacity: 0.85;
+            margin-top: 6px;
+        }
+        .prefix-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .prefix-item code {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: color 0.5s ease;
+        }
+        /* ── Search typing indicator ──────────────────────── */
         @keyframes iconGlow {
             0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
             50%       { box-shadow: 0 0 0 6px transparent; }
@@ -256,7 +207,6 @@
             background: var(--accent-color);
             transition: background 0.3s ease;
         }
-
         /* ── Suggestions ───────────────────────────────────── */
         .suggestions-list {
             position: absolute; top: calc(100% + 5px); left: 0; width: 100%;
@@ -266,7 +216,6 @@
             display: none; z-index: 100;
             box-shadow: 0 12px 36px rgba(0,0,0,0.8);
         }
-
         .suggestions-list li {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 18px;
@@ -277,18 +226,15 @@
         .suggestions-list li.selected {
             background: rgba(255,255,255,0.12); color: var(--accent-color);
         }
-
         .sug-group {
             padding: 7px 18px 3px; font-size: 0.65rem;
             text-transform: uppercase; letter-spacing: 1.5px;
             opacity: 0.3; cursor: default; pointer-events: none;
         }
         .sug-group:hover { background: transparent; color: inherit; }
-
         .sug-icon    { font-size: 0.8rem; opacity: 0.5; flex-shrink: 0; }
         .sug-favicon { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; opacity: 0.75; }
         .sug-text    { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
         .sug-remove {
             background: none; border: none; padding: 2px 4px;
             color: rgba(255,255,255,0.25); font-size: 1rem; line-height: 1;
@@ -298,13 +244,11 @@
         }
         .suggestions-list li:hover .sug-remove { opacity: 1; }
         .sug-remove:hover { color: rgba(255,255,255,0.85) !important; background: rgba(255,255,255,0.08); }
-
         /* ── Speed Dial ────────────────────────────────────── */
         .speed-dial {
             display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;
             animation: fadeSlideIn 0.5s ease 0.31s both;
         }
-
         .speed-dial-item {
             display: flex; align-items: center; justify-content: center;
             width: 45px; height: 45px; border-radius: 50%;
@@ -321,7 +265,6 @@
             box-shadow: 0 5px 15px var(--accent-glow);
         }
         .speed-dial-item:hover svg { transform: scale(1.1); }
-
         /* ── Quote ─────────────────────────────────────────── */
         #quote {
             font-size: 1.1rem; font-style: italic; line-height: 1.6;
@@ -332,7 +275,6 @@
             animation: fadeSlideIn 0.5s ease 0.36s both;
         }
         #quote:hover { opacity: 1; }
-
         /* ── Weather Widget ────────────────────────────────── */
         .weather-widget {
             position: absolute; top: 30px; right: 40px;
@@ -345,7 +287,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             pointer-events: auto; cursor: pointer; user-select: none;
             transition: all 0.25s ease;
-            z-index: 30;
             animation: fadeSlideDown 0.5s ease 0.1s both;
         }
         .weather-widget:hover {
@@ -359,7 +300,6 @@
         .weather-widget.expanded .weather-chevron {
             transform: rotate(180deg); opacity: 0.85;
         }
-
         /* Extended weather panel */
         .weather-panel {
             position: absolute; top: 80px; right: 40px;
@@ -373,13 +313,11 @@
             transform: scaleY(0.85) translateY(-8px);
             opacity: 0; visibility: hidden;
             transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-            z-index: 30;
         }
         .weather-panel.open {
             transform: scaleY(1) translateY(0);
             opacity: 1; visibility: visible;
         }
-
         .wd-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 5px 0; font-size: 0.86rem;
@@ -388,36 +326,6 @@
         .wd-row:last-child { border-bottom: none; }
         .wd-row span:first-child { opacity: 0.5; }
         .wd-row span:last-child  { font-weight: 500; }
-
-        /* ── Anime Schedule Sidebar Trigger Widget ─────────── */
-        .anime-sidebar-widget {
-            position: absolute; top: 30px; right: 280px;
-            display: flex; align-items: center; gap: 8px;
-            font-size: 1.1rem;
-            background: rgba(0,0,0,0.25); padding: 8px 14px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.1);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            pointer-events: auto; cursor: pointer; user-select: none;
-            transition: all 0.25s ease;
-            z-index: 30;
-            animation: fadeSlideDown 0.5s ease 0.15s both;
-        }
-        .anime-sidebar-widget:hover {
-            background: rgba(0,0,0,0.4);
-            border-color: rgba(255,255,255,0.2);
-        }
-
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            opacity: 0.4;
-            margin-bottom: 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 6px;
-        }
-
         /* ── Settings Toggle ───────────────────────────────── */
         .settings-toggle {
             position: absolute; bottom: 30px; left: 30px;
@@ -431,7 +339,6 @@
         }
         .settings-toggle:hover { background: rgba(255,255,255,0.25); transform: rotate(45deg); }
         .settings-toggle svg   { fill: white; width: 20px; height: 20px; }
-
         /* ── Settings Panel ────────────────────────────────── */
         .settings-panel {
             position: absolute; bottom: 85px; left: 30px;
@@ -448,29 +355,24 @@
         .settings-panel::-webkit-scrollbar { width: 3px; }
         .settings-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
         .settings-panel.open { transform: translateY(0); opacity: 1; visibility: visible; }
-
         .sp-title {
             font-size: 1rem; font-weight: 600; letter-spacing: 1px;
             color: var(--accent-color);
             border-bottom: 1px solid rgba(255,255,255,0.08);
             padding-bottom: 10px; margin-bottom: 14px;
         }
-
         .sp-section {
             margin-bottom: 14px; padding-bottom: 14px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .sp-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-
         .sp-label {
             font-size: 0.63rem; text-transform: uppercase;
             letter-spacing: 2px; opacity: 0.3; margin-bottom: 9px;
         }
-
         .sp-group { margin-bottom: 9px; }
         .sp-group:last-child { margin-bottom: 0; }
         .sp-group > label { display: block; font-size: 0.81rem; margin-bottom: 5px; opacity: 0.75; }
-
         .sp-group input[type="text"] {
             width: 100%;
             background: rgba(255,255,255,0.07);
@@ -481,10 +383,8 @@
             transition: border-color 0.2s;
         }
         .sp-group input[type="text"]:focus { border-color: var(--accent-color); }
-
         /* ── Pill Pickers (themes, fonts, clock) ───────────── */
         .pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
-
         .pill {
             background: rgba(255,255,255,0.07);
             border: 1px solid rgba(255,255,255,0.14);
@@ -501,14 +401,11 @@
             border-color: var(--accent-color);
             color: black; font-weight: 600;
         }
-
         .tdot {
             width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
         }
-
         /* ── GIF Picker ────────────────────────────────────── */
         #gifFileInput { display: none; }
-
         .gif-btn {
             width: 100%;
             background: rgba(255,255,255,0.07);
@@ -520,7 +417,6 @@
             transition: all 0.2s; user-select: none;
         }
         .gif-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--accent-color); }
-
         .gif-name {
             margin-top: 5px; font-size: 0.72rem; opacity: 0.38;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 2px;
@@ -538,7 +434,6 @@
         }
         .anime-toggle:hover { background: rgba(255,255,255,0.25); transform: scale(1.1); box-shadow: 0 0 10px var(--accent-glow); }
         .anime-toggle svg { fill: white; width: 20px; height: 20px; }
-
         .anime-sidebar {
             position: absolute; top: 0; right: -450px;
             width: 450px; height: 100vh;
@@ -552,7 +447,7 @@
             box-shadow: -10px 0 30px rgba(0,0,0,0.5);
         }
         .anime-sidebar.open { right: 0; }
-        
+
         .as-header {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 20px;
@@ -564,7 +459,6 @@
             font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
         }
         .as-close:hover { color: white; }
-
         .as-days {
             display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 10px;
             margin-bottom: 15px; justify-content: center;
@@ -579,13 +473,12 @@
             background: var(--accent-color); color: black; font-weight: bold; border-color: var(--accent-color);
             box-shadow: 0 0 12px var(--accent-glow);
         }
-        
+
         .as-content {
             flex: 1; overflow-y: auto; padding-right: 5px;
         }
         .as-content::-webkit-scrollbar { width: 4px; }
         .as-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
-
         .anime-card {
             display: flex; gap: 15px; padding: 12px;
             background: rgba(255,255,255,0.05); border-radius: 14px;
@@ -613,14 +506,13 @@
         .anime-time {
             font-size: 0.75rem; opacity: 0.7; display: flex; align-items: center; gap: 6px;
         }
-        
+
         /* Highlight for Watched */
         .watched-highlight {
             border: 2px solid var(--accent-color);
             box-shadow: 0 0 10px var(--accent-glow);
         }
-        
-        
+
         /* Main Container Box */
         .today-anime-box {
             margin-top: 25px;
@@ -636,7 +528,7 @@
         }
         .tab-title { font-weight: 600; color: var(--accent-color); }
         .tab-error { font-size: 0.7rem; color: #ff6b6b; opacity: 0; transition: opacity 0.5s; font-weight: 600; background: rgba(255, 107, 107, 0.1); padding: 2px 6px; border-radius: 4px;}
-        
+
         .tab-list {
             display: flex; flex-direction: column; gap: 8px;
             overflow-y: auto; padding-right: 4px;
@@ -657,256 +549,11 @@
         .tab-item-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
         .tab-item-meta { font-size: 0.65rem; opacity: 0.6; }
         .tab-item.watched-highlight { margin-bottom: 4px; }
-
-            font-size: 0.87rem; font-family: inherit;
-            transition: border-color 0.2s;
-        }
-        .sp-group input[type="text"]:focus { border-color: var(--accent-color); }
-
-        /* ── Pill Pickers (themes, fonts, clock) ───────────── */
-        .pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
-
-        .pill {
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.14);
-            color: rgba(255,255,255,0.6);
-            padding: 4px 11px; border-radius: 20px;
-            font-size: 0.75rem; cursor: pointer;
-            transition: all 0.2s; font-family: inherit;
-            display: flex; align-items: center; gap: 5px;
-            white-space: nowrap;
-        }
-        .pill:hover { background: rgba(255,255,255,0.13); color: white; }
-        .pill.active {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-            color: black; font-weight: 600;
-        }
-
-        .tdot {
-            width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-        }
-
-        /* ── GIF Picker ────────────────────────────────────── */
-        #gifFileInput { display: none; }
-
-        .gif-btn {
-            width: 100%;
-            background: rgba(255,255,255,0.07);
-            border: 1px dashed rgba(255,255,255,0.22);
-            border-radius: 8px; padding: 8px 12px;
-            color: rgba(255,255,255,0.78);
-            cursor: pointer; font-size: 0.82rem; font-family: inherit;
-            display: flex; align-items: center; gap: 8px;
-            transition: all 0.2s; user-select: none;
-        }
-        .gif-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--accent-color); }
-
-        .gif-name {
-            margin-top: 5px; font-size: 0.72rem; opacity: 0.38;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 2px;
-        }
-        .gif-name.set { opacity: 0.6; color: var(--accent-color); }
-
-        /* ── Skeleton Loading ─────────────────────────────── */
-        @keyframes shimmer {
-            0% { background-position: -200px 0; }
-            100% { background-position: 200px 0; }
-        }
-        .skeleton-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 6px 8px;
-        }
-        .skeleton-img {
-            width: 35px; height: 50px; border-radius: 4px; flex-shrink: 0;
-            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-            background-size: 400px 100%;
-            animation: shimmer 1.5s ease-in-out infinite;
-        }
-        .skeleton-text {
-            flex: 1; display: flex; flex-direction: column; gap: 6px;
-        }
-        .skeleton-line {
-            height: 10px; border-radius: 4px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-            background-size: 400px 100%;
-            animation: shimmer 1.5s ease-in-out infinite;
-        }
-        .skeleton-line.short { width: 60%; }
-        .skeleton-line.long { width: 90%; }
-
-        /* ── Particle Canvas ──────────────────────────────── */
-        #particleCanvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; pointer-events: none;
-        }
-
-        /* ── Countdown Badge ──────────────────────────────── */
-        .countdown-badge {
-            font-size: 0.58rem; font-weight: 700;
-            padding: 2px 7px; border-radius: 10px;
-            white-space: nowrap; flex-shrink: 0; margin-left: auto;
-            letter-spacing: 0.3px;
-        }
-        .countdown-badge.upcoming {
-            background: rgba(255, 210, 106, 0.15); color: #FFD26A;
-            border: 1px solid rgba(255, 210, 106, 0.25);
-        }
-        .countdown-badge.aired {
-            background: rgba(80, 200, 120, 0.12); color: #50c878;
-            border: 1px solid rgba(80, 200, 120, 0.2);
-        }
-        .countdown-badge.live {
-            background: rgba(255, 80, 80, 0.15); color: #ff5050;
-            border: 1px solid rgba(255, 80, 80, 0.25);
-            animation: livePulse 2s ease-in-out infinite;
-        }
-        @keyframes livePulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        /* ── Episode Tag ──────────────────────────────────── */
-        .ep-tag {
-            font-size: 0.58rem; font-weight: 600;
-            padding: 1px 6px; border-radius: 8px;
-            background: rgba(138, 180, 248, 0.12); color: #8ab4f8;
-            border: 1px solid rgba(138, 180, 248, 0.2);
-            margin-left: 6px; white-space: nowrap;
-        }
-
-        /* ── Add to MAL Button ────────────────────────────── */
-        .add-mal-btn {
-            width: 24px; height: 24px; border-radius: 50%;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            color: rgba(255,255,255,0.4);
-            font-size: 0.85rem; line-height: 1;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; flex-shrink: 0; margin-left: auto;
-            transition: all 0.25s ease; text-decoration: none;
-        }
-        .add-mal-btn:hover {
-            background: var(--accent-color); color: black;
-            border-color: var(--accent-color);
-            transform: scale(1.15);
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        /* ── Weekly Heatmap ────────────────────────────────── */
-        .heatmap-row {
-            display: flex; gap: 6px; align-items: center;
-            margin-bottom: 10px; justify-content: center;
-        }
-        .heatmap-dot {
-            width: 28px; height: 28px; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.55rem; font-weight: 700; color: rgba(255,255,255,0.7);
-            transition: all 0.3s ease; cursor: default;
-            position: relative; border: 1px solid transparent;
-        }
-        .heatmap-dot.today {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 8px var(--accent-glow);
-        }
-        .heatmap-dot .heatmap-tooltip {
-            position: absolute; bottom: calc(100% + 6px); left: 50%;
-            transform: translateX(-50%) scale(0.9); opacity: 0;
-            background: rgba(0,0,0,0.9); color: white;
-            padding: 4px 8px; border-radius: 6px; font-size: 0.6rem;
-            white-space: nowrap; pointer-events: none;
-            transition: all 0.2s ease; font-weight: 400;
-        }
-        .heatmap-dot:hover .heatmap-tooltip {
-            opacity: 1; transform: translateX(-50%) scale(1);
-        }
-
-        /* ── Trailer Preview ──────────────────────────────── */
-        .trailer-popup {
-            position: fixed; z-index: 200;
-            width: 340px; height: 210px;
-            background: rgba(8, 8, 8, 0.95);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 14px; overflow: hidden;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.7);
-            backdrop-filter: blur(20px);
-            transform: scale(0.92) translateY(6px); opacity: 0;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-        }
-        .trailer-popup.visible {
-            transform: scale(1) translateY(0); opacity: 1;
-        }
-        .trailer-popup iframe {
-            width: 100%; height: 100%; border: none;
-        }
-        .trailer-thumb {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; transition: opacity 0.4s ease;
-        }
-        .trailer-thumb.hidden { opacity: 0; pointer-events: none; }
-        .trailer-play-icon {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 48px; height: 48px; border-radius: 50%;
-            background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.4);
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .trailer-play-icon::after {
-            content: ''; width: 0; height: 0;
-            border-style: solid; border-width: 8px 0 8px 14px;
-            border-color: transparent transparent transparent white;
-            margin-left: 3px;
-        }
-        .trailer-loading {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.7rem; opacity: 0.5; white-space: nowrap;
-        }
-
-        /* ── Notification Badge ────────────────────────────── */
-        .speed-dial-item { position: relative; }
-        .mal-notification-badge {
-            position: absolute; top: 2px; right: 2px;
-            width: 10px; height: 10px; border-radius: 50%;
-            background: #ff5050;
-            box-shadow: 0 0 8px rgba(255, 80, 80, 0.6);
-            animation: badgePulse 1.5s ease-in-out 3;
-            pointer-events: none;
-        }
-        @keyframes badgePulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-        }
     </style>
 </head>
 <body>
-    <canvas id="particleCanvas"></canvas>
-    
-    <div class="trailer-popup" id="trailerPopup">
-        <div class="trailer-loading">Loading trailer...</div>
-        <img class="trailer-thumb" id="trailerThumb" src="" alt="Thumbnail">
-        <div class="trailer-play-icon" id="trailerPlayIcon"></div>
-        <iframe id="trailerFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    </div>
-
     <div class="overlay" id="overlay"></div>
-
     <div class="interactive-ui" id="mainUi">
-
-        <div class="anime-sidebar-widget" id="animeSidebarWidget">
-            <span>📺</span>
-            <span>Schedule Overflow</span>
-        </div>
-        <!-- Permanent Anime Sidebar Panel -->
-        <div class="anime-sidebar-panel" id="animeSidebarPanel">
-            <div class="anime-sidebar-header">More of Today's Releases</div>
-            <div class="anime-grid" id="animeSidebarGrid">
-                <!-- Overflow anime items drop here dynamically -->
-            </div>
-        </div>
-
         <div class="weather-widget" id="weatherWidget">
             <span id="weatherIcon">☀️</span>
             <span id="weatherTemp">--°C</span>
@@ -919,25 +566,15 @@
             <div class="wd-row"><span>🌅 Sunrise</span><span id="wSunrise">--:--</span></div>
             <div class="wd-row"><span>🌇 Sunset</span><span id="wSunset">--:--</span></div>
         </div>
-
         <div class="container">
             <div id="greeting">Hello!</div>
-
             <div class="clock-row mode-digital" id="clockRow">
                 <div id="time">00:00</div>
                 <div id="analogWrap">
                     <canvas id="analogCanvas"></canvas>
                 </div>
             </div>
-
             <div id="date">Loading…</div>
-
-            <div class="anime-dashboard-section" id="animeDashboardSection" style="display:none;">
-                <div class="anime-dashboard-title">On Air Today</div>
-                <div class="heatmap-row" id="weeklyHeatmap"></div>
-                <div class="anime-grid" id="animeDashboardGrid"></div>
-            </div>
-
             <form id="searchForm" class="search-container">
                 <div class="search-icon"></div>
                 <div class="engine-badge" id="engineBadge"></div>
@@ -946,11 +583,6 @@
                        autocomplete="off" autofocus>
                 <ul class="suggestions-list" id="suggestionsList"></ul>
             </form>
-            <div class="search-hint">
-                <kbd>Ctrl</kbd>+<kbd>Space</kbd> to focus &nbsp;·&nbsp;
-                <code>yt</code> <code>r</code> <code>g</code> <code>wiki</code> <code>ddg</code> + <kbd>Space</kbd> to switch engine
-            </div>
-
             <div class="speed-dial">
                 <a href="https://youtube.com" class="speed-dial-item" title="YouTube" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24"><path fill="#FF0000" d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
@@ -961,34 +593,32 @@
                 <a href="https://netflix.com" class="speed-dial-item" title="Netflix" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24"><path fill="#E50914" d="M5.398 0v.006c3.028 8.556 5.37 15.175 8.348 23.596 2.344.058 4.85.398 4.854.398-2.8-7.924-5.923-16.747-8.487-24zm8.489 0v9.63L18.6 22.951c-.043-7.86-.004-15.913.002-22.95zM5.398 1.05V24c1.873-.225 2.81-.312 4.715-.398v-9.22z"/></svg>
                 </a>
-                <a href="https://myanimelist.net" class="speed-dial-item" title="MyAnimeList" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24"><path fill="#2E51A2" d="M11.668 15.006c-.663 0-1.258-.231-1.636-.576-.379-.344-.543-.787-.543-1.424V3.06h-2.92v10.027c0 1.554.512 2.766 1.517 3.553.96.755 2.221 1.058 3.844 1.058 1.455 0 2.54-.153 3.327-.373v-2.61c-.569.197-1.408.291-2.453.291zM23.94 13.57v3.52c-.672.235-1.745.418-2.949.418-1.574 0-2.65-.45-3.327-1.127-.679-.675-.92-1.848-.92-3.414V8.406h-2.92v4.646c0 2.368.498 4.148 1.637 5.161 1.107.981 2.651 1.393 4.871 1.393 1.25 0 2.451-.233 3.161-.504l.447.886V8.406h-3.007v5.164H23.94zm-14.757-5.164h-3.414L3.89 12.396 2.016 8.406H0v9.112h2.92v-5.285l1.926 4.398h2.09l1.83-4.398v5.285h2.92V8.406z"/></svg>
-                    <div id="malNotificationBadge" class="mal-notification-badge" style="display:none;"></div>
+                <a href="https://myanimelist.net/animelist/claclo98" class="speed-dial-item" title="MyAnimeList" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24"><path fill="#2E51A2" d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404-1.989-2.458-.02 5.285H.001L0 7.247h2.203l1.865 2.545 2.015-2.546 2.19.001zm8.628 2.069l.025 6.335h-2.157l-.026-3.665-1.455 1.647-1.597-1.7-.012 3.718h-2.106V9.316h2.229l1.5 1.858 1.42-1.858h2.179zm5.708 4.627l.026-4.627h2.131l.001 6.335h-2.07l-2.016-3.024.013 3.024H18.56V9.316h2.065l1.984 2.627z"/></svg>
                 </a>
             </div>
-
             <div id="quote" title="Click for new quote">"Loading inspiration…"</div>
+            <div class="today-anime-box" id="todayAnimeBox">
+                <div class="tab-header">
+                    <span class="tab-title">Today's Launch</span>
+                </div>
+                <div class="tab-list" id="tabList">
+                    <div style="font-size: 0.8rem; opacity: 0.5;">Loading schedule...</div>
+                </div>
+            </div>
         </div>
-
         <div class="settings-toggle" id="settingsToggle" title="Settings">
             <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94zM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
         </div>
-
         <div class="settings-panel" id="settingsPanel">
             <div class="sp-title">⚙ Settings</div>
-
             <div class="sp-section">
                 <div class="sp-label">Profile</div>
                 <div class="sp-group">
                     <label for="usernameInput">Display Name</label>
                     <input type="text" id="usernameInput" placeholder="Your name">
                 </div>
-                <div class="sp-group" style="margin-top: 10px;">
-                    <label for="malUsernameInput">MyAnimeList Username</label>
-                    <input type="text" id="malUsernameInput" placeholder="e.g., ClaudioMAL">
-                </div>
             </div>
-
             <div class="sp-section">
                 <div class="sp-label">Theme</div>
                 <div class="pill-row" id="themePicker">
@@ -999,7 +629,6 @@
                     <button class="pill" data-theme="forest"><span class="tdot" style="background:#9ece6a"></span>Forest</button>
                 </div>
             </div>
-
             <div class="sp-section">
                 <div class="sp-label">Font</div>
                 <div class="pill-row" id="fontPicker">
@@ -1011,7 +640,6 @@
                     <button class="pill" data-font="playfair"  style="font-family:'Playfair Display'">Playfair</button>
                 </div>
             </div>
-
             <div class="sp-section">
                 <div class="sp-label">Clock Style</div>
                 <div class="pill-row" id="clockPicker">
@@ -1020,7 +648,6 @@
                     <button class="pill" data-clock="both">Both</button>
                 </div>
             </div>
-
             <div class="sp-section">
                 <div class="sp-label">Background</div>
                 <div class="gif-btn" id="gifPickerBtn">
@@ -1029,10 +656,40 @@
                 <div class="gif-name" id="gifName">No background set</div>
                 <input type="file" id="gifFileInput" accept="image/gif,image/webp,image/png,image/jpeg,video/mp4">
             </div>
+            <div class="sp-section">
+                <div class="sp-label">Keyboard Shortcuts</div>
+                <div class="shortcut-list">
+                    <div class="shortcut-item"><span>Focus Search</span><kbd>Ctrl + Space</kbd></div>
+                    <div class="shortcut-item"><span>Close Suggestions</span><kbd>Esc</kbd></div>
+                    <div class="shortcut-item"><span>Navigate List</span><kbd>↑ / ↓</kbd></div>
+                    <div class="shortcut-item"><span>Clear Engine Prefix</span><kbd>Backspace</kbd></div>
+                </div>
+                <div class="sp-label" style="margin-top: 15px;">Search Prefixes</div>
+                <div class="prefix-grid">
+                    <div class="prefix-item"><code>g </code><span>Google</span></div>
+                    <div class="prefix-item"><code>yt </code><span>YouTube</span></div>
+                    <div class="prefix-item"><code>r </code><span>Reddit</span></div>
+                    <div class="prefix-item"><code>gh </code><span>GitHub</span></div>
+                    <div class="prefix-item"><code>ddg </code><span>DuckDuckGo</span></div>
+                    <div class="prefix-item"><code>wiki </code><span>Wikipedia</span></div>
+                    <div class="prefix-item"><code>mdn </code><span>MDN</span></div>
+                    <div class="prefix-item"><code>tw </code><span>Twitter/X</span></div>
+                    <div class="prefix-item"><code>a </code><span>Amazon</span></div>
+                </div>
+            </div>
         </div>
-
+        <div class="anime-toggle" id="animeToggle" title="Anime Schedule">
+            <svg viewBox="0 0 24 24"><path d="M21.2 5.5l-1.4-1.4c-.4-.4-1-.4-1.4 0l-1.4 1.4-1.4-1.4c-.4-.4-1-.4-1.4 0L14.2 5.5l-1.4-1.4c-.4-.4-1-.4-1.4 0l-1.4 1.4-1.4-1.4c-.4-.4-1-.4-1.4 0L7.2 5.5 5.8 4.1c-.4-.4-1-.4-1.4 0L2.8 5.7c-.5.5-.8 1.1-.8 1.8v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-10c0-.7-.3-1.3-.8-1.8zM20 17.5H4v-8h16v8z"/></svg>
+        </div>
+        <div class="anime-sidebar" id="animeSidebar">
+            <div class="as-header">
+                <span>Anime Schedule</span>
+                <button class="as-close" id="animeClose">&times;</button>
+            </div>
+            <div class="as-days" id="asDays"></div>
+            <div class="as-content" id="asContent"></div>
+        </div>
     </div>
-
     <script>
     /* ════════════════════════════════════════════════════
        QUOTES
@@ -1045,7 +702,6 @@
         "Your focus determines your reality.",
         "Consistency beats intensity every single time."
     ];
-
     /* ════════════════════════════════════════════════════
        THEMES
     ════════════════════════════════════════════════════ */
@@ -1056,15 +712,12 @@
         sunset: { accent: '#f7768e', glow: 'rgba(247,118,142,0.25)', overlayA: 'rgba(70,20,30,0.85)',  overlayB: 'rgba(70,20,30,0.3)' },
         forest: { accent: '#9ece6a', glow: 'rgba(158,206,106,0.25)', overlayA: 'rgba(15,35,15,0.85)',  overlayB: 'rgba(15,35,15,0.3)' },
     };
-
     let useTimedAccent = true;
     let currentAccent  = '#FFD26A';
-
     function applyTheme(id) {
         const t = THEMES[id]; if (!t) return;
         localStorage.setItem('dash_theme', id);
         useTimedAccent = !!t.timeBased;
-
         if (!t.timeBased) {
             document.documentElement.style.setProperty('--accent-color', t.accent);
             document.documentElement.style.setProperty('--accent-glow',  t.glow);
@@ -1072,17 +725,11 @@
         } else {
             updateTimeAccent(new Date().getHours());
         }
-
         document.getElementById('overlay').style.background =
             `linear-gradient(90deg, ${t.overlayA} 0%, ${t.overlayB} 50%, rgba(0,0,0,0) 100%)`;
-
         document.querySelectorAll('#themePicker .pill').forEach(b =>
             b.classList.toggle('active', b.dataset.theme === id));
-            
-        // Redraw canvas/clocks when themes update to capture new accents
-        drawAnalogClock();
     }
-
     /* ════════════════════════════════════════════════════
        FONTS
     ════════════════════════════════════════════════════ */
@@ -1094,7 +741,6 @@
         jetbrains: { family: "'JetBrains Mono',monospace",    url: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap' },
         playfair:  { family: "'Playfair Display',serif",      url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap' },
     };
-
     function applyFont(id) {
         const f = FONTS[id]; if (!f) return;
         localStorage.setItem('dash_font', id);
@@ -1107,19 +753,16 @@
         document.querySelectorAll('#fontPicker .pill').forEach(b =>
             b.classList.toggle('active', b.dataset.font === id));
     }
-
     /* ════════════════════════════════════════════════════
        ANALOG CLOCK
     ════════════════════════════════════════════════════ */
     let clockMode = 'digital';
     const clockRow     = document.getElementById('clockRow');
     const analogCanvas = document.getElementById('analogCanvas');
-
     function setClockMode(mode) {
         clockMode = mode;
         localStorage.setItem('dash_clock', mode);
         clockRow.className = 'clock-row mode-' + mode;
-
         if (mode !== 'digital') {
             const sz = mode === 'analog' ? 150 : 90;
             analogCanvas.width = analogCanvas.height = sz;
@@ -1128,21 +771,16 @@
         document.querySelectorAll('#clockPicker .pill').forEach(b =>
             b.classList.toggle('active', b.dataset.clock === mode));
     }
-
     function drawAnalogClock() {
         if (clockMode === 'digital') return;
         const ctx = analogCanvas.getContext('2d');
-        if (!ctx) return;
         const sz = analogCanvas.width, cx = sz / 2, cy = sz / 2, r = sz / 2 - 3;
         const now = new Date();
-
         ctx.clearRect(0, 0, sz, sz);
-
         // face
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
         ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 1; ctx.stroke();
-
         // hour ticks
         for (let i = 0; i < 12; i++) {
             const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
@@ -1155,7 +793,6 @@
             ctx.strokeStyle = major ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)';
             ctx.lineWidth = major ? 2 : 1; ctx.stroke();
         }
-
         const hand = (angle, len, w, color) => {
             ctx.beginPath();
             ctx.moveTo(cx, cy);
@@ -1163,16 +800,13 @@
             ctx.strokeStyle = color; ctx.lineWidth = w;
             ctx.lineCap = 'round'; ctx.stroke();
         };
-
         const h = now.getHours() % 12, m = now.getMinutes(), s = now.getSeconds();
         hand(((h + m / 60) / 12) * Math.PI * 2 - Math.PI / 2, r * 0.50, sz < 100 ? 2   : 3,   'rgba(255,255,255,0.92)');
         hand(((m + s / 60) / 60) * Math.PI * 2 - Math.PI / 2, r * 0.72, sz < 100 ? 1.5 : 2,   'rgba(255,255,255,0.92)');
         hand((s / 60)             * Math.PI * 2 - Math.PI / 2, r * 0.82, 1, currentAccent);
-
         ctx.beginPath(); ctx.arc(cx, cy, sz < 100 ? 2.5 : 3.5, 0, Math.PI * 2);
         ctx.fillStyle = currentAccent; ctx.fill();
     }
-
     /* ════════════════════════════════════════════════════
        TIME-OF-DAY ACCENT
     ════════════════════════════════════════════════════ */
@@ -1186,34 +820,26 @@
         document.documentElement.style.setProperty('--accent-glow',  g);
         currentAccent = a;
     }
-
     /* ════════════════════════════════════════════════════
        CLOCK & DATE TICK
     ════════════════════════════════════════════════════ */
     let currentUsername = localStorage.getItem('dash_username') || 'Cláudio';
     document.getElementById('usernameInput').value = currentUsername;
-
     function updatePage() {
         const now = new Date();
         document.getElementById('time').innerText =
             String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-
         document.getElementById('date').innerText =
             now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
         updateTimeAccent(now.getHours());
         currentAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-
         const hr = now.getHours();
         document.getElementById('greeting').innerText =
             (hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening') + ', ' + currentUsername;
-
         drawAnalogClock();
     }
-
     updatePage();
     setInterval(updatePage, 1000);
-
     /* ════════════════════════════════════════════════════
        QUOTES
     ════════════════════════════════════════════════════ */
@@ -1227,7 +853,6 @@
     }
     document.getElementById('quote').addEventListener('click', newQuote);
     newQuote();
-
     /* ════════════════════════════════════════════════════
        WEATHER — geolocation + extended panel
     ════════════════════════════════════════════════════ */
@@ -1237,7 +862,6 @@
             let lat, lon;
             const cached = localStorage.getItem('dash_geo');
             const cachedTs = parseInt(localStorage.getItem('dash_geo_ts') || '0', 10);
-
             if (cached && Date.now() - cachedTs < 3_600_000) {
                 ({ lat, lon } = JSON.parse(cached));
             } else {
@@ -1247,7 +871,6 @@
                 localStorage.setItem('dash_geo', JSON.stringify({ lat, lon }));
                 localStorage.setItem('dash_geo_ts', String(Date.now()));
             }
-
             const res = await fetch(
                 `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
                 `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code` +
@@ -1256,7 +879,6 @@
             const d = await res.json();
             const c = d.current;
             if (!c) return;
-
             const code = c.weather_code;
             let icon = '☀️';
             if      (code >= 1  && code <= 3)  icon = '⛅';
@@ -1265,13 +887,11 @@
             else if (code >= 71 && code <= 77) icon = '❄️';
             else if (code >= 80 && code <= 82) icon = '🌦️';
             else if (code >= 95)               icon = '⛈️';
-
             document.getElementById('weatherIcon').innerText = icon;
             document.getElementById('weatherTemp').innerText = Math.round(c.temperature_2m) + '°C';
             document.getElementById('wFeels').innerText      = Math.round(c.apparent_temperature) + '°C';
             document.getElementById('wHumidity').innerText   = c.relative_humidity_2m + '%';
             document.getElementById('wWind').innerText       = Math.round(c.wind_speed_10m) + ' km/h';
-
             if (d.daily) {
                 const fmt = iso => new Date(iso).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
                 document.getElementById('wSunrise').innerText = fmt(d.daily.sunrise[0]);
@@ -1286,7 +906,6 @@
     }
     fetchWeather();
     setInterval(fetchWeather, 600_000);
-
     // Weather expand/collapse
     const weatherWidget = document.getElementById('weatherWidget');
     const weatherPanel  = document.getElementById('weatherPanel');
@@ -1295,179 +914,6 @@
         weatherWidget.classList.toggle('expanded');
         weatherPanel.classList.toggle('open');
     });
-
-    /* ════════════════════════════════════════════════════
-       JIKAN (MAL) ANIME AIRING SCHEDULE ENGINE
-    ════════════════════════════════════════════════════ */
-    let malUsername = localStorage.getItem('dash_mal_username') || '';
-    document.getElementById('malUsernameInput').value = malUsername;
-
-   const animeSidebarWidget = document.getElementById('animeSidebarWidget');
-    const animeSidebarPanel  = document.getElementById('animeSidebarPanel');
-    
-    // Sidebar toggle functionality
-    animeSidebarWidget.addEventListener('click', e => {
-        e.stopPropagation();
-        animeSidebarPanel.classList.toggle('open');
-        weatherPanel.classList.remove('open');
-        weatherWidget.classList.remove('expanded');
-    });
-    // Helper: Safely derive Portugal (Europe/Lisbon) current day of the week
-    function getPortugalDayOfWeek() {
-        const options = { timeZone: 'Europe/Lisbon', weekday: 'long' };
-        const formatter = new Intl.DateTimeFormat('en-US', options);
-        return formatter.format(new Date()).toLowerCase(); 
-    }
-
-    async function fetchUserWatchingList(username) {
-        if (!username) return [];
-        try {
-            const response = await fetch(`https://api.jikan.moe/v4/users/${encodeURIComponent(username)}/animelist?status=watching`);
-            if (!response.ok) return [];
-            const data = await response.ok ? await response.json() : null;
-            if (!data || !data.data) return [];
-            return data.data.map(item => item.anime.mal_id);
-        } catch (err) {
-            console.error("Failed parsing watching tracker data:", err);
-            return [];
-        }
-    }
-
-    async function fetchDailyAnimeSchedule(day) {
-        try {
-            const response = await fetch(`https://api.jikan.moe/v4/schedules?filter=${day}`);
-            if (!response.ok) return [];
-            const data = await response.json();
-            return data.data || [];
-        } catch (err) {
-            console.error("Failed fetching daily schedules:", err);
-            return [];
-        }
-    }
-
-    function createAnimeCardMarkup(anime, isWatching) {
-        const airTime = anime.broadcast && anime.broadcast.time ? anime.broadcast.time : '';
-        const trailerId = anime.trailer && anime.trailer.youtube_id ? anime.trailer.youtube_id : '';
-        const malUrl = `https://myanimelist.net/ownlist/anime/add?selected_series_id=${anime.mal_id}`;
-        
-        let tagsHtml = '';
-        if (isWatching) {
-            tagsHtml = '<span class="ep-tag">Watching</span>';
-        } else {
-            tagsHtml = `<a href="${malUrl}" target="_blank" rel="noopener" class="add-mal-btn" title="Add to MAL">＋</a>`;
-        }
-
-        return `
-            <div class="anime-card ${isWatching ? 'watched-highlight' : ''}" data-trailer-id="${trailerId}">
-                <img src="${anime.images.jpg.image_url}" alt="Thumbnail" loading="lazy">
-                <div class="anime-info">
-                    <div class="anime-title" title="${anime.title}">${anime.title}</div>
-                    <div class="anime-time">
-                        ⏰ ${airTime || 'Scheduled Today'} (JST)
-                        ${airTime ? `<span class="countdown-badge" data-jst="${airTime}"></span>` : ''}
-                    </div>
-                </div>
-                ${tagsHtml}
-            </div>
-        `;
-    }
-
-    async function updateAnimeScheduleEngine() {
-        const dashboardGrid = document.getElementById('animeDashboardGrid');
-        const sidebarGrid   = document.getElementById('animeSidebarGrid');
-        const heatmapRow    = document.getElementById('weeklyHeatmap');
-        const malBadge      = document.getElementById('malNotificationBadge');
-        
-        document.getElementById('animeDashboardSection').style.display = 'block';
-        
-        // Show Skeleton Loading
-        const skeletonHtml = Array(3).fill(`
-            <div class="skeleton-item">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-text">
-                    <div class="skeleton-line long"></div>
-                    <div class="skeleton-line short"></div>
-                </div>
-            </div>
-        `).join('');
-        dashboardGrid.innerHTML = skeletonHtml;
-        sidebarGrid.innerHTML = '';
-
-        const day = getPortugalDayOfWeek();
-        
-        // Execute both calls utilizing Promise.all to optimize data pipelines
-        const [watchingIds, dailySchedule] = await Promise.all([
-            fetchUserWatchingList(malUsername),
-            fetchDailyAnimeSchedule(day)
-        ]);
-
-        if (!dailySchedule || dailySchedule.length === 0) {
-            document.getElementById('animeDashboardSection').style.display = 'none';
-            return;
-        }
-
-        // Check if watching list changed to pulse badge
-        const prevWatching = localStorage.getItem('dash_watching_cache');
-        const currWatching = JSON.stringify(watchingIds);
-        if (prevWatching !== null && prevWatching !== currWatching) {
-            malBadge.style.display = 'block';
-            setTimeout(() => { malBadge.style.display = 'none'; }, 5000);
-        }
-        localStorage.setItem('dash_watching_cache', currWatching);
-
-        // Sort items: push prioritized matches to top of list pipeline
-        dailySchedule.sort((a, b) => {
-            const aW = watchingIds.includes(a.mal_id) ? 1 : 0;
-            const bW = watchingIds.includes(b.mal_id) ? 1 : 0;
-            return bW - aW;
-        });
-        
-        dashboardGrid.innerHTML = '';
-        sidebarGrid.innerHTML = '';
-
-        // Distribute payload instances between dashboard primary card structure and overflow container
-        dailySchedule.forEach((anime, index) => {
-            const isWatching = watchingIds.includes(anime.mal_id);
-            const cardHtml = createAnimeCardMarkup(anime, isWatching);
-
-            if (index < 5) {
-                dashboardGrid.insertAdjacentHTML('beforeend', cardHtml);
-            } else {
-                sidebarGrid.insertAdjacentHTML('beforeend', cardHtml);
-            }
-        });
-
-        if (dailySchedule.length > 5) {
-            animeSidebarPanel.style.display = 'flex';
-        } else {
-            animeSidebarPanel.style.display = 'none';
-        }
-
-        // --- Generate Weekly Heatmap ---
-        const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-        
-        // Since fetching all 7 days synchronously is slow, we use cached data if available, 
-        // or just highlight today for now to not block rendering.
-        // A full heatmap implementation requires caching the whole week.
-        let heatmapHtml = '';
-        DAYS.forEach(d => {
-            const isToday = (d === day);
-            heatmapHtml += \`
-                <div class="heatmap-dot \${isToday ? 'today' : ''}">
-                    \${d.charAt(0).toUpperCase()}
-                    <div class="heatmap-tooltip">\${d.charAt(0).toUpperCase() + d.slice(1)}</div>
-                </div>
-            \`;
-        });
-        if (heatmapRow) heatmapRow.innerHTML = heatmapHtml;
-    
-    }
-
-    // Initialize schedule sequence
-    updateAnimeScheduleEngine();
-    // Refresh parameters once every hour to stay perfectly up-to-date
-    setInterval(updateAnimeScheduleEngine, 3600000);
-
     /* ════════════════════════════════════════════════════
        GIF BACKGROUND — IndexedDB
     ════════════════════════════════════════════════════ */
@@ -1504,14 +950,13 @@
             backgroundAttachment: 'fixed',
         });
     };
-
-    const DEFAULT_GIF = 'file:///C:/Users/claudio/Desktop/good_morning/animated_gif.gif';
-
+    const DEFAULT_GIF = 'file:///C:\Users\claudio\Pictures\Gifs\animated.gif';
     (async () => {
         const blob = await loadBlob();
         if (blob) {
             applyBg(URL.createObjectURL(blob));
         } else {
+            // No custom GIF picked yet — use the default local file
             applyBg(DEFAULT_GIF);
         }
         const name = localStorage.getItem('dash_gif_name');
@@ -1521,10 +966,8 @@
             document.getElementById('gifPickerLabel').textContent = 'Change GIF…';
         }
     })();
-
     document.getElementById('gifPickerBtn').addEventListener('click', () =>
         document.getElementById('gifFileInput').click());
-
     document.getElementById('gifFileInput').addEventListener('change', async e => {
         const f = e.target.files[0]; if (!f) return;
         await saveBlob(f);
@@ -1534,7 +977,6 @@
         document.getElementById('gifName').classList.add('set');
         document.getElementById('gifPickerLabel').textContent = 'Change GIF…';
     });
-
     /* ════════════════════════════════════════════════════
        SEARCH ENGINE SWITCHER
     ════════════════════════════════════════════════════ */
@@ -1549,13 +991,11 @@
         'tw ':    { name:'Twitter/X',  bg:'#1DA1F2', fg:'#fff', url: q=>`https://twitter.com/search?q=${encodeURIComponent(q)}` },
         'a ':     { name:'Amazon',     bg:'#FF9900', fg:'#000', url: q=>`https://www.amazon.com/s?k=${encodeURIComponent(q)}` },
     };
-
     const engineBadge = document.getElementById('engineBadge');
     const searchInput = document.getElementById('searchInput');
     const searchCont  = document.querySelector('.search-container');
-
+    // Active engine: set once prefix is consumed, cleared after search or reset
     let activeEngine = null;
-
     function activateEngine(eng) {
         activeEngine = eng;
         engineBadge.textContent = eng.name;
@@ -1566,13 +1006,11 @@
             searchInput.style.paddingLeft = (52 + engineBadge.offsetWidth + 10) + 'px';
         });
     }
-
     function deactivateEngine() {
         activeEngine = null;
         engineBadge.classList.remove('show');
         searchInput.style.paddingLeft = '52px';
     }
-
     function detectEnginePrefix(val) {
         const low = val.toLowerCase();
         for (const [pfx, eng] of Object.entries(ENGINES)) {
@@ -1580,29 +1018,29 @@
         }
         return null;
     }
-
     /* ════════════════════════════════════════════════════
-       RECENT HISTORY
+       RECENT HISTORY (UPDATED LOGIC)
     ════════════════════════════════════════════════════ */
     function saveHistory(query, url, engineName = 'Google') {
         let h = JSON.parse(localStorage.getItem('dash_recent') || '[]');
         h = h.filter(x => x.query !== query);
+        // Save the query separate from the engine tag
         h.unshift({ query, url, engineName });
         localStorage.setItem('dash_recent', JSON.stringify(h.slice(0, 8)));
     }
-
     function removeHistory(query) {
         let h = JSON.parse(localStorage.getItem('dash_recent') || '[]');
         h = h.filter(x => x.query !== query);
         localStorage.setItem('dash_recent', JSON.stringify(h));
+        // Refresh the dropdown
         if (h.length) { showRecent(); }
         else { suggestionsList.style.display = 'none'; }
     }
-
     function showRecent() {
         let h = JSON.parse(localStorage.getItem('dash_recent') || '[]');
         if (!h.length) { suggestionsList.style.display = 'none'; return; }
-
+        // --- MIGRATION CHECK FOR OLD SAVES ---
+        // If an old item doesn't have an engineName, fix it automatically
         let needsSave = false;
         h = h.map(item => {
             if (!item.engineName) {
@@ -1618,12 +1056,12 @@
             return item;
         });
         if (needsSave) localStorage.setItem('dash_recent', JSON.stringify(h));
-
+        // -------------------------------------
         suggestionsList.innerHTML = '';
         const hdr = document.createElement('li');
         hdr.className = 'sug-group'; hdr.textContent = 'Recent';
         suggestionsList.appendChild(hdr);
-        
+
         h.forEach(item => {
             const li = document.createElement('li');
             let ico = `<span class="sug-icon">🕒</span>`;
@@ -1631,76 +1069,74 @@
                 const dom = new URL(item.url).hostname;
                 ico = `<img src="https://www.google.com/s2/favicons?domain=${dom}&sz=16" class="sug-favicon" onerror="this.style.display='none'">`;
             } catch {}
-
+            // Display "Engine: query"
             li.innerHTML = ico +
                 `<span class="sug-text">${item.engineName}: ${item.query}</span>` +
                 `<button class="sug-remove" title="Remove">×</button>`;
-
+            // Click on the row → run that search
             li.addEventListener('click', e => {
                 if (e.target.classList.contains('sug-remove')) return;
-                
+
+                // Find the engine in our map
                 const engineKey = Object.keys(ENGINES).find(k => ENGINES[k].name === item.engineName);
                 const engine = engineKey ? ENGINES[engineKey] : null;
-                
+
+                // Execute using the correct engine URL if found
                 if (engine) {
                     window.open(engine.url(item.query), '_blank');
                 } else {
                     processQuery(item.query);
                 }
-                
+
+                deactivateEngine();
+                searchInput.value = '';
+                searchCont.classList.remove('typing');
                 suggestionsList.style.display = 'none';
             });
-
+            // Click the × → delete from history
             li.querySelector('.sug-remove').addEventListener('click', e => {
                 e.stopPropagation();
                 removeHistory(item.query);
             });
-
             suggestionsList.appendChild(li);
         });
         suggestionsList.style.display = 'block';
     }
-
     /* ════════════════════════════════════════════════════
        SEARCH LOGIC
     ════════════════════════════════════════════════════ */
     function processQuery(q) {
         q = q.trim(); if (!q) return;
-
+        // If an engine is locked in via prefix, use it
         if (activeEngine) {
             const url = activeEngine.url(q);
+            // Updated to pass engine name specifically
             saveHistory(q, url, activeEngine.name);
             window.open(url, '_blank');
-            deactivateEngine();
-            searchInput.value = '';
-            searchCont.classList.remove('typing');
-            return;
-        }
-
-        const urlPat = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?($|\?)/i;
-        const ipPat  = /^https?:\/\/|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?/;
-        let url;
-        if (urlPat.test(q) || ipPat.test(q)) {
-            url = /^https?:\/\//i.test(q) ? q : 'https://' + q;
         } else {
-            url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+            const urlPat = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?($|\?)/i;
+            const ipPat  = /^https?:\/\/|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?/;
+            let url;
+            if (urlPat.test(q) || ipPat.test(q)) {
+                url = /^https?:\/\//i.test(q) ? q : 'https://' + q;
+            } else {
+                url = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+            }
+            saveHistory(q, url, 'Google');
+            window.open(url, '_blank');
         }
-        saveHistory(q, url, 'Google');
-        window.open(url, '_blank');
+        deactivateEngine();
+        searchInput.value = '';
+        searchCont.classList.remove('typing');
     }
-
     const searchForm      = document.getElementById('searchForm');
     const suggestionsList = document.getElementById('suggestionsList');
     let focusIdx = -1, origQuery = '';
-
     searchInput.focus();
-
     searchForm.addEventListener('submit', e => { e.preventDefault(); processQuery(searchInput.value); });
-
     searchInput.addEventListener('focus', () => {
         if (!searchInput.value.trim()) showRecent();
     });
-
     function fetchSuggestions(q) {
         const old = document.getElementById('gss'); if (old) old.remove();
         const s = document.createElement('script');
@@ -1708,13 +1144,12 @@
         s.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}&callback=gsCb`;
         document.body.appendChild(s);
     }
-
     searchInput.addEventListener('input', function() {
         focusIdx = -1;
         const val = this.value;
-
+        // Update typing indicator
         searchCont.classList.toggle('typing', val.length > 0);
-
+        // If engine already locked, handle backspace-to-reset and fetch suggestions
         if (activeEngine) {
             origQuery = val;
             if (val === '') {
@@ -1725,22 +1160,21 @@
             }
             return;
         }
-
+        // Detect prefix — when user types e.g. "yt " consume it immediately
         const m = detectEnginePrefix(val);
         if (m) {
             activateEngine(m.eng);
+            // Strip the prefix: only the query remains in the input
             searchInput.value = m.rest;
             origQuery = m.rest;
             if (m.rest) fetchSuggestions(m.rest);
             else showRecent();
             return;
         }
-
         origQuery = val;
         if (!val.trim()) { showRecent(); return; }
         fetchSuggestions(val);
     });
-
     window.gsCb = function(data) {
         const sugs = data[1] || [];
         suggestionsList.innerHTML = '';
@@ -1749,32 +1183,21 @@
             const li = document.createElement('li');
             li.innerHTML = `<span class="sug-icon">🔍</span><span class="sug-text">${item}</span>`;
             li.addEventListener('click', () => {
-                if (activeEngine) {
-                    const url = activeEngine.url(item);
-                    saveHistory(item, url, activeEngine.name);
-                    window.open(url, '_blank');
-                    deactivateEngine();
-                    searchInput.value = '';
-                    searchCont.classList.remove('typing');
-                } else {
-                    searchInput.value = item;
-                    processQuery(item);
-                }
+                processQuery(item);
                 suggestionsList.style.display = 'none';
             });
             suggestionsList.appendChild(li);
         });
         suggestionsList.style.display = 'block';
     };
-
     searchInput.addEventListener('keydown', function(e) {
+        // Backspace on empty input with engine locked → release engine
         if (e.key === 'Backspace' && activeEngine && this.value === '') {
             deactivateEngine();
             searchCont.classList.remove('typing');
             showRecent();
             return;
         }
-
         const items = [...suggestionsList.querySelectorAll('li:not(.sug-group)')];
         if (!items.length || suggestionsList.style.display === 'none') return;
         if (e.key === 'ArrowDown') {
@@ -1785,7 +1208,6 @@
             suggestionsList.style.display = 'none'; focusIdx = -1;
         }
     });
-
     function highlight(items) {
         items.forEach(li => li.classList.remove('selected'));
         if (focusIdx === -1) { searchInput.value = origQuery; }
@@ -1794,13 +1216,12 @@
             searchInput.value = items[focusIdx].querySelector('.sug-text').textContent;
         }
     }
-
+    /* Ctrl+Space to focus search */
     document.addEventListener('keydown', e => {
         if (e.ctrlKey && e.code === 'Space') {
             e.preventDefault(); searchInput.focus(); searchInput.select();
         }
     });
-
     /* ════════════════════════════════════════════════════
        IDLE FADE
     ════════════════════════════════════════════════════ */
@@ -1818,216 +1239,303 @@
     ['mousemove','mousedown','keydown','touchstart','click'].forEach(ev =>
         window.addEventListener(ev, resetIdle));
     resetIdle();
-
     /* ════════════════════════════════════════════════════
        SETTINGS PANEL
     ════════════════════════════════════════════════════ */
     const settingsToggle = document.getElementById('settingsToggle');
     const settingsPanel  = document.getElementById('settingsPanel');
-
     settingsToggle.addEventListener('click', e => {
         e.stopPropagation(); settingsPanel.classList.toggle('open');
     });
-
     document.addEventListener('click', e => {
+        // close suggestions
         if (!searchForm.contains(e.target)) {
             suggestionsList.style.display = 'none'; focusIdx = -1;
         }
-        if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target))
+        // close settings
+        if (!settingsPanel.contains(e.target) &&
+            !settingsToggle.contains(e.target))
             settingsPanel.classList.remove('open');
+        // close weather panel
         if (!weatherWidget.contains(e.target) && !weatherPanel.contains(e.target)) {
             weatherWidget.classList.remove('expanded');
             weatherPanel.classList.remove('open');
         }
-       // Safely clear out anime overflow panels if user clicks elsewhere
-        if (!animeSidebarPanel.contains(e.target) && !animeSidebarWidget.contains(e.target)) {
-            animeSidebarPanel.classList.remove('open');
-        }
     });
-
     document.getElementById('usernameInput').addEventListener('input', e => {
         currentUsername = e.target.value.trim() || 'Cláudio';
         localStorage.setItem('dash_username', currentUsername);
         updatePage();
     });
-
-    // Tracking for MAL changes inside the active settings viewport
-    document.getElementById('malUsernameInput').addEventListener('input', e => {
-        malUsername = e.target.value.trim();
-        localStorage.setItem('dash_mal_username', malUsername);
-        updateAnimeScheduleEngine();
-    });
-
     document.querySelectorAll('#themePicker .pill').forEach(b =>
         b.addEventListener('click', () => applyTheme(b.dataset.theme)));
-
     document.querySelectorAll('#fontPicker .pill').forEach(b =>
         b.addEventListener('click', () => applyFont(b.dataset.font)));
-
     document.querySelectorAll('#clockPicker .pill').forEach(b =>
         b.addEventListener('click', () => setClockMode(b.dataset.clock)));
-
     /* ════════════════════════════════════════════════════
        INIT — restore saved prefs
     ════════════════════════════════════════════════════ */
     applyTheme(localStorage.getItem('dash_theme') || 'aurora');
     applyFont (localStorage.getItem('dash_font')  || 'default');
     setClockMode(localStorage.getItem('dash_clock') || 'digital');
-
     /* ════════════════════════════════════════════════════
-       PARTICLES ANIMATION
+       ANIME SCHEDULE
     ════════════════════════════════════════════════════ */
-    const canvas = document.getElementById('particleCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    const animeSidebar = document.getElementById('animeSidebar');
+    const animeToggle = document.getElementById('animeToggle');
+    const animeClose = document.getElementById('animeClose');
+    const asDays = document.getElementById('asDays');
+    const asContent = document.getElementById('asContent');
+    const tabList = document.getElementById('tabList');
 
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2;
-            this.speedX = Math.random() * 0.5 - 0.25;
-            this.speedY = Math.random() * 0.5 - 0.25;
-            this.opacity = Math.random() * 0.5;
-        }
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            if (this.opacity < 0.5) this.opacity += 0.005;
-            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-        }
-        draw() {
-            ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    function initParticles() {
-        particles = [];
-        for (let i = 0; i < 50; i++) particles.push(new Particle());
-    }
-    initParticles();
-
-    function animateParticles() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
-        requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
-
-    /* ════════════════════════════════════════════════════
-       TRAILER PREVIEW LOGIC
-    ════════════════════════════════════════════════════ */
-    const trailerPopup = document.getElementById('trailerPopup');
-    const trailerFrame = document.getElementById('trailerFrame');
-    const trailerThumb = document.getElementById('trailerThumb');
-    const trailerPlayIcon = document.getElementById('trailerPlayIcon');
-    let trailerTimeout;
-
-    document.addEventListener('mouseover', async (e) => {
-        const card = e.target.closest('.anime-card');
-        if (!card || !card.dataset.trailerId) return;
-
-        clearTimeout(trailerTimeout);
-        trailerTimeout = setTimeout(async () => {
-            const rect = card.getBoundingClientRect();
-            let top = rect.top - 20;
-            let left = rect.right + 15;
-            
-            // Adjust if goes off screen
-            if (left + 340 > window.innerWidth) left = rect.left - 355;
-            if (top + 210 > window.innerHeight) top = window.innerHeight - 220;
-
-            trailerPopup.style.top = `${top}px`;
-            trailerPopup.style.left = `${left}px`;
-            trailerPopup.classList.add('visible');
-
-            // Show thumb first
-            const trailerId = card.dataset.trailerId;
-            trailerThumb.src = `https://img.youtube.com/vi/${trailerId}/mqdefault.jpg`;
-            trailerThumb.classList.remove('hidden');
-            trailerPlayIcon.style.display = 'flex';
-            trailerFrame.src = '';
-
-            // Optional delay before loading iframe to let user see thumbnail
-            setTimeout(() => {
-                if (!trailerPopup.classList.contains('visible')) return;
-                trailerFrame.src = `https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&controls=0&modestbranding=1`;
-                trailerFrame.onload = () => {
-                    trailerThumb.classList.add('hidden');
-                    trailerPlayIcon.style.display = 'none';
-                };
-            }, 800);
-            
-        }, 600); // hover delay
-    });
-
-    document.addEventListener('mouseout', (e) => {
-        const card = e.target.closest('.anime-card');
-        if (card) {
-            clearTimeout(trailerTimeout);
+    // Toggle sidebar
+    animeToggle.addEventListener('click', (e) => { e.stopPropagation(); animeSidebar.classList.add('open'); });
+    animeClose.addEventListener('click', () => animeSidebar.classList.remove('open'));
+    document.addEventListener('click', e => {
+        if (!animeSidebar.contains(e.target) && !animeToggle.contains(e.target)) {
+            animeSidebar.classList.remove('open');
         }
     });
-
-    // Close when moving mouse outside popup and card
-    document.addEventListener('mousemove', (e) => {
-        if (!trailerPopup.classList.contains('visible')) return;
-        if (!e.target.closest('.anime-card') && !e.target.closest('.trailer-popup')) {
-            trailerPopup.classList.remove('visible');
-            trailerFrame.src = '';
+    const DAYS = ['sundays', 'mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays'];
+    const DAY_FILTERS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todayStr = DAYS[new Date().getDay()];
+    const todayFilter = DAY_FILTERS[new Date().getDay()];
+    // Per-day schedule cache in localStorage
+    function getScheduleCache() {
+        try { return JSON.parse(localStorage.getItem('dash_anime_schedule_v2') || '{}'); } catch(e) { return {}; }
+    }
+    function setScheduleCache(cache) {
+        localStorage.setItem('dash_anime_schedule_v2', JSON.stringify(cache));
+    }
+    // Fetch a single day's full schedule using the filter param
+    async function fetchDaySchedule(dayFilter) {
+        const cache = getScheduleCache();
+        const entry = cache[dayFilter];
+        // Use cache if less than 1 hour old
+        if (entry && Date.now() - entry.ts < 3600000) {
+            return entry.data;
         }
-    });
-
-    /* ════════════════════════════════════════════════════
-       COUNTDOWN BADGES
-    ════════════════════════════════════════════════════ */
-    function updateCountdowns() {
-        const badges = document.querySelectorAll('.countdown-badge');
-        const now = new Date();
-        
-        // JST is UTC+9
-        const utcNow = now.getTime() + (now.getTimezoneOffset() * 60000);
-        const jstNow = new Date(utcNow + (3600000 * 9));
-
-        badges.forEach(badge => {
-            const timeStr = badge.dataset.jst; // e.g. "23:00"
-            if (!timeStr) return;
-            const [hours, mins] = timeStr.split(':').map(Number);
-            
-            const targetJst = new Date(jstNow);
-            targetJst.setHours(hours, mins, 0, 0);
-
-            const diffMs = targetJst - jstNow;
-            
-            if (diffMs < -3600000) { // Aired more than an hour ago
-                badge.textContent = '✅ Aired';
-                badge.className = 'countdown-badge aired';
-            } else if (diffMs < 0) { // Currently airing (within last hour)
-                badge.textContent = '🔴 Live';
-                badge.className = 'countdown-badge live';
-            } else { // Upcoming
-                const h = Math.floor(diffMs / 3600000);
-                const m = Math.floor((diffMs % 3600000) / 60000);
-                badge.textContent = `⏳ ${h}h ${m}m`;
-                badge.className = 'countdown-badge upcoming';
+        try {
+            const res = await fetch('https://api.jikan.moe/v4/schedules?filter=' + dayFilter);
+            if (!res.ok) throw new Error(res.status);
+            const json = await res.json();
+            const data = json.data || [];
+            cache[dayFilter] = { data, ts: Date.now() };
+            setScheduleCache(cache);
+            return data;
+        } catch (e) {
+            console.error('Schedule fetch error for ' + dayFilter + ':', e);
+            return (entry && entry.data) || [];
+        }
+    }
+    async function loadAnimeData() {
+        tabList.innerHTML = '<div style="font-size: 0.8rem; opacity: 0.5;">Loading schedule...</div>';
+        const malListEl = document.getElementById('malList');
+        if (malListEl) malListEl.innerHTML = '<div style="font-size: 0.8rem; opacity: 0.5;">Loading MAL...</div>';
+        // 1. Instantly render from cache (zero wait)
+        let cachedWatching = [];
+        try {
+            const cached = JSON.parse(localStorage.getItem('dash_anime_watching') || '[]');
+            if (cached.length > 0 && typeof cached[0] === 'object') cachedWatching = cached;
+        } catch(e) {}
+        // 2. Fetch schedule (this is usually fast due to its own cache)
+        const todayData = await fetchDaySchedule(todayFilter);
+        // Render immediately with cached MAL data
+        const cachedIds = cachedWatching.map(a => a.mal_id).filter(Boolean);
+        renderDashboard(todayData, cachedIds);
+        renderMALBox(cachedWatching);
+        setupSidebar();
+        // 3. Fetch fresh MAL data in background, update only if changed
+        fetchUserWatching().then(freshWatching => {
+            if (freshWatching && freshWatching.length > 0) {
+                localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
+                if (JSON.stringify(cachedWatching) !== JSON.stringify(freshWatching)) {
+                    const freshIds = freshWatching.map(a => a.mal_id).filter(Boolean);
+                    renderDashboard(todayData, freshIds);
+                    renderMALBox(freshWatching);
+                }
             }
         });
+        // 4. Poll MAL every 5 minutes for changes
+        setInterval(async () => {
+            try {
+                const freshWatching = await fetchUserWatching();
+                if (freshWatching && freshWatching.length > 0) {
+                    const prev = localStorage.getItem('dash_anime_watching') || '[]';
+                    const freshJson = JSON.stringify(freshWatching);
+                    if (prev !== freshJson) {
+                        localStorage.setItem('dash_anime_watching', freshJson);
+                        const freshIds = freshWatching.map(a => a.mal_id).filter(Boolean);
+                        renderDashboard(todayData, freshIds);
+                        console.log('[MAL Poll] Updated watching list');
+                    }
+                }
+            } catch(e) { console.error('[MAL Poll] Error:', e); }
+        }, 60 * 1000);
     }
-    // Update every minute, and also immediately
-    setInterval(updateCountdowns, 60000);
-    // Observe DOM changes to apply countdowns to dynamically loaded elements
-    new MutationObserver(updateCountdowns).observe(document.body, { childList: true, subtree: true });
+    function parseMALItems(raw) {
+        return raw.map(a => ({
+            mal_id: a.anime_id,
+            url: 'https://myanimelist.net' + a.anime_url,
+            image_url: a.anime_image_path,
+            title: a.anime_title,
+            score: a.anime_score_val || 'N/A',
+            watched_eps: a.num_watched_episodes
+        }));
+    }
+    async function fetchUserWatching() {
+        const cacheBust = '&_t=' + Date.now();
+        const malUrl = 'https://myanimelist.net/animelist/claclo98/load.json?offset=0&status=1' + cacheBust;
+        // Race all proxies simultaneously — fastest one wins
+        const makeAlloriginsRequest = async () => {
+            const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(malUrl), { cache: 'no-store' });
+            if (!res.ok) throw new Error(res.status);
+            const wrapper = await res.json();
+            return parseMALItems(JSON.parse(wrapper.contents));
+        };
+        const makeCodetabsRequest = async () => {
+            const res = await fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(malUrl), { cache: 'no-store' });
+            if (!res.ok) throw new Error(res.status);
+            return parseMALItems(await res.json());
+        };
+        const makeJikanRequest = async () => {
+            const res = await fetch('https://api.jikan.moe/v4/users/claclo98/animelist?status=watching', { cache: 'no-store' });
+            if (!res.ok) throw new Error(res.status);
+            const jikanJson = await res.json();
+            if (!jikanJson.data) throw new Error('no data');
+            return jikanJson.data.map(item => {
+                const anime = item.anime || {};
+                return {
+                    mal_id: anime.mal_id || item.mal_id,
+                    url: anime.url || '',
+                    image_url: anime.images?.jpg?.small_image_url || '',
+                    title: anime.title || 'Unknown',
+                    score: anime.score || 'N/A',
+                    watched_eps: item.episodes_watched || 0
+                };
+            });
+        };
+        try {
+            // Promise.any resolves with the FIRST successful result
+            return await Promise.any([
+                makeAlloriginsRequest(),
+                makeCodetabsRequest(),
+                makeJikanRequest()
+            ]);
+        } catch (e) {
+            console.error('All MAL fetches failed:', e);
+            return [];
+        }
+    }
+    function renderMALBox(userWatching) {
+        const malListEl = document.getElementById('malList');
+        if (!malListEl) return;
 
+        if (!userWatching || userWatching.length === 0) {
+            malListEl.innerHTML = '<div style="font-size: 0.8rem; opacity: 0.5;">Nothing in currently watching.</div>';
+            return;
+        }
+
+        malListEl.innerHTML = '';
+        userWatching.forEach(anime => {
+            const el = document.createElement('a');
+            el.href = anime.url;
+            el.target = '_blank';
+            el.rel = 'noopener';
+            el.className = 'tab-item';
+            el.innerHTML = '<img src="' + anime.image_url + '" alt="poster">'
+                + '<div class="tab-item-info">'
+                + '<div class="tab-item-title">' + anime.title + '</div>'
+                + '<div class="tab-item-meta">\u2b50 ' + anime.score + ' \u2022 \ud83d\udd52 Ep: ' + anime.watched_eps + '</div>'
+                + '</div>';
+            malListEl.appendChild(el);
+        });
+    }
+    function renderDashboard(todayData, userWatching) {
+        let displayList = [];
+
+        // 1. Get all matches for today that the user is watching, sorted by score
+        const watchedToday = todayData
+            .filter(a => userWatching && userWatching.includes(a.mal_id))
+            .sort((a,b) => (b.score || 0) - (a.score || 0));
+        if (watchedToday.length >= 5) {
+            // Rule 3: If more than 5 matches, show all of them
+            displayList = watchedToday;
+        } else {
+            // Rule 2 & 1: Fill the rest of the 5 slots with highest rated non-watched anime
+            const othersToday = todayData
+                .filter(a => !(userWatching && userWatching.includes(a.mal_id)))
+                .sort((a,b) => (b.score || 0) - (a.score || 0));
+
+            displayList = [...watchedToday, ...othersToday.slice(0, 5 - watchedToday.length)];
+        }
+        tabList.innerHTML = '';
+        if (displayList.length === 0) {
+            tabList.innerHTML = '<div style="font-size: 0.8rem; opacity: 0.5;">No anime airing today.</div>';
+            return;
+        }
+        displayList.forEach(anime => {
+            const isWatched = userWatching && userWatching.includes(anime.mal_id);
+            const el = document.createElement('a');
+            el.href = anime.url;
+            el.target = '_blank';
+            el.rel = 'noopener';
+            el.className = 'tab-item' + (isWatched ? ' watched-highlight' : '');
+            el.innerHTML = '<img src="' + anime.images.jpg.small_image_url + '" alt="poster">'
+                + '<div class="tab-item-info">'
+                + '<div class="tab-item-title">' + anime.title + '</div>'
+                + '<div class="tab-item-meta">\u2b50 ' + (anime.score || 'N/A') + ' \u2022 \ud83d\udd52 ' + (anime.broadcast.time || '?') + '</div>'
+                + '</div>';
+            tabList.appendChild(el);
+        });
+    }
+    function setupSidebar() {
+        asDays.innerHTML = '';
+        DAYS.forEach((day, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'as-day-btn' + (day === todayStr ? ' active' : '');
+            btn.textContent = day.charAt(0).toUpperCase() + day.slice(1);
+            btn.addEventListener('click', async () => {
+                document.querySelectorAll('.as-day-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                await renderSidebarList(DAY_FILTERS[i]);
+            });
+            asDays.appendChild(btn);
+        });
+        renderSidebarList(todayFilter);
+    }
+    async function renderSidebarList(dayFilter) {
+        asContent.innerHTML = '<div style="opacity:0.5; padding: 20px; text-align: center; font-size: 0.8rem;">Loading...</div>';
+        const dayData = await fetchDaySchedule(dayFilter);
+        const sorted = [...dayData].sort((a,b) => {
+            if(a.broadcast.time && b.broadcast.time) return a.broadcast.time.localeCompare(b.broadcast.time);
+            return 0;
+        });
+        asContent.innerHTML = '';
+        if (sorted.length === 0) {
+            asContent.innerHTML = '<div style="opacity:0.5; padding: 20px; text-align: center; font-size: 0.8rem;">No anime scheduled.</div>';
+            return;
+        }
+        sorted.forEach(anime => {
+            const el = document.createElement('a');
+            el.href = anime.url;
+            el.target = '_blank';
+            el.rel = 'noopener';
+            el.className = 'anime-card';
+            el.innerHTML = '<img src="' + anime.images.jpg.small_image_url + '" alt="poster">'
+                + '<div class="anime-info">'
+                + '<div class="anime-title">' + anime.title + '</div>'
+                + '<div class="anime-time">\ud83d\udd52 ' + (anime.broadcast.time || '?') + (anime.score ? ' \u2022 \u2b50 ' + anime.score : '') + '</div>'
+                + '</div>';
+            asContent.appendChild(el);
+        });
+    }
+    // Clear old cache format
+    localStorage.removeItem('dash_anime_schedule');
+    localStorage.removeItem('dash_anime_ts');
+    // Load asynchronously
+    setTimeout(loadAnimeData, 1000);
     </script>
 </body>
 </html>
