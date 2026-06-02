@@ -30,7 +30,7 @@ export default function App() {
                     document.body.classList.add('idle');
                     window.dispatchEvent(new Event('app-idle'));
                 }
-            }, 5000);
+            }, 120000); // 2 minutes
         };
 
         const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'click'];
@@ -82,29 +82,29 @@ export default function App() {
                 </div>
             )}
             
-            <div className={`interactive-ui ${booting ? 'boot-hidden' : ''}`} id="mainUi">
-                <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
+            <main className={`interactive-ui ${booting ? 'boot-hidden' : ''}`} id="mainUi">
+                <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <WeatherWidget />
-                </div>
+                </section>
                 <div className="container">
-                    <div className="center-content">
+                    <header className="center-content">
                         <Greeting />
                         <Clock />
                         <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', marginBottom: '35px' }}>
                             <Quote />
                         </div>
-                    </div>
-                    <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
+                    </header>
+                    <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                         <SearchBox />
                         <SpeedDial />
                         <AnimeSchedule />
-                    </div>
+                    </section>
                 </div>
-                <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
+                <aside style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <SettingsPanel />
                     <LofiPlayer />
-                </div>
-            </div>
+                </aside>
+            </main>
         </>
     );
 }

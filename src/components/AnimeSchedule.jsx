@@ -409,7 +409,7 @@ export default function AnimeSchedule() {
     const sidebarContent = (
         <>
             <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
-                <div 
+                <button 
                     className={`anime-toggle ${isSidebarOpen ? 'open' : ''}`}
                     id="animeToggle" 
                     title="Anime Schedule"
@@ -417,14 +417,14 @@ export default function AnimeSchedule() {
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 >
                     <svg viewBox="0 0 24 24"><path d="M21.2 5.5l-1.4-1.4c-.4-.4-1-.4-1.4 0l-1.4 1.4-1.4-1.4c-.4-.4-1-.4-1.4 0L14.2 5.5l-1.4-1.4c-.4-.4-1-.4-1.4 0l-1.4 1.4-1.4-1.4c-.4-.4-1-.4-1.4 0L7.2 5.5 5.8 4.1c-.4-.4-1-.4-1.4 0L2.8 5.7c-.5.5-.8 1.1-.8 1.8v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-10c0-.7-.3-1.3-.8-1.8zM20 17.5H4v-8h16v8z"/></svg>
-                </div>
+                </button>
             </div>
 
-            <div className={`anime-sidebar ${isSidebarOpen ? 'open' : ''}`} id="animeSidebar" ref={sidebarRef}>
-                <div className="as-header">
+            <aside className={`anime-sidebar ${isSidebarOpen ? 'open' : ''}`} id="animeSidebar" ref={sidebarRef}>
+                <header className="as-header">
                     <span>Anime Schedule</span>
                     <button className="as-close" onClick={() => setIsSidebarOpen(false)}>&times;</button>
-                </div>
+                </header>
                 <div className="as-days">
                     {DAY_FILTERS.map((df, i) => (
                         <button 
@@ -494,7 +494,7 @@ export default function AnimeSchedule() {
                         })
                     )}
                 </div>
-            </div>
+            </aside>
         </>
     );
 
