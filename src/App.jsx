@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Greeting from './components/Greeting';
 import Clock from './components/Clock';
 import SearchBox from './components/SearchBox';
@@ -7,12 +7,15 @@ import Quote from './components/Quote';
 import WeatherWidget from './components/WeatherWidget';
 import SettingsPanel from './components/SettingsPanel';
 import AnimeSchedule from './components/AnimeSchedule';
+import LofiPlayer from './components/LofiPlayer';
 import { useSettings } from './context/SettingsContext';
 
 export default function App() {
     const { backgroundUrl, backgroundIsVideo } = useSettings();
+    const [booting, setBooting] = useState(true);
 
     useEffect(() => {
+        const bootT = setTimeout(() => setBooting(false), 2500);
         let idleT;
         const mainUi = document.getElementById('mainUi');
         
@@ -37,6 +40,7 @@ export default function App() {
         return () => {
             events.forEach(ev => window.removeEventListener(ev, resetIdle));
             clearTimeout(idleT);
+            clearTimeout(bootT);
         };
     }, []);
 
@@ -72,7 +76,13 @@ export default function App() {
                 />
             )}
             <div className="overlay" id="overlay"></div>
-            <div className="interactive-ui" id="mainUi">
+            {booting && (
+                <div id="bootScreen" className="boot-screen">
+                    <div className="boot-logo">Good Morning</div>
+                </div>
+            )}
+            
+            <div className={`interactive-ui ${booting ? 'boot-hidden' : ''}`} id="mainUi">
                 <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <WeatherWidget />
                 </div>
@@ -92,6 +102,7 @@ export default function App() {
                 </div>
                 <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <SettingsPanel />
+                    <LofiPlayer />
                 </div>
             </div>
         </>

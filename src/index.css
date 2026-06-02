@@ -488,12 +488,12 @@ body {
 }
 .anime-toggle svg { fill: white; width: 20px; height: 20px; }
 .anime-sidebar {
-    position: absolute; top: 0; right: -450px;
-    width: 450px; height: 100vh;
+    position: absolute; top: 0; right: -500px;
+    width: 500px; height: 100vh;
     background: rgba(12,12,12,0.95);
     backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
     border-left: 1px solid rgba(255,255,255,0.1);
-    padding: 30px 20px;
+    padding: 30px;
     transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: auto; z-index: 100;
     display: flex; flex-direction: column;
@@ -513,14 +513,17 @@ body {
 }
 .as-close:hover { color: white; }
 .as-days {
-    display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 10px;
-    margin-bottom: 15px; justify-content: center;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    padding-bottom: 10px; margin-bottom: 15px;
 }
 .as-day-btn {
     background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.6); padding: 6px 16px; border-radius: 20px;
-    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
-    white-space: nowrap; flex-grow: 1; text-align: center;
+    color: rgba(255,255,255,0.6); padding: 8px 0; border-radius: 8px;
+    font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap; text-align: center; width: 100%;
+}
+.as-day-btn:last-child {
+    grid-column: span 2;
 }
 .as-day-btn.active {
     background: var(--accent-color); color: black; font-weight: bold; border-color: var(--accent-color);
@@ -528,16 +531,21 @@ body {
 }
 
 .as-content {
-    flex: 1; overflow-y: auto; padding-right: 5px;
+    flex: 1; overflow-y: auto; padding-right: 15px; padding-top: 5px; padding-bottom: 30px;
+    width: 100%;
 }
 .as-content::-webkit-scrollbar { width: 4px; }
 .as-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 .anime-card {
-    display: flex; gap: 15px; padding: 12px;
+    display: flex; flex-direction: column; padding: 0;
     background: rgba(255,255,255,0.05); border-radius: 14px;
-    margin-bottom: 12px; transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+    margin-bottom: 15px; transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
     text-decoration: none; color: inherit;
     border: 1px solid rgba(255,255,255,0.02);
+    cursor: pointer; overflow: hidden;
+}
+.anime-card-main {
+    display: flex; flex-direction: row; gap: 15px; padding: 12px;
 }
 .anime-card:hover {
     background: rgba(255,255,255,0.08); transform: translateY(-3px);
@@ -590,10 +598,15 @@ body {
 .tab-list::-webkit-scrollbar { width: 4px; }
 .tab-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 .tab-item {
+    display: flex; flex-direction: column; gap: 0; padding: 0;
+    text-decoration: none; color: white; cursor: pointer;
+    border-radius: 8px; transition: background 0.2s, transform 0.2s;
+    animation: fadeSlideIn 0.4s ease both; overflow: hidden;
+    background: transparent; border: 1px solid transparent;
+}
+.tab-item-main {
     display: flex; align-items: center; gap: 10px;
-    text-decoration: none; color: white;
-    padding: 6px 8px; border-radius: 8px; transition: background 0.2s, transform 0.2s;
-    animation: fadeSlideIn 0.4s ease both;
+    padding: 6px 8px;
 }
 .tab-item:nth-child(1) { animation-delay: 0.45s; }
 .tab-item:nth-child(2) { animation-delay: 0.50s; }
@@ -605,10 +618,152 @@ body {
     background: rgba(255,255,255,0.08); 
     transform: translateX(4px);
 }
+.tab-item.expanded {
+    background: rgba(255,255,255,0.05); border-color: var(--accent-color);
+}
 .tab-item img {
     width: 35px; height: 50px; object-fit: cover; border-radius: 4px; flex-shrink: 0;
 }
 .tab-item-info { flex: 1; overflow: hidden; }
 .tab-item-title { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
-.tab-item-meta { font-size: 0.65rem; opacity: 0.6; }
+.tab-item-meta { font-size: 0.65rem; opacity: 0.6; display: flex; flex-direction: column; }
 .tab-item.watched-highlight { margin-bottom: 4px; }
+
+.tab-synopsis-panel {
+    padding: 8px 10px; background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.7rem; color: #ccc; line-height: 1.4;
+    animation: fadeSlideIn 0.2s ease; border-radius: 0 0 8px 8px;
+}
+
+/* ── Lofi Player ─────────────────────────────────────── */
+.lofi-player {
+    position: absolute; bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    pointer-events: auto;
+    animation: fadeSlideUp 0.5s ease 0.5s both;
+}
+.lofi-ui {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(10,10,10,0.65);
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    padding: 8px 16px 8px 8px;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.lofi-ui:hover {
+    background: rgba(20,20,20,0.8);
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 10px rgba(255,210,106,0.2);
+}
+.lofi-play-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: #111;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.lofi-ui:hover .lofi-play-btn {
+    transform: scale(1.05);
+}
+.lofi-info {
+    display: flex; flex-direction: column; justify-content: center;
+}
+.lofi-title {
+    font-size: 0.85rem; font-weight: bold;
+    display: block; line-height: 1.2;
+}
+.lofi-status {
+    font-size: 0.7rem; opacity: 0.6;
+    display: block; line-height: 1.2;
+}
+
+/* EQ Animation */
+.lofi-eq {
+    display: inline-flex; align-items: flex-end; gap: 3px;
+    height: 14px; margin-top: 2px;
+}
+.eq-bar {
+    width: 3px; background: var(--accent-color);
+    border-radius: 2px;
+    animation: eqBounce 0.8s infinite ease-in-out alternate;
+}
+.eq-bar:nth-child(1) { animation-delay: 0s; }
+.eq-bar:nth-child(2) { animation-delay: 0.3s; }
+.eq-bar:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes eqBounce {
+    0% { height: 4px; opacity: 0.6; }
+    100% { height: 14px; opacity: 1; }
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ── Boot Screen ─────────────────────────────────────── */
+.boot-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(30px) brightness(0.5);
+    -webkit-backdrop-filter: blur(30px) brightness(0.5);
+    z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    animation: bootFadeOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) 2s forwards;
+    pointer-events: none;
+}
+.boot-logo {
+    font-family: var(--font-family);
+    font-size: 3rem; font-weight: 200; letter-spacing: 5px;
+    color: #fff; opacity: 0;
+    animation: bootLogoGlow 1.8s ease forwards;
+}
+@keyframes bootLogoGlow {
+    0% { opacity: 0; filter: blur(10px); transform: scale(0.9); }
+    30% { opacity: 1; filter: blur(0px); transform: scale(1); text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+    80% { opacity: 1; filter: blur(0px); transform: scale(1.02); text-shadow: 0 0 20px rgba(255,255,255,0.4); }
+    100% { opacity: 0; filter: blur(10px); transform: scale(1.05); }
+}
+@keyframes bootFadeOut {
+    to { opacity: 0; visibility: hidden; }
+}
+.boot-hidden {
+    opacity: 0 !important;
+    transform: scale(1.02);
+    pointer-events: none;
+}
+.interactive-ui {
+    transition: opacity 1s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anime-card.expanded { background: rgba(255,255,255,0.05); border-color: var(--accent-color); }
+
+.anime-synopsis-panel {
+    padding: 15px; background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.75rem; color: #ccc; line-height: 1.5;
+    animation: fadeSlideIn 0.3s ease;
+    border-radius: 0 0 14px 14px;
+}
+.anime-genres { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+.anime-tag { padding: 2px 6px; background: rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.65rem; }
+.anime-synopsis-text { margin-bottom: 8px; }
+.anime-mal-link { color: var(--accent-color); text-decoration: none; font-weight: bold; }
+.anime-mal-link:hover { text-decoration: underline; }
+
+.anime-countdown {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; background: rgba(255,210,106,0.1);
+    color: var(--accent-color); border-radius: 20px; font-weight: 600; font-family: var(--font-family);
+    font-size: 0.75rem; margin-top: 8px; border: 1px solid rgba(255,210,106,0.25);
+    box-shadow: 0 0 10px rgba(255,210,106,0.05);
+}
+.anime-countdown svg {
+    animation: pulseGlow 2s infinite;
+}

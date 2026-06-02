@@ -82,6 +82,8 @@ export default function WeatherWidget() {
                     sunset: d.daily ? fmt(d.daily.sunset[0]) : '--:--',
                     forecast
                 });
+
+                window.dispatchEvent(new CustomEvent('weather-update', { detail: c.weather_code }));
             } catch (err) {
                 if (err.code === 1) setError(true);
             }

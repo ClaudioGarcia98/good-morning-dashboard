@@ -12,7 +12,8 @@ export default function SettingsPanel() {
         speedDials, setSpeedDials,
         volume, setVolume,
         customEngines, setCustomEngines,
-        setBackgroundIsVideo
+        setBackgroundIsVideo,
+        lofiId, setLofiId
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +22,11 @@ export default function SettingsPanel() {
     const [newEngName, setNewEngName] = useState('');
     const [newEngPrefix, setNewEngPrefix] = useState('');
     const [newEngUrl, setNewEngUrl] = useState('');
+    const [tempLofi, setTempLofi] = useState('');
+
+    useEffect(() => {
+        setTempLofi(lofiId);
+    }, [lofiId]);
     
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
@@ -100,6 +106,16 @@ export default function SettingsPanel() {
 
     const handleRemoveEngine = (id) => {
         setCustomEngines(prev => prev.filter(e => e.id !== id));
+    };
+
+    const handleSaveLofi = () => {
+        let val = tempLofi.trim();
+        // Extract video ID if user pasted a full YouTube URL
+        const match = val.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+        if (match) {
+            val = match[1];
+        }
+        setLofiId(val);
     };
 
     return (
@@ -218,6 +234,25 @@ export default function SettingsPanel() {
                         accept="image/gif,image/webp,image/png,image/jpeg,video/mp4"
                         onChange={handleFileChange}
                     />
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Lofi Player</div>
+                    <div className="sp-group">
+                        <label htmlFor="lofiInput">YouTube Video ID or URL</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <input 
+                                type="text" 
+                                id="lofiInput" 
+                                placeholder="e.g. jfKfPfyJRdk" 
+                                value={tempLofi}
+                                onChange={(e) => setTempLofi(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleSaveLofi()}
+                                style={{ flex: 1 }}
+                            />
+                            <button className="pill" onClick={handleSaveLofi}>Save</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="sp-section">

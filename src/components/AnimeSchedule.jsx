@@ -1,21 +1,86 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings } from '../context/SettingsContext';
-const DAYS = ['sundays', 'mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays'];
-const DAY_FILTERS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-const todayIdx = new Date().getDay();
-const todayStr = DAYS[todayIdx];
-const todayFilter = DAY_FILTERS[todayIdx];
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAY_FILTERS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export default function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [expandedAnime, setExpandedAnime] = useState(null);
     const { volume } = useSettings();
+
+    // Helper to calculate countdown (+1.5 hours for internet release)
+    const calculateTimeLeft = (broadcast) => {
+        if (!broadcast || !broadcast.time || !broadcast.day) return null;
+        
+        const dayMap = { 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 0 };
+        const cleanDay = broadcast.day.toLowerCase().replace(/s$/, '');
+        const targetDay = dayMap[cleanDay];
+        if (targetDay === undefined) return null;
+
+        const [hours, minutes] = broadcast.time.split(':').map(Number);
+        
+        // JST is UTC+9
+        const now = new Date();
+        const jstNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+        
+        let target = new Date(jstNow);
+        target.setHours(hours, minutes, 0, 0);
+        
+        // If the target day is different or we already passed the time today, move forward
+        while (target.getDay() !== targetDay || target < jstNow) {
+            target.setDate(target.getDate() + 1);
+        }
+
+        // Add 1.5 hours for internet sub release
+        target.setMinutes(target.getMinutes() + 90);
+
+        const diff = target - jstNow;
+        if (diff <= 0) return "Out Now!";
+        
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / 1000 / 60) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+        
+        if (d > 0) return `${d}d ${h}h ${m}m`;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const CountdownBadge = ({ broadcast }) => {
+        const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(broadcast));
+        
+        useEffect(() => {
+            if (!broadcast) return;
+            const timer = setInterval(() => setTimeLeft(calculateTimeLeft(broadcast)), 1000);
+            return () => clearInterval(timer);
+        }, [broadcast]);
+
+        if (!timeLeft) return null;
+        return (
+            <div className="anime-countdown">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <span>{timeLeft}</span>
+            </div>
+        );
+    };
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
         window.addEventListener('app-idle', closeSidebar);
         return () => window.removeEventListener('app-idle', closeSidebar);
     }, []);
+
+    useEffect(() => {
+        const handleCollapseClick = (e) => {
+            if (expandedAnime && !e.target.closest('.anime-card') && !e.target.closest('.tab-item') && !e.target.closest('.trailer-portal-container')) {
+                setExpandedAnime(null);
+            }
+        };
+        document.addEventListener('mousedown', handleCollapseClick);
+        return () => document.removeEventListener('mousedown', handleCollapseClick);
+    }, [expandedAnime]);
+    const todayFilter = DAY_FILTERS[(new Date().getDay() + 6) % 7];
     const [activeDay, setActiveDay] = useState(todayFilter);
     const [sidebarData, setSidebarData] = useState([]);
     const [sidebarLoading, setSidebarLoading] = useState(false);
@@ -137,7 +202,8 @@ export default function AnimeSchedule() {
 
         const handleClickOutside = (e) => {
             if (sidebarRef.current && !sidebarRef.current.contains(e.target) &&
-                toggleRef.current && !toggleRef.current.contains(e.target)) {
+                toggleRef.current && !toggleRef.current.contains(e.target) &&
+                !e.target.closest('.trailer-portal-container')) {
                 setIsSidebarOpen(false);
             }
         };
@@ -153,9 +219,13 @@ export default function AnimeSchedule() {
         const loadSidebarData = async () => {
             setSidebarLoading(true);
             const data = await fetchDaySchedule(activeDay);
-            const sorted = [...data].sort((a,b) => {
-                if(a.broadcast.time && b.broadcast.time) return a.broadcast.time.localeCompare(b.broadcast.time);
-                return 0;
+            
+            // Deduplicate by mal_id and filter out entries without a broadcast time
+            const uniqueData = Array.from(new Map(data.map(item => [item.mal_id, item])).values())
+                .filter(a => a.broadcast && a.broadcast.time);
+                
+            const sorted = uniqueData.sort((a,b) => {
+                return a.broadcast.time.localeCompare(b.broadcast.time);
             });
             setSidebarData(sorted);
             setSidebarLoading(false);
@@ -365,25 +435,56 @@ export default function AnimeSchedule() {
                     ) : sidebarData.length === 0 ? (
                         <div style={{ opacity: 0.5, padding: '20px', textAlign: 'center', fontSize: '0.8rem' }}>No anime scheduled.</div>
                     ) : (
-                        sidebarData.map(anime => (
-                            <a 
-                                key={anime.mal_id} 
-                                href={anime.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="anime-card"
-                                onMouseEnter={(e) => handleMouseEnter(e, anime)}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                <img src={anime.images?.jpg?.small_image_url} alt="poster" />
-                                <div className="anime-info">
-                                    <div className="anime-title">{anime.title}</div>
-                                    <div className="anime-time">
-                                        🕒 {anime.broadcast?.time || '?'} {anime.score && `• ⭐ ${anime.score}`}
+                        sidebarData.map((anime, index) => {
+                            const isExpanded = expandedAnime === anime.mal_id;
+                            const isLastItem = index === sidebarData.length - 1;
+                            return (
+                                <div 
+                                    key={anime.mal_id} 
+                                    id={`anime-card-${anime.mal_id}`}
+                                    className={`anime-card ${isExpanded ? 'expanded' : ''}`}
+                                    onClick={() => {
+                                        const expand = !isExpanded;
+                                        setExpandedAnime(expand ? anime.mal_id : null);
+                                        if (expand && isLastItem) {
+                                            setTimeout(() => {
+                                                document.getElementById(`anime-card-${anime.mal_id}`)?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                                            }, 200);
+                                        }
+                                    }}
+                                    onMouseLeave={handleMouseLeave}
+                                >
+                                    <div className="anime-card-main" 
+                                        onMouseEnter={(e) => handleMouseEnter(e, anime)}
+                                        onMouseLeave={handleMouseLeave}
+                                    >
+                                        <img src={anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || anime.images?.jpg?.small_image_url} alt="poster" />
+                                        <div className="anime-info">
+                                            <div className="anime-title">{anime.title}</div>
+                                            <div className="anime-time">
+                                                <span>🕒 {anime.broadcast?.time || '?'} {anime.score && `• ⭐ ${anime.score}`}</span>
+                                            </div>
+                                            <CountdownBadge broadcast={anime.broadcast} />
+                                        </div>
                                     </div>
+                                    {isExpanded && (
+                                        <div className="anime-synopsis-panel" onClick={e => e.stopPropagation()}>
+                                            <div className="anime-genres">
+                                                {(anime.genres || []).slice(0, 3).map(g => (
+                                                    <span key={g.mal_id} className="anime-tag">{g.name}</span>
+                                                ))}
+                                            </div>
+                                            <p className="anime-synopsis-text">
+                                                {anime.synopsis ? anime.synopsis.substring(0, 200) + '...' : 'No synopsis available.'}
+                                            </p>
+                                            <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
+                                                View on MyAnimeList ↗
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
-                            </a>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>
@@ -402,45 +503,71 @@ export default function AnimeSchedule() {
                     ) : displayList.length === 0 ? (
                         <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>No anime airing today.</div>
                     ) : (
-                        displayList.map(anime => (
-                            <a 
-                                key={anime.mal_id}
-                                href={anime.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className={`tab-item ${userWatchingIds.includes(anime.mal_id) ? 'watched-highlight' : ''}`}
-                                onMouseEnter={(e) => handleMouseEnter(e, anime)}
-                                onMouseLeave={handleMouseLeave}
-                            >
-                                <img src={anime.images?.jpg?.small_image_url} alt="poster" />
-                                <div className="tab-item-info">
-                                    <div className="tab-item-title">{anime.title}</div>
-                                    <div className="tab-item-meta">⭐ {anime.score || 'N/A'} • 🕒 {anime.broadcast?.time || '?'}</div>
+                        displayList.map(anime => {
+                            const isExpanded = expandedAnime === anime.mal_id;
+                            return (
+                                <div 
+                                    key={anime.mal_id}
+                                    id={`tab-anime-${anime.mal_id}`}
+                                    className={`tab-item ${userWatchingIds.includes(anime.mal_id) ? 'watched-highlight' : ''} ${isExpanded ? 'expanded' : ''}`}
+                                    onClick={() => {
+                                        const expand = !isExpanded;
+                                        setExpandedAnime(expand ? anime.mal_id : null);
+                                    }}
+                                    onMouseLeave={handleMouseLeave}
+                                >
+                                    <div className="tab-item-main"
+                                        onMouseEnter={(e) => handleMouseEnter(e, anime)}
+                                        onMouseLeave={handleMouseLeave}
+                                    >
+                                        <img src={anime.images?.jpg?.small_image_url} alt="poster" />
+                                        <div className="tab-item-info">
+                                            <div className="tab-item-title">{anime.title}</div>
+                                            <div className="tab-item-meta">
+                                                <span>⭐ {anime.score || 'N/A'} • 🕒 {anime.broadcast?.time || '?'}</span>
+                                            </div>
+                                            <div style={{ transform: 'scale(0.85)', transformOrigin: 'left top', marginTop: '4px' }}>
+                                                <CountdownBadge broadcast={anime.broadcast} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {isExpanded && (
+                                        <div className="tab-synopsis-panel" onClick={e => e.stopPropagation()}>
+                                            <p className="anime-synopsis-text">
+                                                {anime.synopsis ? anime.synopsis.substring(0, 120) + '...' : 'No synopsis available.'}
+                                            </p>
+                                            <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
+                                                View on MyAnimeList ↗
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
-                            </a>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>
             {sidebarPortal && createPortal(sidebarContent, sidebarPortal)}
             {trailerPortal && previewTrailer && createPortal(
-                <div style={{
-                    position: 'fixed',
-                    left: Math.max(20, previewPos.x),
-                    top: Math.max(20, Math.min(previewPos.y, window.innerHeight - 190)),
-                    width: '300px',
-                    height: '169px',
-                    background: '#000',
-                    borderRadius: '12px',
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    zIndex: 99999,
-                    overflow: 'hidden',
-                    pointerEvents: 'auto',
-                    animation: 'fadeSlideIn 0.3s ease both'
-                }}
-                onMouseEnter={handleTrailerMouseEnter}
-                onMouseLeave={handleTrailerMouseLeave}
+                <div 
+                    className="trailer-portal-container"
+                    style={{
+                        position: 'fixed',
+                        left: Math.max(20, previewPos.x),
+                        top: Math.max(20, Math.min(previewPos.y, window.innerHeight - 190)),
+                        width: '300px',
+                        height: '169px',
+                        background: '#000',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        zIndex: 99999,
+                        overflow: 'hidden',
+                        pointerEvents: 'auto',
+                        animation: 'fadeSlideIn 0.3s ease both'
+                    }}
+                    onMouseEnter={handleTrailerMouseEnter}
+                    onMouseLeave={handleTrailerMouseLeave}
                 >
                     <div style={{ borderRadius: '12px', overflow: 'hidden', width: '300px', height: '169px', position: 'relative' }}>
                         <iframe
