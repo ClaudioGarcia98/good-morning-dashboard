@@ -7,7 +7,6 @@ import Quote from './components/Quote';
 import WeatherWidget from './components/WeatherWidget';
 import SettingsPanel from './components/SettingsPanel';
 import AnimeSchedule from './components/AnimeSchedule';
-import YouTubeMusic from './components/YouTubeMusic';
 import { useSettings } from './context/SettingsContext';
 
 export default function App() {
@@ -63,7 +62,6 @@ export default function App() {
                     <div className="center-content">
                         <Greeting />
                         <Clock />
-                        <YouTubeMusic />
                         <div className="opacity-transition">
                             <Quote />
                         </div>

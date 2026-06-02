@@ -248,11 +248,13 @@ export default function AnimeSchedule() {
     const handleTrailerMouseLeave = () => {
         hideTimer.current = setTimeout(() => {
             setPreviewTrailer(null);
-            setTrailerMuted(true);
         }, 300);
     };
 
-    const [trailerMuted, setTrailerMuted] = useState(true);
+    const [trailerMuted, setTrailerMuted] = useState(() => {
+        const saved = localStorage.getItem('dash_trailer_muted');
+        return saved === null ? true : saved === 'true';
+    });
     const trailerIframeRef = useRef(null);
 
     const handleUnmute = () => {
@@ -270,6 +272,7 @@ export default function AnimeSchedule() {
             }), '*');
         }
         setTrailerMuted(false);
+        localStorage.setItem('dash_trailer_muted', 'false');
     };
 
     const handleMute = () => {
@@ -282,12 +285,30 @@ export default function AnimeSchedule() {
             }), '*');
         }
         setTrailerMuted(true);
+        localStorage.setItem('dash_trailer_muted', 'true');
     };
 
-    // Reset muted state when trailer changes
+    // Auto-unmute new trailers if user preference is unmuted
     useEffect(() => {
-        setTrailerMuted(true);
-    }, [previewTrailer]);
+        if (!previewTrailer || trailerMuted) return;
+        // Wait for iframe to load, then send unmute command
+        const timer = setTimeout(() => {
+            const iframe = trailerIframeRef.current;
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    event: 'command',
+                    func: 'unMute',
+                    args: []
+                }), '*');
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    event: 'command',
+                    func: 'setVolume',
+                    args: [80]
+                }), '*');
+            }
+        }, 1500);
+        return () => clearTimeout(timer);
+    }, [previewTrailer, trailerMuted]);
 
     const sidebarContent = (
         <>
