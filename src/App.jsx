@@ -7,6 +7,7 @@ import Quote from './components/Quote';
 import WeatherWidget from './components/WeatherWidget';
 import SettingsPanel from './components/SettingsPanel';
 import AnimeSchedule from './components/AnimeSchedule';
+import YouTubeMusic from './components/YouTubeMusic';
 import { useSettings } from './context/SettingsContext';
 
 export default function App() {
@@ -59,12 +60,17 @@ export default function App() {
                     <WeatherWidget />
                 </div>
                 <div className="container">
-                    <Greeting />
-                    <Clock />
+                    <div className="center-content">
+                        <Greeting />
+                        <Clock />
+                        <YouTubeMusic />
+                        <div className="opacity-transition">
+                            <Quote />
+                        </div>
+                    </div>
                     <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                         <SearchBox />
                         <SpeedDial />
-                        <Quote />
                         <AnimeSchedule />
                     </div>
                 </div>

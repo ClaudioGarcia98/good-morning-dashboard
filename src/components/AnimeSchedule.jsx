@@ -344,7 +344,7 @@ export default function AnimeSchedule() {
                 >
                     <iframe 
                         width="300" height="169" 
-                        src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0`} 
+                        src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&controls=0&modestbranding=1&rel=0`} 
                         title="Trailer Preview" 
                         frameBorder="0" 
                         allow="autoplay; encrypted-media" 
