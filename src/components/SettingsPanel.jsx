@@ -9,7 +9,8 @@ export default function SettingsPanel() {
         username, setUsername,
         setBackgroundUrl,
         gifName, setGifName,
-        speedDials, setSpeedDials
+        speedDials, setSpeedDials,
+        volume, setVolume
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -26,8 +27,14 @@ export default function SettingsPanel() {
                 setIsOpen(false);
             }
         };
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
+        const closeOnIdle = () => setIsOpen(false);
+
+        document.addEventListener('mousedown', handleClickOutside);
+        window.addEventListener('app-idle', closeOnIdle);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener('app-idle', closeOnIdle);
+        };
     }, []);
 
     const saveBlob = async (blob) => {
@@ -146,6 +153,29 @@ export default function SettingsPanel() {
                                 {m.charAt(0).toUpperCase() + m.slice(1)}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Media Volume</div>
+                    <div className="sp-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            {volume > 0 && <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>}
+                            {volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>}
+                        </svg>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.01"
+                            value={volume}
+                            onChange={(e) => setVolume(parseFloat(e.target.value))}
+                            style={{ flex: 1, height: '4px', accentColor: 'var(--accent-color, #00ffcc)', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '0.75rem', opacity: 0.7, width: '32px', textAlign: 'right' }}>
+                            {Math.round(volume * 100)}%
+                        </span>
                     </div>
                 </div>
 

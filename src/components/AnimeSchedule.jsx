@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-
-
+import { useSettings } from '../context/SettingsContext';
 const DAYS = ['sundays', 'mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays'];
 const DAY_FILTERS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const todayIdx = new Date().getDay();
@@ -10,6 +9,13 @@ const todayFilter = DAY_FILTERS[todayIdx];
 
 export default function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { volume } = useSettings();
+
+    useEffect(() => {
+        const closeSidebar = () => setIsSidebarOpen(false);
+        window.addEventListener('app-idle', closeSidebar);
+        return () => window.removeEventListener('app-idle', closeSidebar);
+    }, []);
     const [activeDay, setActiveDay] = useState(todayFilter);
     const [sidebarData, setSidebarData] = useState([]);
     const [sidebarLoading, setSidebarLoading] = useState(false);
@@ -268,7 +274,7 @@ export default function AnimeSchedule() {
             iframe.contentWindow.postMessage(JSON.stringify({
                 event: 'command',
                 func: 'setVolume',
-                args: [80]
+                args: [Math.round(volume * 100)]
             }), '*');
         }
         setTrailerMuted(false);
@@ -303,12 +309,25 @@ export default function AnimeSchedule() {
                 iframe.contentWindow.postMessage(JSON.stringify({
                     event: 'command',
                     func: 'setVolume',
-                    args: [80]
+                    args: [Math.round(volume * 100)]
                 }), '*');
             }
         }, 1500);
         return () => clearTimeout(timer);
-    }, [previewTrailer, trailerMuted]);
+    }, [previewTrailer, trailerMuted, volume]);
+
+    // Live volume sync
+    useEffect(() => {
+        if (!previewTrailer || trailerMuted) return;
+        const iframe = trailerIframeRef.current;
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'setVolume',
+                args: [Math.round(volume * 100)]
+            }), '*');
+        }
+    }, [volume]);
 
     const sidebarContent = (
         <>

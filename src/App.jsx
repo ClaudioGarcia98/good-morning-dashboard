@@ -25,6 +25,7 @@ export default function App() {
                 if (document.activeElement !== document.getElementById('searchInput')) {
                     document.documentElement.style.setProperty('--ui-opacity', '0.2');
                     document.body.classList.add('idle');
+                    window.dispatchEvent(new Event('app-idle'));
                 }
             }, 5000);
         };
