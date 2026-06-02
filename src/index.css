@@ -481,17 +481,25 @@ body {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.3s ease;
+    cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: auto; z-index: 20;
     animation: fadeSlideIn 0.5s ease 0.4s both;
 }
 .anime-toggle:hover { 
     background: rgba(255,255,255,0.25); 
-    transform: scale(1.1); 
-    box-shadow: 0 0 10px var(--accent-glow); 
-    animation: pulseGlow 1.5s infinite;
+    box-shadow: 0 0 12px var(--accent-glow); 
 }
-.anime-toggle svg { fill: white; width: 20px; height: 20px; }
+.anime-toggle svg { 
+    fill: white; width: 20px; height: 20px;
+    transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy flip timing */
+    transform-style: preserve-3d;
+}
+.anime-toggle.open {
+    right: 520px;
+}
+.anime-toggle.open svg {
+    transform: perspective(500px) rotateY(-180deg) scale(1.15);
+}
 .anime-sidebar {
     position: absolute; top: 0; right: -500px;
     width: 500px; height: 100vh;
@@ -513,10 +521,17 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;
 }
 .as-close {
-    background: none; border: none; color: rgba(255,255,255,0.5);
-    font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; cursor: pointer; transition: all 0.2s;
+    line-height: 1;
 }
-.as-close:hover { color: white; }
+.as-close:hover { 
+    background: #ff6b6b; color: white; border-color: #ff6b6b;
+    transform: scale(1.1); box-shadow: 0 0 10px rgba(255,107,107,0.4);
+}
 .as-days {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
     padding-bottom: 10px; margin-bottom: 15px;
