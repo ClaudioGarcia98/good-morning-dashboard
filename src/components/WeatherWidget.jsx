@@ -118,18 +118,12 @@ export default function WeatherWidget() {
                 onClick={() => setExpanded(!expanded)}
                 aria-expanded={expanded}
                 aria-label="Toggle Weather Details"
-                style={{ background: 'none', border: 'none', color: 'inherit', fontFamily: 'inherit' }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', 
-                    background: 'rgba(0,0,0,0.25)', padding: '8px 14px', borderRadius: '20px',
-                    backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', 
-                    border: '1px solid rgba(255,255,255,0.1)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                    <span id="weatherIcon" className={weather?.iconInfo?.className || ''} aria-hidden="true" style={{ display: 'inline-block' }}>
-                        {weather ? weather.iconInfo.icon : '☀️'}
-                    </span>
-                    <span id="weatherTemp">{weather ? weather.temp : '--°C'}</span>
-                    <span className="weather-chevron" aria-hidden="true">▾</span>
-                </div>
+                <span id="weatherIcon" className={weather?.iconInfo?.className || ''} aria-hidden="true" style={{ display: 'inline-block' }}>
+                    {weather ? weather.iconInfo.icon : '☀️'}
+                </span>
+                <span id="weatherTemp">{weather ? weather.temp : '--°C'}</span>
+                <span className="weather-chevron" aria-hidden="true">▾</span>
             </button>
             <div 
                 className={`weather-panel ${expanded ? 'open' : ''}`} 
