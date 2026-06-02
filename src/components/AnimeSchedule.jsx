@@ -4,66 +4,68 @@ import { useSettings } from '../context/SettingsContext';
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const DAY_FILTERS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+
+
+// Helper to calculate countdown (+1.5 hours for internet release)
+const calculateTimeLeft = (broadcast) => {
+    if (!broadcast || !broadcast.time || !broadcast.day) return null;
+    
+    const dayMap = { 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 0 };
+    const cleanDay = broadcast.day.toLowerCase().replace(/s$/, '');
+    const targetDay = dayMap[cleanDay];
+    if (targetDay === undefined) return null;
+
+    const [hours, minutes] = broadcast.time.split(':').map(Number);
+    
+    // JST is UTC+9
+    const now = new Date();
+    const jstNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+    
+    let target = new Date(jstNow);
+    target.setHours(hours, minutes, 0, 0);
+    
+    // If the target day is different or we already passed the time today, move forward
+    while (target.getDay() !== targetDay || target < jstNow) {
+        target.setDate(target.getDate() + 1);
+    }
+
+    // Add 1.5 hours for internet sub release
+    target.setMinutes(target.getMinutes() + 90);
+
+    const diff = target - jstNow;
+    if (diff <= 0) return "Out Now!";
+    
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+    
+    if (d > 0) return `${d}d ${h}h ${m}m`;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
+
+const CountdownBadge = ({ broadcast }) => {
+    const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(broadcast));
+    
+    useEffect(() => {
+        if (!broadcast) return;
+        const timer = setInterval(() => setTimeLeft(calculateTimeLeft(broadcast)), 1000);
+        return () => clearInterval(timer);
+    }, [broadcast]);
+
+    if (!timeLeft) return null;
+    return (
+        <div className="anime-countdown">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            <span>{timeLeft}</span>
+        </div>
+    );
+};
+
 export default function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
     const { volume } = useSettings();
-
-    // Helper to calculate countdown (+1.5 hours for internet release)
-    const calculateTimeLeft = (broadcast) => {
-        if (!broadcast || !broadcast.time || !broadcast.day) return null;
-        
-        const dayMap = { 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 0 };
-        const cleanDay = broadcast.day.toLowerCase().replace(/s$/, '');
-        const targetDay = dayMap[cleanDay];
-        if (targetDay === undefined) return null;
-
-        const [hours, minutes] = broadcast.time.split(':').map(Number);
-        
-        // JST is UTC+9
-        const now = new Date();
-        const jstNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-        
-        let target = new Date(jstNow);
-        target.setHours(hours, minutes, 0, 0);
-        
-        // If the target day is different or we already passed the time today, move forward
-        while (target.getDay() !== targetDay || target < jstNow) {
-            target.setDate(target.getDate() + 1);
-        }
-
-        // Add 1.5 hours for internet sub release
-        target.setMinutes(target.getMinutes() + 90);
-
-        const diff = target - jstNow;
-        if (diff <= 0) return "Out Now!";
-        
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const m = Math.floor((diff / 1000 / 60) % 60);
-        const s = Math.floor((diff / 1000) % 60);
-        
-        if (d > 0) return `${d}d ${h}h ${m}m`;
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
-
-    const CountdownBadge = ({ broadcast }) => {
-        const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(broadcast));
-        
-        useEffect(() => {
-            if (!broadcast) return;
-            const timer = setInterval(() => setTimeLeft(calculateTimeLeft(broadcast)), 1000);
-            return () => clearInterval(timer);
-        }, [broadcast]);
-
-        if (!timeLeft) return null;
-        return (
-            <div className="anime-countdown">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                <span>{timeLeft}</span>
-            </div>
-        );
-    };
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
@@ -208,6 +210,7 @@ export default function AnimeSchedule() {
         setTimeout(loadInitialData, 1000);
 
         const handleClickOutside = (e) => {
+            if (!document.contains(e.target)) return; // Ignore clicks on elements that were unmounted
             if (sidebarRef.current && !sidebarRef.current.contains(e.target) &&
                 toggleRef.current && !toggleRef.current.contains(e.target) &&
                 !e.target.closest('.trailer-portal-container')) {
@@ -533,12 +536,14 @@ export default function AnimeSchedule() {
                                         onMouseLeave={handleMouseLeave}
                                     >
                                         <img src={anime.images?.jpg?.small_image_url} alt="poster" />
-                                        <div className="tab-item-info">
+                                        <div className="tab-item-info" style={{ flex: 1, minWidth: 0 }}>
                                             <div className="tab-item-title">{anime.title}</div>
                                             <div className="tab-item-meta">
                                                 <span>⭐ {anime.score || 'N/A'} • 🕒 {anime.broadcast?.time || '?'}</span>
                                             </div>
-                                            <div style={{ transform: 'scale(0.85)', transformOrigin: 'left top', marginTop: '4px' }}>
+                                        </div>
+                                        <div className="tab-item-timer" style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                                            <div>
                                                 <CountdownBadge broadcast={anime.broadcast} />
                                             </div>
                                         </div>

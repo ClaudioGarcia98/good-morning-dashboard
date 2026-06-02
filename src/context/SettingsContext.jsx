@@ -106,7 +106,7 @@ export function SettingsProvider({ children }) {
             let a = '#FFD26A', g = 'rgba(255,210,106,0.2)';
             if (hr >= 12 && hr < 18) { a = '#FF9F43'; g = 'rgba(255,159,67,0.2)'; }
             else if (hr >= 18 && hr < 22) { a = '#54a0ff'; g = 'rgba(84,160,255,0.2)'; }
-            else if (hr >= 22 || hr < 5)  { a = '#a55eea'; g = 'rgba(165,94,234,0.2)'; }
+            else if (hr >= 22 || hr < 5)  { a = '#c482fb'; g = 'rgba(196,130,251,0.25)'; }
             document.documentElement.style.setProperty('--accent-color', a);
             document.documentElement.style.setProperty('--accent-glow', g);
         };
