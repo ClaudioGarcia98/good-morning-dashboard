@@ -35,31 +35,52 @@ export default function WeatherWidget() {
                 const res = await fetch(
                     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
                     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code` +
-                    `&daily=sunrise,sunset&timezone=auto&forecast_days=1`
+                    `&daily=sunrise,sunset,weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4`
                 );
                 const d = await res.json();
                 const c = d.current;
                 if (!c) return;
 
-                const code = c.weather_code;
-                let icon = '☀️';
-                if      (code >= 1  && code <= 3)  icon = '⛅';
-                else if (code >= 45 && code <= 48) icon = '🌫️';
-                else if (code >= 51 && code <= 67) icon = '🌧️';
-                else if (code >= 71 && code <= 77) icon = '❄️';
-                else if (code >= 80 && code <= 82) icon = '🌦️';
-                else if (code >= 95)               icon = '⛈️';
+                const getIconInfo = (code) => {
+                    if      (code >= 1  && code <= 3)  return { icon: '⛅', className: 'weather-icon-cloud' };
+                    else if (code >= 45 && code <= 48) return { icon: '🌫️', className: 'weather-icon-cloud' };
+                    else if (code >= 51 && code <= 67) return { icon: '🌧️', className: 'weather-icon-rain' };
+                    else if (code >= 71 && code <= 77) return { icon: '❄️', className: 'weather-icon-rain' };
+                    else if (code >= 80 && code <= 82) return { icon: '🌦️', className: 'weather-icon-rain' };
+                    else if (code >= 95)               return { icon: '⛈️', className: 'weather-icon-rain' };
+                    return { icon: '☀️', className: 'weather-icon-sun' };
+                };
 
+                const currentIconInfo = getIconInfo(c.weather_code);
                 const fmt = iso => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 
+                const forecast = [];
+                if (d.daily && d.daily.time) {
+                    // Skip today (index 0), get next 3 days
+                    for (let i = 1; i <= 3; i++) {
+                        if (!d.daily.time[i]) break;
+                        const dateObj = new Date(d.daily.time[i]);
+                        const dayName = dateObj.toLocaleDateString('en-GB', { weekday: 'short' });
+                        const maxTemp = Math.round(d.daily.temperature_2m_max[i]);
+                        const minTemp = Math.round(d.daily.temperature_2m_min[i]);
+                        forecast.push({
+                            day: dayName,
+                            iconInfo: getIconInfo(d.daily.weather_code[i]),
+                            max: maxTemp,
+                            min: minTemp
+                        });
+                    }
+                }
+
                 setWeather({
-                    icon,
+                    iconInfo: currentIconInfo,
                     temp: Math.round(c.temperature_2m) + '°C',
                     feelsLike: Math.round(c.apparent_temperature) + '°C',
                     humidity: c.relative_humidity_2m + '%',
                     wind: Math.round(c.wind_speed_10m) + ' km/h',
                     sunrise: d.daily ? fmt(d.daily.sunrise[0]) : '--:--',
                     sunset: d.daily ? fmt(d.daily.sunset[0]) : '--:--',
+                    forecast
                 });
             } catch (err) {
                 if (err.code === 1) setError(true);
@@ -101,7 +122,9 @@ export default function WeatherWidget() {
                     background: 'rgba(0,0,0,0.25)', padding: '8px 14px', borderRadius: '20px',
                     backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', 
                     border: '1px solid rgba(255,255,255,0.1)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                    <span id="weatherIcon" aria-hidden="true">{weather ? weather.icon : '☀️'}</span>
+                    <span id="weatherIcon" className={weather?.iconInfo?.className || ''} aria-hidden="true" style={{ display: 'inline-block' }}>
+                        {weather ? weather.iconInfo.icon : '☀️'}
+                    </span>
                     <span id="weatherTemp">{weather ? weather.temp : '--°C'}</span>
                     <span className="weather-chevron" aria-hidden="true">▾</span>
                 </div>
@@ -118,6 +141,24 @@ export default function WeatherWidget() {
                 <div className="wd-row"><span>Wind</span><span id="wWind">{weather ? weather.wind : '-- km/h'}</span></div>
                 <div className="wd-row"><span>🌅 Sunrise</span><span id="wSunrise">{weather ? weather.sunrise : '--:--'}</span></div>
                 <div className="wd-row"><span>🌇 Sunset</span><span id="wSunset">{weather ? weather.sunset : '--:--'}</span></div>
+                
+                {weather?.forecast && weather.forecast.length > 0 && (
+                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                        <div style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: '8px', fontWeight: 'bold' }}>3-Day Forecast</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            {weather.forecast.map((day, idx) => (
+                                <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                    <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>{day.day}</div>
+                                    <div className={day.iconInfo.className} style={{ display: 'inline-block', fontSize: '1.2rem' }}>{day.iconInfo.icon}</div>
+                                    <div style={{ fontSize: '0.75rem' }}>
+                                        <span style={{ fontWeight: 'bold' }}>{day.max}°</span>
+                                        <span style={{ opacity: 0.6, marginLeft: '4px' }}>{day.min}°</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

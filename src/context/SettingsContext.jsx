@@ -25,6 +25,7 @@ export function SettingsProvider({ children }) {
     const [clockMode, setClockMode] = useState(() => localStorage.getItem('dash_clock') || 'digital');
     const [username, setUsername] = useState(() => localStorage.getItem('dash_username') || 'Cláudio');
     const [backgroundUrl, setBackgroundUrl] = useState(null);
+    const [backgroundIsVideo, setBackgroundIsVideo] = useState(false);
     const [gifName, setGifName] = useState(() => localStorage.getItem('dash_gif_name') || '');
     
     const [volume, setVolume] = useState(() => {
@@ -58,9 +59,15 @@ export function SettingsProvider({ children }) {
         ];
     });
 
+    const [customEngines, setCustomEngines] = useState(() => {
+        const cached = localStorage.getItem('dash_custom_engines');
+        if (cached) return JSON.parse(cached);
+        return [];
+    });
+
     // Background setup
     useEffect(() => {
-        const DEFAULT_GIF = 'file:///C:/Users/claudio/Pictures/Gifs/animated.gif';
+        const DEFAULT_GIF = 'https://video.r2.moele.me/v/29642/29632082_a-01.mp4';
         const loadBlob = async () => {
             try {
                 const db = await new Promise((res, rej) => {
@@ -80,8 +87,10 @@ export function SettingsProvider({ children }) {
         loadBlob().then(blob => {
             if (blob) {
                 setBackgroundUrl(URL.createObjectURL(blob));
+                setBackgroundIsVideo(blob.type && blob.type.startsWith('video/'));
             } else {
                 setBackgroundUrl(DEFAULT_GIF);
+                setBackgroundIsVideo(DEFAULT_GIF.endsWith('.mp4'));
             }
         });
     }, []);
@@ -139,16 +148,22 @@ export function SettingsProvider({ children }) {
         localStorage.setItem('dash_speed_dials', JSON.stringify(speedDials));
     }, [speedDials]);
 
+    useEffect(() => {
+        localStorage.setItem('dash_custom_engines', JSON.stringify(customEngines));
+    }, [customEngines]);
+
     const value = {
         theme, setTheme, THEMES,
         font, setFont, FONTS,
         clockMode, setClockMode,
         username, setUsername,
         backgroundUrl, setBackgroundUrl,
+        backgroundIsVideo, setBackgroundIsVideo,
         gifName, setGifName,
         speedDials, setSpeedDials,
         volume, setVolume,
-        hasInteracted
+        hasInteracted,
+        customEngines, setCustomEngines
     };
 
     return (

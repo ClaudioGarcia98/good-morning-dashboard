@@ -10,7 +10,7 @@ import AnimeSchedule from './components/AnimeSchedule';
 import { useSettings } from './context/SettingsContext';
 
 export default function App() {
-    const { backgroundUrl } = useSettings();
+    const { backgroundUrl, backgroundIsVideo } = useSettings();
 
     useEffect(() => {
         let idleT;
@@ -41,7 +41,7 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        if (backgroundUrl) {
+        if (backgroundUrl && !backgroundIsVideo) {
             Object.assign(document.body.style, {
                 backgroundImage: `url('${backgroundUrl}')`,
                 backgroundSize: 'cover',
@@ -49,11 +49,28 @@ export default function App() {
                 backgroundRepeat: 'no-repeat',
                 backgroundAttachment: 'fixed',
             });
+        } else {
+            document.body.style.backgroundImage = 'none';
         }
-    }, [backgroundUrl]);
+    }, [backgroundUrl, backgroundIsVideo]);
 
     return (
         <>
+            {backgroundIsVideo && backgroundUrl && (
+                <video
+                    src={backgroundUrl}
+                    autoPlay
+                    loop
+                    muted
+                    style={{
+                        position: 'absolute',
+                        top: 0, left: 0,
+                        width: '100%', height: '100%',
+                        objectFit: 'cover',
+                        zIndex: 0
+                    }}
+                />
+            )}
             <div className="overlay" id="overlay"></div>
             <div className="interactive-ui" id="mainUi">
                 <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>

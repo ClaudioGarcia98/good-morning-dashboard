@@ -350,6 +350,22 @@ body {
 .wd-row span:first-child { opacity: 0.5; }
 .wd-row span:last-child  { font-weight: 500; }
 
+/* ── Weather Animations ────────────────────────────── */
+@keyframes weatherSpin { 100% { transform: rotate(360deg); } }
+@keyframes weatherFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes weatherBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+
+.weather-icon-sun {
+    animation: weatherSpin 15s linear infinite;
+    transform-origin: center;
+}
+.weather-icon-cloud {
+    animation: weatherFloat 4s ease-in-out infinite;
+}
+.weather-icon-rain {
+    animation: weatherBob 2s ease-in-out infinite;
+}
+
 /* ── Settings Toggle ───────────────────────────────── */
 .settings-toggle {
     position: absolute; bottom: 30px; left: 30px;

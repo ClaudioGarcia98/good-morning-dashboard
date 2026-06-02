@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSettings } from '../context/SettingsContext';
 
 const ENGINES = {
     'yt ':    { name:'YouTube',    bg:'#FF0000', fg:'#fff', url: q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}` },
@@ -13,12 +14,26 @@ const ENGINES = {
 };
 
 export default function SearchBox() {
+    const { customEngines } = useSettings();
     const [query, setQuery] = useState('');
     const [activeEngine, setActiveEngine] = useState(null);
     const [suggestions, setSuggestions] = useState([]);
     const [recent, setRecent] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [focusIdx, setFocusIdx] = useState(-1);
+
+    // Combine default engines with custom engines
+    const combinedEngines = { ...ENGINES };
+    if (customEngines) {
+        customEngines.forEach(e => {
+            combinedEngines[e.prefix] = {
+                name: e.name,
+                bg: '#333',
+                fg: '#fff',
+                url: q => e.url.replace('%s', encodeURIComponent(q))
+            };
+        });
+    }
     
     const inputRef = useRef(null);
     const formRef = useRef(null);
@@ -149,7 +164,7 @@ export default function SearchBox() {
         }
 
         const low = val.toLowerCase();
-        for (const [pfx, eng] of Object.entries(ENGINES)) {
+        for (const [pfx, eng] of Object.entries(combinedEngines)) {
             if (low.startsWith(pfx)) {
                 setActiveEngine({ ...eng, pfx });
                 const rest = val.slice(pfx.length);
@@ -272,9 +287,9 @@ export default function SearchBox() {
                                 key={idx}
                                 className={idx === focusIdx ? 'selected' : ''}
                                 onClick={() => {
-                                    const engKey = Object.keys(ENGINES).find(k => ENGINES[k].name === item.engineName);
+                                    const engKey = Object.keys(combinedEngines).find(k => combinedEngines[k].name === item.engineName);
                                     if (engKey) {
-                                        window.open(ENGINES[engKey].url(item.query), '_blank');
+                                        window.open(combinedEngines[engKey].url(item.query), '_blank');
                                     } else {
                                         processQuery(item.query);
                                     }

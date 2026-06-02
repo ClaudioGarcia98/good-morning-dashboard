@@ -10,12 +10,18 @@ export default function SettingsPanel() {
         setBackgroundUrl,
         gifName, setGifName,
         speedDials, setSpeedDials,
-        volume, setVolume
+        volume, setVolume,
+        customEngines, setCustomEngines,
+        setBackgroundIsVideo
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
     const [newDialName, setNewDialName] = useState('');
     const [newDialUrl, setNewDialUrl] = useState('');
+    const [newEngName, setNewEngName] = useState('');
+    const [newEngPrefix, setNewEngPrefix] = useState('');
+    const [newEngUrl, setNewEngUrl] = useState('');
+    
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -57,6 +63,7 @@ export default function SettingsPanel() {
         if (!f) return;
         await saveBlob(f);
         setBackgroundUrl(URL.createObjectURL(f));
+        setBackgroundIsVideo(f.type && f.type.startsWith('video/'));
         localStorage.setItem('dash_gif_name', f.name);
         setGifName(f.name);
     };
@@ -73,7 +80,26 @@ export default function SettingsPanel() {
     };
 
     const handleRemoveDial = (id) => {
-        setSpeedDials(speedDials.filter(d => d.id !== id));
+        setSpeedDials(prev => prev.filter(d => d.id !== id));
+    };
+
+    const handleAddEngine = () => {
+        if (!newEngName.trim() || !newEngPrefix.trim() || !newEngUrl.trim()) return;
+        const prefix = newEngPrefix.trim().toLowerCase() + ' ';
+        const newEng = {
+            id: Date.now(),
+            name: newEngName.trim(),
+            prefix: prefix,
+            url: newEngUrl.trim()
+        };
+        setCustomEngines(prev => [...prev, newEng]);
+        setNewEngName('');
+        setNewEngPrefix('');
+        setNewEngUrl('');
+    };
+
+    const handleRemoveEngine = (id) => {
+        setCustomEngines(prev => prev.filter(e => e.id !== id));
     };
 
     return (
@@ -223,6 +249,50 @@ export default function SettingsPanel() {
                                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{dial.name}</span>
                                     </div>
                                     <button onClick={() => handleRemoveDial(dial.id)} style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Search Shortcuts</div>
+                    <div className="sp-group">
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                            <input 
+                                type="text" 
+                                placeholder="Name (e.g. Wiki)" 
+                                value={newEngName}
+                                onChange={e => setNewEngName(e.target.value)}
+                                style={{ flex: 1 }}
+                            />
+                            <input 
+                                type="text" 
+                                placeholder="Prefix (e.g. w)" 
+                                value={newEngPrefix}
+                                onChange={e => setNewEngPrefix(e.target.value)}
+                                style={{ flex: 1 }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                            <input 
+                                type="text" 
+                                placeholder="Search URL (use %s for query)" 
+                                value={newEngUrl}
+                                onChange={e => setNewEngUrl(e.target.value)}
+                                style={{ flex: 3 }}
+                                onKeyDown={e => e.key === 'Enter' && handleAddEngine()}
+                            />
+                            <button className="pill" onClick={handleAddEngine}>Add</button>
+                        </div>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                            {customEngines.map(eng => (
+                                <li key={eng.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
+                                        <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 5px', borderRadius: '4px', fontSize: '0.7rem' }}>{eng.prefix.trim()}</kbd>
+                                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{eng.name}</span>
+                                    </div>
+                                    <button onClick={() => handleRemoveEngine(eng.id)} style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
                                 </li>
                             ))}
                         </ul>
