@@ -121,7 +121,7 @@ export default function SettingsPanel() {
     return (
         <>
             <div 
-                className="settings-toggle" 
+                className={`settings-toggle ${isOpen ? 'open' : ''}`}
                 id="settingsToggle" 
                 title="Settings"
                 ref={toggleRef}

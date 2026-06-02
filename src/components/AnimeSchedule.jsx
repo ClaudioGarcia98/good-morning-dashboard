@@ -436,7 +436,7 @@ export default function AnimeSchedule() {
                         <div style={{ opacity: 0.5, padding: '20px', textAlign: 'center', fontSize: '0.8rem' }}>No anime scheduled.</div>
                     ) : (
                         sidebarData.map((anime, index) => {
-                            const isExpanded = expandedAnime === anime.mal_id;
+                            const isExpanded = expandedAnime?.id === anime.mal_id && expandedAnime?.source === 'sidebar';
                             const isLastItem = index === sidebarData.length - 1;
                             return (
                                 <div 
@@ -445,7 +445,7 @@ export default function AnimeSchedule() {
                                     className={`anime-card ${isExpanded ? 'expanded' : ''}`}
                                     onClick={() => {
                                         const expand = !isExpanded;
-                                        setExpandedAnime(expand ? anime.mal_id : null);
+                                        setExpandedAnime(expand ? { id: anime.mal_id, source: 'sidebar' } : null);
                                         if (expand && isLastItem) {
                                             setTimeout(() => {
                                                 document.getElementById(`anime-card-${anime.mal_id}`)?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -504,7 +504,7 @@ export default function AnimeSchedule() {
                         <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>No anime airing today.</div>
                     ) : (
                         displayList.map(anime => {
-                            const isExpanded = expandedAnime === anime.mal_id;
+                            const isExpanded = expandedAnime?.id === anime.mal_id && expandedAnime?.source === 'today';
                             return (
                                 <div 
                                     key={anime.mal_id}
@@ -512,7 +512,7 @@ export default function AnimeSchedule() {
                                     className={`tab-item ${userWatchingIds.includes(anime.mal_id) ? 'watched-highlight' : ''} ${isExpanded ? 'expanded' : ''}`}
                                     onClick={() => {
                                         const expand = !isExpanded;
-                                        setExpandedAnime(expand ? anime.mal_id : null);
+                                        setExpandedAnime(expand ? { id: anime.mal_id, source: 'today' } : null);
                                     }}
                                     onMouseLeave={handleMouseLeave}
                                 >
