@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import ReactPlayer from 'react-player';
+import { useSettings } from '../context/SettingsContext';
 
 const DAYS = ['sundays', 'mondays', 'tuesdays', 'wednesdays', 'thursdays', 'fridays', 'saturdays'];
 const DAY_FILTERS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -184,6 +186,7 @@ export default function AnimeSchedule() {
         setPortalNode(document.getElementById('mainUi'));
     }, []);
 
+    const { volume, hasInteracted } = useSettings();
     const [previewTrailer, setPreviewTrailer] = useState(null);
     const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
     const hoverTimer = useRef(null);
@@ -342,14 +345,22 @@ export default function AnimeSchedule() {
                 onMouseEnter={handleTrailerMouseEnter}
                 onMouseLeave={handleTrailerMouseLeave}
                 >
-                    <iframe 
-                        width="300" height="169" 
-                        src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&mute=1&controls=1&modestbranding=1&rel=0`} 
-                        title="Trailer Preview" 
-                        frameBorder="0" 
-                        allow="autoplay; encrypted-media" 
-                        referrerPolicy="strict-origin-when-cross-origin"
-                    />
+                    <div style={{ borderRadius: '12px', overflow: 'hidden', width: '300px', height: '169px' }}>
+                        <ReactPlayer 
+                            url={`https://www.youtube.com/watch?v=${previewTrailer}`} 
+                            playing={true} 
+                            muted={!hasInteracted}
+                            controls={false}
+                            volume={volume}
+                            width="300px" 
+                            height="169px" 
+                            config={{
+                                youtube: {
+                                    playerVars: { modestbranding: 1, showinfo: 0, rel: 0 }
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
             , portalNode)}
         </>
