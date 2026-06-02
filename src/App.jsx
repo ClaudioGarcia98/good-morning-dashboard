@@ -62,7 +62,7 @@ export default function App() {
                     <div className="center-content">
                         <Greeting />
                         <Clock />
-                        <div className="opacity-transition">
+                        <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', marginBottom: '35px' }}>
                             <Quote />
                         </div>
                     </div>
