@@ -30,6 +30,21 @@ export function SettingsProvider({ children }) {
         const saved = localStorage.getItem('dash_volume');
         return saved ? parseFloat(saved) : 0.2;
     });
+    const [hasInteracted, setHasInteracted] = useState(false);
+
+    useEffect(() => {
+        const handleInteract = () => {
+            setHasInteracted(true);
+            window.removeEventListener('click', handleInteract);
+            window.removeEventListener('keydown', handleInteract);
+        };
+        window.addEventListener('click', handleInteract);
+        window.addEventListener('keydown', handleInteract);
+        return () => {
+            window.removeEventListener('click', handleInteract);
+            window.removeEventListener('keydown', handleInteract);
+        };
+    }, []);
     
     const [speedDials, setSpeedDials] = useState(() => {
         const cached = localStorage.getItem('dash_speed_dials');
@@ -131,7 +146,8 @@ export function SettingsProvider({ children }) {
         backgroundUrl, setBackgroundUrl,
         gifName, setGifName,
         speedDials, setSpeedDials,
-        volume, setVolume
+        volume, setVolume,
+        hasInteracted
     };
 
     return (

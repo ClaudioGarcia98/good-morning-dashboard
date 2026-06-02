@@ -26,11 +26,12 @@ function YouTubeMusic() {
             gap: '10px'
         }} className="opacity-transition yt-music-box">
             
-            <div style={{ borderRadius: '8px', overflow: 'hidden', height: '80px', pointerEvents: 'none' }}>
+            <div style={{ borderRadius: '8px', overflow: 'hidden', height: '80px' }}>
                 <ReactPlayer 
                     url="https://www.youtube.com/watch?v=5qap5aO4i9A" 
+                    light={true}
                     playing={true} 
-                    controls={false}
+                    controls={true}
                     volume={volume}
                     width="100%" 
                     height="120px" 

@@ -186,7 +186,7 @@ export default function AnimeSchedule() {
         setPortalNode(document.getElementById('mainUi'));
     }, []);
 
-    const { volume } = useSettings();
+    const { volume, hasInteracted } = useSettings();
     const [previewTrailer, setPreviewTrailer] = useState(null);
     const [previewPos, setPreviewPos] = useState({ x: 0, y: 0 });
     const hoverTimer = useRef(null);
@@ -349,6 +349,7 @@ export default function AnimeSchedule() {
                         <ReactPlayer 
                             url={`https://www.youtube.com/watch?v=${previewTrailer}`} 
                             playing={true} 
+                            muted={!hasInteracted}
                             controls={false}
                             volume={volume}
                             width="300px" 
