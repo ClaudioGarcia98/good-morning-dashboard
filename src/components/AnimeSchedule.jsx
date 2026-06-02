@@ -248,8 +248,46 @@ export default function AnimeSchedule() {
     const handleTrailerMouseLeave = () => {
         hideTimer.current = setTimeout(() => {
             setPreviewTrailer(null);
+            setTrailerMuted(true);
         }, 300);
     };
+
+    const [trailerMuted, setTrailerMuted] = useState(true);
+    const trailerIframeRef = useRef(null);
+
+    const handleUnmute = () => {
+        const iframe = trailerIframeRef.current;
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'unMute',
+                args: []
+            }), '*');
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'setVolume',
+                args: [80]
+            }), '*');
+        }
+        setTrailerMuted(false);
+    };
+
+    const handleMute = () => {
+        const iframe = trailerIframeRef.current;
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'mute',
+                args: []
+            }), '*');
+        }
+        setTrailerMuted(true);
+    };
+
+    // Reset muted state when trailer changes
+    useEffect(() => {
+        setTrailerMuted(true);
+    }, [previewTrailer]);
 
     const sidebarContent = (
         <>
@@ -364,15 +402,54 @@ export default function AnimeSchedule() {
                 onMouseEnter={handleTrailerMouseEnter}
                 onMouseLeave={handleTrailerMouseLeave}
                 >
-                    <div style={{ borderRadius: '12px', overflow: 'hidden', width: '300px', height: '169px' }}>
+                    <div style={{ borderRadius: '12px', overflow: 'hidden', width: '300px', height: '169px', position: 'relative' }}>
                         <iframe
-                            src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&mute=1&modestbranding=1&showinfo=0&rel=0&controls=0&playsinline=1`}
+                            ref={trailerIframeRef}
+                            src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&mute=1&enablejsapi=1&modestbranding=1&showinfo=0&rel=0&controls=0&playsinline=1&origin=${window.location.origin}`}
                             width="300"
                             height="169"
                             style={{ border: 'none', display: 'block' }}
                             allow="autoplay; encrypted-media"
                             allowFullScreen
                         />
+                        {/* Unmute/Mute toggle button */}
+                        <button
+                            onClick={trailerMuted ? handleUnmute : handleMute}
+                            style={{
+                                position: 'absolute',
+                                bottom: '8px',
+                                right: '8px',
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                background: 'rgba(0,0,0,0.7)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backdropFilter: 'blur(4px)',
+                                transition: 'all 0.2s ease',
+                                zIndex: 2
+                            }}
+                            title={trailerMuted ? 'Unmute' : 'Mute'}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" />
+                                {trailerMuted ? (
+                                    <>
+                                        <line x1="23" y1="9" x2="17" y2="15" />
+                                        <line x1="17" y1="9" x2="23" y2="15" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                                    </>
+                                )}
+                            </svg>
+                        </button>
                     </div>
                 </div>
             , trailerPortal)}
