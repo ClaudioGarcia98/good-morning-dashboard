@@ -9,7 +9,8 @@ export default function SettingsPanel() {
         username, setUsername,
         setBackgroundUrl,
         gifName, setGifName,
-        speedDials, setSpeedDials
+        speedDials, setSpeedDials,
+        musicUrl, setMusicUrl
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -146,6 +147,23 @@ export default function SettingsPanel() {
                                 {m.charAt(0).toUpperCase() + m.slice(1)}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Music</div>
+                    <div className="sp-group">
+                        <label htmlFor="musicUrlInput">YouTube URL</label>
+                        <input 
+                            type="text" 
+                            id="musicUrlInput" 
+                            placeholder="Paste YouTube video or playlist URL" 
+                            value={musicUrl}
+                            onChange={(e) => setMusicUrl(e.target.value)}
+                        />
+                        <div style={{ fontSize: '0.65rem', opacity: 0.35, marginTop: '4px', lineHeight: 1.4 }}>
+                            Supports video, playlist, or YouTube Music links
+                        </div>
                     </div>
                 </div>
 

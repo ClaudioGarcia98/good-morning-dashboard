@@ -180,10 +180,12 @@ export default function AnimeSchedule() {
     const displayList = getDisplayList();
     const userWatchingIds = userWatching.map(u => u.mal_id);
 
-    const [portalNode, setPortalNode] = useState(null);
+    const [sidebarPortal, setSidebarPortal] = useState(null);
+    const [trailerPortal, setTrailerPortal] = useState(null);
 
     useEffect(() => {
-        setPortalNode(document.getElementById('mainUi'));
+        setSidebarPortal(document.getElementById('mainUi'));
+        setTrailerPortal(document.body);
     }, []);
 
     const { volume, hasInteracted } = useSettings();
@@ -199,20 +201,38 @@ export default function AnimeSchedule() {
             const match = anime.trailer.embed_url.match(/embed\/([^?]+)/);
             if (match) yid = match[1];
         }
+        if (!yid && anime.trailer?.url) {
+            const match = anime.trailer.url.match(/(?:v=|youtu\.be\/)([^&?#]+)/);
+            if (match) yid = match[1];
+        }
         if (!yid) {
             setPreviewTrailer(null);
             return;
         }
         
         const rect = e.currentTarget.getBoundingClientRect();
-        const isSidebar = e.currentTarget.classList.contains('anime-card');
-        const x = isSidebar ? rect.left - 320 : rect.right + 20;
-        const y = rect.top;
+        const isSidebar = e.currentTarget.closest('.anime-sidebar') !== null;
+        const previewWidth = 300;
+        const previewHeight = 169;
+        
+        let x, y;
+        if (isSidebar) {
+            x = rect.left - previewWidth - 20;
+            if (x < 10) x = rect.right + 10;
+        } else {
+            x = rect.right + 20;
+            if (x + previewWidth > window.innerWidth - 10) {
+                x = rect.left - previewWidth - 20;
+            }
+        }
+        y = rect.top + (rect.height / 2) - (previewHeight / 2);
+        y = Math.max(10, Math.min(y, window.innerHeight - previewHeight - 10));
+        x = Math.max(10, x);
         
         hoverTimer.current = setTimeout(() => {
             setPreviewTrailer(yid);
             setPreviewPos({ x, y });
-        }, 500);
+        }, 400);
     };
 
     const handleMouseLeave = () => {
@@ -325,8 +345,8 @@ export default function AnimeSchedule() {
                     )}
                 </div>
             </div>
-            {portalNode && createPortal(sidebarContent, portalNode)}
-            {portalNode && previewTrailer && createPortal(
+            {sidebarPortal && createPortal(sidebarContent, sidebarPortal)}
+            {trailerPortal && previewTrailer && createPortal(
                 <div style={{
                     position: 'fixed',
                     left: Math.max(20, previewPos.x),
@@ -362,7 +382,7 @@ export default function AnimeSchedule() {
                         />
                     </div>
                 </div>
-            , portalNode)}
+            , trailerPortal)}
         </>
     );
 }
