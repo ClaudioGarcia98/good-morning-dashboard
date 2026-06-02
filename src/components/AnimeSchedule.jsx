@@ -324,47 +324,33 @@ export default function AnimeSchedule() {
             </div>
             {portalNode && createPortal(sidebarContent, portalNode)}
             {portalNode && previewTrailer && createPortal(
-                <a 
-                    href={`https://www.youtube.com/watch?v=${previewTrailer}`}
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{
-                        position: 'fixed',
-                        left: Math.max(20, previewPos.x),
-                        top: Math.max(20, Math.min(previewPos.y, window.innerHeight - 190)),
-                        width: '300px',
-                        height: '169px',
-                        background: '#000',
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        zIndex: 99999,
-                        overflow: 'hidden',
-                        pointerEvents: 'auto',
-                        animation: 'fadeSlideIn 0.3s ease both',
-                        display: 'block'
-                    }}
-                    onMouseEnter={handleTrailerMouseEnter}
-                    onMouseLeave={handleTrailerMouseLeave}
+                <div style={{
+                    position: 'fixed',
+                    left: Math.max(20, previewPos.x),
+                    top: Math.max(20, Math.min(previewPos.y, window.innerHeight - 190)),
+                    width: '300px',
+                    height: '169px',
+                    background: '#000',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    zIndex: 99999,
+                    overflow: 'hidden',
+                    pointerEvents: 'auto',
+                    animation: 'fadeSlideIn 0.3s ease both'
+                }}
+                onMouseEnter={handleTrailerMouseEnter}
+                onMouseLeave={handleTrailerMouseLeave}
                 >
-                    <img 
-                        src={`https://img.youtube.com/vi/${previewTrailer}/mqdefault.jpg`} 
-                        alt="Trailer Preview" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s ease' }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    <iframe 
+                        width="300" height="169" 
+                        src={`https://www.youtube.com/embed/${previewTrailer}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0`} 
+                        title="Trailer Preview" 
+                        frameBorder="0" 
+                        allow="autoplay; encrypted-media" 
+                        referrerPolicy="strict-origin-when-cross-origin"
                     />
-                    <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        background: 'rgba(255,0,0,0.9)', color: 'white', width: '50px', height: '35px',
-                        borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 4px 15px rgba(255,0,0,0.4)', pointerEvents: 'none'
-                    }}>
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                            <path d="M8 5v14l11-7z" />
-                        </svg>
-                    </div>
-                </a>
+                </div>
             , portalNode)}
         </>
     );
