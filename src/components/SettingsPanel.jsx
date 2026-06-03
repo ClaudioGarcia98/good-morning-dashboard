@@ -57,8 +57,55 @@ export default React.memo(function SettingsPanel() {
     
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
-    const fileInputRef = useRef(null);
+    const cityInputRef = useRef(null);
     const cityHintRef = useRef(null);
+    const fileInputRef = useRef(null);
+
+    const handleExportSettings = () => {
+        const settings = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('dash_')) {
+                settings[key] = localStorage.getItem(key);
+            }
+        }
+        const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `good_morning_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImportSettings = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const settings = JSON.parse(evt.target.result);
+                const keys = Object.keys(settings);
+                if (keys.length === 0 || !keys.some(k => k.startsWith('dash_'))) {
+                    alert("Invalid backup file format.");
+                    return;
+                }
+                keys.forEach(k => {
+                    if (k.startsWith('dash_')) {
+                        localStorage.setItem(k, settings[k]);
+                    }
+                });
+                alert("Settings imported successfully! The dashboard will now reload.");
+                window.location.reload();
+            } catch (err) {
+                alert("Failed to parse the backup file.");
+            }
+        };
+        reader.readAsText(file);
+        // Reset file input so the same file can be selected again if needed
+        e.target.value = '';
+    };
+
     const [cityHintPos, setCityHintPos] = useState(null);
 
     useEffect(() => {
@@ -598,6 +645,28 @@ export default React.memo(function SettingsPanel() {
                         <div className="prefix-item"><code>tw </code><span>Twitter/X</span></div>
                         <div className="prefix-item"><code>a </code><span>Amazon</span></div>
                         <div className="prefix-item"><code>mal </code><span>MyAnimeList</span></div>
+                    </div>
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Backup & Restore</div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={handleExportSettings}>
+                            ⬇ Export Settings
+                        </button>
+                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={() => fileInputRef.current?.click()}>
+                            ⬆ Import Settings
+                        </button>
+                        <input 
+                            type="file" 
+                            accept=".json" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            onChange={handleImportSettings} 
+                        />
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '8px', lineHeight: 1.4 }}>
+                        Save your configuration, speed dials, and layout preferences to a file.
                     </div>
                 </div>
 
