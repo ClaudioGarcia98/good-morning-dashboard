@@ -122,10 +122,10 @@ export default React.memo(function SpeedDial() {
                                 <a 
                                     href={link.url} 
                                     className="speed-dial-item"
-                                    title={link.name} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     aria-label={link.name}
+                                    draggable={false}
                                     style={{
                                         background: isDragged ? 'transparent' : '',
                                         border: isDragged ? '2px dashed rgba(255, 255, 255, 0.4)' : '',
