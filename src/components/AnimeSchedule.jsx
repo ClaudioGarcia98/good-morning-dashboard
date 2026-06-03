@@ -543,7 +543,7 @@ export default React.memo(function AnimeSchedule() {
                         <span className="as-subtitle" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             Daily Airing Episodes
                             <span className="info-badge-container" tabIndex={0} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                <svg className="info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'help', marginTop: '-1px' }}>
+                                <svg className="info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'help', transform: 'translateY(-2px)' }}>
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="16" x2="12" y2="12"></line>
                                     <line x1="12" y1="8" x2="12.01" y2="8"></line>

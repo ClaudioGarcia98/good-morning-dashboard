@@ -1042,7 +1042,9 @@ body {
 
 .sidebar-tooltip {
     left: 0;
-    transform: translateX(0) translateY(5px);
+    bottom: auto;
+    top: 130%;
+    transform: translateX(0) translateY(-5px);
 }
 .info-badge-container:hover .sidebar-tooltip,
 .info-badge-container:focus-visible .sidebar-tooltip {
@@ -1050,7 +1052,10 @@ body {
 }
 .sidebar-tooltip::after {
     left: 15px;
+    top: auto;
+    bottom: 100%;
     transform: none;
+    border-color: transparent transparent rgba(15, 15, 15, 0.95) transparent;
 }
 
 .custom-hint-card {
