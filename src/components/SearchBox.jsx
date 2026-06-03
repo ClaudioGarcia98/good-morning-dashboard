@@ -22,6 +22,7 @@ export default React.memo(function SearchBox() {
     const [recent, setRecent] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [focusIdx, setFocusIdx] = useState(-1);
+    const [badgeWidth, setBadgeWidth] = useState(0);
 
     // Combine default engines with custom engines
     const combinedEngines = { ...ENGINES };
@@ -38,6 +39,15 @@ export default React.memo(function SearchBox() {
     
     const inputRef = useRef(null);
     const formRef = useRef(null);
+    const badgeRef = useRef(null);
+
+    React.useLayoutEffect(() => {
+        if (activeEngine && badgeRef.current) {
+            setBadgeWidth(badgeRef.current.offsetWidth);
+        } else {
+            setBadgeWidth(0);
+        }
+    }, [activeEngine, query]);
     const origQueryRef = useRef('');
 
     const loadRecent = () => {
@@ -300,6 +310,7 @@ export default React.memo(function SearchBox() {
             <div className="search-icon"></div>
             
             <div 
+                ref={badgeRef}
                 className={`engine-badge ${activeEngine ? 'show' : ''}`} 
                 style={activeEngine ? { background: activeEngine.bg, color: activeEngine.fg } : {}}
             >
@@ -317,7 +328,7 @@ export default React.memo(function SearchBox() {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onFocus={handleFocus}
-                style={{ paddingLeft: activeEngine ? '120px' : '52px' }} // Approximate width, ideally calculated
+                style={{ paddingLeft: activeEngine ? `${badgeWidth + 60}px` : '52px' }}
             />
             
             <ul 
