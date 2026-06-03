@@ -193,9 +193,13 @@ export default React.memo(function AnimeSchedule() {
         };
 
         return fetchWithRetry(async () => {
-            return await Promise.any([makeAlloriginsRequest(), makeCodetabsRequest(), makeJikanRequest()]);
-        }, 1, 1000).catch(e => {
-            console.error('All MAL fetches failed:', e);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 1500));
+            return await Promise.race([
+                Promise.any([makeAlloriginsRequest(), makeCodetabsRequest(), makeJikanRequest()]),
+                timeoutPromise
+            ]);
+        }, 0, 0).catch(e => {
+            console.error('MAL fetch timed out or failed:', e);
             throw e;
         });
     }, [malUsername]);
@@ -306,7 +310,7 @@ export default React.memo(function AnimeSchedule() {
 
         const timeoutId = setTimeout(() => {
             refreshWatching();
-        }, 800);
+        }, 500);
 
         return () => { 
             isMounted = false; 
