@@ -88,52 +88,85 @@ export default React.memo(function SpeedDial() {
     return (
         <>
             <nav className="speed-dial" aria-label="Quick Links">
-                {speedDials.map((link) => {
-                    const isDragged = draggedId === link.id;
+                {speedDials.length === 0 ? (
+                    <button 
+                        className="add-dial-empty-btn"
+                        onClick={() => window.dispatchEvent(new Event('open-settings-dials'))}
+                        title="Add Speed Dial"
+                        aria-label="Add Speed Dial"
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                ) : (
+                    speedDials.map((link) => {
+                        const isDragged = draggedId === link.id;
 
-                    return (
-                        <a 
-                            key={link.id} 
-                            href={link.url} 
-                            className="speed-dial-item"
-                            title={link.name} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            aria-label={link.name}
-                            draggable
-                            onDragStart={(e) => handleDragStart(e, link.id)}
-                            onDragOver={handleDragOver}
-                            onDragEnter={(e) => handleDragEnter(e, link.id)}
-                            onDrop={handleDrop}
-                            onDragEnd={handleDragEnd}
-                            style={{
-                                background: isDragged ? 'transparent' : '',
-                                border: isDragged ? '2px dashed rgba(255, 255, 255, 0.4)' : '',
-                                backdropFilter: isDragged ? 'none' : '',
-                                WebkitBackdropFilter: isDragged ? 'none' : '',
-                                transform: 'none',
-                                boxShadow: 'none',
-                                opacity: 1,
-                                transition: 'all 0.2s ease',
-                                viewTransitionName: `speed-dial-${link.id}`
-                            }}
-                        >
-                            <img 
-                                src={getFavicon(link.url)} 
-                                alt={link.name} 
-                                style={{ 
-                                    width: '26px', 
-                                    height: '26px', 
-                                    borderRadius: '4px', 
-                                    pointerEvents: 'none',
-                                    opacity: isDragged ? 0 : 1,
-                                    transition: 'opacity 0.2s ease'
+                        return (
+                            <div 
+                                key={link.id}
+                                className="speed-dial-wrapper"
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, link.id)}
+                                onDragOver={handleDragOver}
+                                onDragEnter={(e) => handleDragEnter(e, link.id)}
+                                onDrop={handleDrop}
+                                onDragEnd={handleDragEnd}
+                                style={{
+                                    position: 'relative',
+                                    viewTransitionName: `speed-dial-${link.id}`
                                 }}
-                                onError={(e) => { e.target.style.display = 'none'; }}
-                            />
-                        </a>
-                    );
-                })}
+                            >
+                                <a 
+                                    href={link.url} 
+                                    className="speed-dial-item"
+                                    title={link.name} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    aria-label={link.name}
+                                    style={{
+                                        background: isDragged ? 'transparent' : '',
+                                        border: isDragged ? '2px dashed rgba(255, 255, 255, 0.4)' : '',
+                                        backdropFilter: isDragged ? 'none' : '',
+                                        WebkitBackdropFilter: isDragged ? 'none' : '',
+                                    }}
+                                >
+                                    <img 
+                                        src={getFavicon(link.url)} 
+                                        alt={link.name} 
+                                        style={{ 
+                                            width: '26px', 
+                                            height: '26px', 
+                                            borderRadius: '4px', 
+                                            pointerEvents: 'none',
+                                            opacity: isDragged ? 0 : 1,
+                                            transition: 'opacity 0.2s ease'
+                                        }}
+                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                    />
+                                </a>
+                                {!isDragged && (
+                                    <button 
+                                        className="speed-dial-delete"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setSpeedDials(speedDials.filter(d => d.id !== link.id));
+                                        }}
+                                        title="Remove Speed Dial"
+                                    >
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
             </nav>
 
             {/* Custom Drag Ghost */}

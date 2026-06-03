@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { THEMES, FONTS } from './settingsConstants';
 import { SettingsContext } from './Context';
+import defaultVideo from '../assets/animated_gif.mp4';
 
 export function SettingsProvider({ children }) {
     const [theme, setTheme] = useState(() => localStorage.getItem('dash_theme') || 'aurora');
     const [font, setFont] = useState(() => localStorage.getItem('dash_font') || 'default');
     const [clockMode, setClockMode] = useState(() => localStorage.getItem('dash_clock') || 'digital');
     const [username, setUsername] = useState(() => localStorage.getItem('dash_username') || 'Cláudio');
-    const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || 'Bombarral');
+    const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || '');
     const [backgroundUrl, setBackgroundUrl] = useState(null);
     const [backgroundIsVideo, setBackgroundIsVideo] = useState(false);
     const [gifName, setGifName] = useState(() => localStorage.getItem('dash_gif_name') || '');
@@ -37,12 +38,7 @@ export function SettingsProvider({ children }) {
     const [speedDials, setSpeedDials] = useState(() => {
         const cached = localStorage.getItem('dash_speed_dials');
         if (cached) return JSON.parse(cached);
-        return [
-            { id: 1, name: 'YouTube', url: 'https://youtube.com' },
-            { id: 2, name: 'Crunchyroll', url: 'https://crunchyroll.com' },
-            { id: 3, name: 'Netflix', url: 'https://netflix.com' },
-            { id: 4, name: 'MyAnimeList', url: 'https://myanimelist.net/animelist/claclo98' }
-        ];
+        return [];
     });
 
     const [customEngines, setCustomEngines] = useState(() => {
@@ -53,7 +49,7 @@ export function SettingsProvider({ children }) {
 
     // Background setup
     useEffect(() => {
-        const DEFAULT_GIF = 'https://video.r2.moele.me/v/29642/29632082_a-01.mp4';
+        const DEFAULT_GIF = defaultVideo;
         const loadBlob = async () => {
             try {
                 const db = await new Promise((res, rej) => {

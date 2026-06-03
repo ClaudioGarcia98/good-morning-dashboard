@@ -20,8 +20,11 @@ export default React.memo(function SettingsPanel() {
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
-    const [newDialName, setNewDialName] = useState('');
     const [newDialUrl, setNewDialUrl] = useState('');
+    
+    const [editingDialId, setEditingDialId] = useState(null);
+    const [editDialName, setEditDialName] = useState('');
+    const [editDialUrl, setEditDialUrl] = useState('');
     const [newEngName, setNewEngName] = useState('');
     const [newEngPrefix, setNewEngPrefix] = useState('');
     const [newEngUrl, setNewEngUrl] = useState('');
@@ -30,6 +33,7 @@ export default React.memo(function SettingsPanel() {
     const [citySuggestions, setCitySuggestions] = useState([]);
     const [isSearchingCity, setIsSearchingCity] = useState(false);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
     
     // Local state for immediate typing before applying
     const [tempLofi, setTempLofi] = useState(customLofiId);
@@ -54,12 +58,24 @@ export default React.memo(function SettingsPanel() {
             }
         };
         const closeOnIdle = () => setIsOpen(false);
+        const openDials = () => {
+            setIsOpen(true);
+            setTimeout(() => {
+                if (panelRef.current) {
+                    const section = panelRef.current.querySelector('#dials-settings-section');
+                    if (section) section.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 150);
+        };
 
         document.addEventListener('mousedown', handleClickOutside);
         window.addEventListener('app-idle', closeOnIdle);
+        window.addEventListener('open-settings-dials', openDials);
+        
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
             window.removeEventListener('app-idle', closeOnIdle);
+            window.removeEventListener('open-settings-dials', openDials);
         };
     }, []);
 
@@ -116,13 +132,24 @@ export default React.memo(function SettingsPanel() {
     };
 
     const handleAddDial = () => {
-        if (!newDialName.trim() || !newDialUrl.trim()) return;
-        let finalUrl = newDialUrl.trim();
-        if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
-            finalUrl = 'https://' + finalUrl;
+        if (!newDialUrl.trim()) return;
+        let url = newDialUrl.trim();
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        
+        let finalName;
+        try {
+            const host = new URL(url).hostname.replace('www.', '').split('.')[0];
+            finalName = host.charAt(0).toUpperCase() + host.slice(1);
+        } catch {
+            finalName = 'Speed Dial';
         }
-        setSpeedDials([...speedDials, { id: Date.now(), name: newDialName.trim(), url: finalUrl }]);
-        setNewDialName('');
+
+        const newDial = {
+            id: Date.now(),
+            name: finalName,
+            url: url
+        };
+        setSpeedDials(prev => [...prev, newDial]);
         setNewDialUrl('');
     };
 
@@ -372,35 +399,73 @@ export default React.memo(function SettingsPanel() {
                     </div>
                 </div>
 
-                <div className="sp-section">
+                <div className="sp-section" id="dials-settings-section">
                     <div className="sp-label">Speed Dials</div>
                     <div className="sp-group">
                         <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
                             <input 
                                 type="text" 
-                                placeholder="Name" 
-                                value={newDialName}
-                                onChange={e => setNewDialName(e.target.value)}
-                                style={{ flex: 1 }}
-                            />
-                            <input 
-                                type="text" 
-                                placeholder="URL" 
+                                placeholder="Paste URL here..." 
                                 value={newDialUrl}
                                 onChange={e => setNewDialUrl(e.target.value)}
-                                style={{ flex: 2 }}
+                                style={{ flex: 1 }}
                                 onKeyDown={e => e.key === 'Enter' && handleAddDial()}
                             />
                             <button className="pill" onClick={handleAddDial}>Add</button>
                         </div>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {speedDials.map(dial => (
-                                <li key={dial.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
-                                        <img src={`https://www.google.com/s2/favicons?domain=${new URL(dial.url).hostname}&sz=16`} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display='none'} alt="" />
-                                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{dial.name}</span>
-                                    </div>
-                                    <button onClick={() => handleRemoveDial(dial.id)} style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
+                                <li key={dial.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    {editingDialId === dial.id ? (
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <input 
+                                                type="text" 
+                                                value={editDialName}
+                                                onChange={e => setEditDialName(e.target.value)}
+                                                style={{ flex: 1 }}
+                                            />
+                                            <input 
+                                                type="text" 
+                                                value={editDialUrl}
+                                                onChange={e => setEditDialUrl(e.target.value)}
+                                                style={{ flex: 2 }}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        setSpeedDials(speedDials.map(d => d.id === dial.id ? { ...d, name: editDialName, url: editDialUrl } : d));
+                                                        setEditingDialId(null);
+                                                    }
+                                                }}
+                                            />
+                                            <button className="pill" onClick={() => {
+                                                setSpeedDials(speedDials.map(d => d.id === dial.id ? { ...d, name: editDialName, url: editDialUrl } : d));
+                                                setEditingDialId(null);
+                                            }}>Save</button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
+                                                <img src={`https://www.google.com/s2/favicons?domain=${new URL(dial.url).hostname}&sz=16`} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display='none'} alt="" />
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{dial.name}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                <button 
+                                                    onClick={() => {
+                                                        setEditingDialId(dial.id);
+                                                        setEditDialName(dial.name);
+                                                        setEditDialUrl(dial.url);
+                                                    }} 
+                                                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.8 }}
+                                                    title="Edit"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M12 20h9"></path>
+                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button onClick={() => handleRemoveDial(dial.id)} style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }} title="Delete">&times;</button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -472,7 +537,65 @@ export default React.memo(function SettingsPanel() {
                         <div className="prefix-item"><code>a </code><span>Amazon</span></div>
                     </div>
                 </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Danger Zone</div>
+                    <button 
+                        className="reset-btn"
+                        onClick={() => setConfirmReset(1)}
+                    >
+                        🗑 Reset All Settings
+                    </button>
+                </div>
             </section>
+
+            {confirmReset && ReactDOM.createPortal(
+                <div className="reset-overlay" onClick={() => setConfirmReset(false)}>
+                    <div className="reset-modal" onClick={e => e.stopPropagation()}>
+                        {confirmReset === 1 ? (
+                            <>
+                                <p>Are you sure you want to reset all settings?</p>
+                                <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>This will clear all your preferences, speed dials, and saved data.</span>
+                                <div className="reset-modal-actions">
+                                    <button className="pill" onClick={() => setConfirmReset(false)}>Cancel</button>
+                                    <button className="reset-confirm-btn" onClick={() => setConfirmReset(2)}>Yes, Reset</button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p>⚠️ This cannot be undone</p>
+                                <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>All settings, cached location, background, and stored data will be permanently erased. The page will reload.</span>
+                                <div className="reset-modal-actions">
+                                    <button className="pill" onClick={() => setConfirmReset(false)}>Go Back</button>
+                                    <button className="reset-confirm-btn" onClick={async () => {
+                                        // Clear all storage
+                                        localStorage.clear();
+                                        sessionStorage.clear();
+                                        
+                                        // Clear IndexedDB
+                                        indexedDB.deleteDatabase('dashDB');
+                                        
+                                        // Clear all caches
+                                        if ('caches' in window) {
+                                            const names = await caches.keys();
+                                            await Promise.all(names.map(n => caches.delete(n)));
+                                        }
+                                        
+                                        // Unregister service workers
+                                        if ('serviceWorker' in navigator) {
+                                            const regs = await navigator.serviceWorker.getRegistrations();
+                                            await Promise.all(regs.map(r => r.unregister()));
+                                        }
+                                        
+                                        window.location.reload();
+                                    }}>Yes, Erase Everything</button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>,
+                document.body
+            )}
         </>
     );
 });

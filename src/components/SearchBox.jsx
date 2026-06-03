@@ -14,7 +14,7 @@ const ENGINES = {
 };
 
 export default React.memo(function SearchBox() {
-    const { customEngines } = useSettings();
+    const { customEngines, setSpeedDials } = useSettings();
     const [query, setQuery] = useState('');
     const [activeEngine, setActiveEngine] = useState(null);
     const [suggestions, setSuggestions] = useState([]);
@@ -164,6 +164,39 @@ export default React.memo(function SearchBox() {
         setShowSuggestions(false);
     };
 
+    const addToSpeedDial = (e, item) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const trimmed = item.trim();
+        let url;
+        let finalName = trimmed;
+        
+        if (activeEngine) {
+            url = activeEngine.url(trimmed);
+        } else {
+            const urlPat = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?($|\?)/i;
+            const ipPat  = /^https?:\/\/|^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?/;
+            if (urlPat.test(trimmed) || ipPat.test(trimmed)) {
+                url = /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
+                try {
+                    const host = new URL(url).hostname.replace('www.', '').split('.')[0];
+                    finalName = host.charAt(0).toUpperCase() + host.slice(1);
+                } catch {}
+            } else {
+                url = `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
+            }
+        }
+
+        const newDial = {
+            id: Date.now(),
+            name: finalName,
+            url: url
+        };
+        setSpeedDials(prev => [...prev, newDial]);
+        setShowSuggestions(false);
+    };
+
     const handleInputChange = (e) => {
         const val = e.target.value;
         setQuery(val);
@@ -295,7 +328,17 @@ export default React.memo(function SearchBox() {
                             onClick={() => processQuery(item)}
                         >
                             <span className="sug-icon">🔍</span>
-                            <span className="sug-text">{item}</span>
+                            <span className="sug-text" style={{ flex: 1 }}>{item}</span>
+                            <button 
+                                className="sug-add" 
+                                title="Add to Speed Dial" 
+                                onClick={(e) => addToSpeedDial(e, item)}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
                         </li>
                     ))
                 ) : (

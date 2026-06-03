@@ -10,7 +10,6 @@ export default React.memo(function WeatherWidget() {
 
     useEffect(() => {
         const fetchWeather = async () => {
-            if (!navigator.geolocation) return;
             try {
                 let lat, lon;
                 const cached = localStorage.getItem('dash_geo');
@@ -18,32 +17,66 @@ export default React.memo(function WeatherWidget() {
                 if (cached && Date.now() - cachedTs < 3600000) {
                     ({ lat, lon } = JSON.parse(cached));
                 } else {
-                    try {
-                        const pos = await new Promise((res, rej) =>
-                            navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
-                        );
-                        lat = pos.coords.latitude;
-                        lon = pos.coords.longitude;
-                    } catch (geoErr) {
-                        const fbCity = localStorage.getItem('dash_fallback_city') || 'Bombarral';
-                        console.warn(`Geolocation denied or failed, falling back to ${fbCity}:`, geoErr);
+                    // 1. Try GPS
+                    let resolved = false;
+                    let gpsResolved = false;
+                    if (navigator.geolocation) {
                         try {
-                            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(fbCity)}&count=1`);
-                            const geoData = await geoRes.json();
-                            if (geoData.results && geoData.results.length > 0) {
-                                lat = geoData.results[0].latitude;
-                                lon = geoData.results[0].longitude;
-                            } else {
-                                throw new Error("City not found");
-                            }
-                        } catch (err) {
-                            console.warn("Geocoding failed, falling back to Bombarral coords", err);
-                            lat = 39.2667;
-                            lon = -9.1667;
+                            const pos = await new Promise((res, rej) =>
+                                navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
+                            );
+                            lat = pos.coords.latitude;
+                            lon = pos.coords.longitude;
+                            resolved = true;
+                            gpsResolved = true;
+                        } catch (geoErr) {
+                            console.warn('GPS denied or failed:', geoErr);
                         }
-                        setIsFallback(true);
                     }
-                    localStorage.setItem('dash_geo', JSON.stringify({ lat, lon, city: localStorage.getItem('dash_fallback_city') }));
+
+                    // 2. Try IP geolocation
+                    if (!resolved) {
+                        try {
+                            const ipRes = await fetch('http://ip-api.com/json/?fields=lat,lon,city,status', { signal: AbortSignal.timeout(4000) });
+                            const ipData = await ipRes.json();
+                            if (ipData.status === 'success') {
+                                lat = ipData.lat;
+                                lon = ipData.lon;
+                                resolved = true;
+                                console.info(`IP geolocation resolved to ${ipData.city}`);
+                            }
+                        } catch (ipErr) {
+                            console.warn('IP geolocation failed:', ipErr);
+                        }
+                    }
+
+                    // 3. Try manual fallback city from settings
+                    if (!resolved) {
+                        const fbCity = localStorage.getItem('dash_fallback_city');
+                        if (fbCity) {
+                            console.info(`Trying manual fallback city: ${fbCity}`);
+                            try {
+                                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(fbCity)}&count=1`);
+                                const geoData = await geoRes.json();
+                                if (geoData.results && geoData.results.length > 0) {
+                                    lat = geoData.results[0].latitude;
+                                    lon = geoData.results[0].longitude;
+                                    resolved = true;
+                                }
+                            } catch (fbErr) {
+                                console.warn('Fallback city geocoding failed:', fbErr);
+                            }
+                        }
+                    }
+
+                    if (!resolved) {
+                        console.error('All location methods failed');
+                        setError(true);
+                        return;
+                    }
+
+                    if (!gpsResolved) setIsFallback(true);
+                    localStorage.setItem('dash_geo', JSON.stringify({ lat, lon }));
                     localStorage.setItem('dash_geo_ts', String(Date.now()));
                 }
 
