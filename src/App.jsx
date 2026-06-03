@@ -91,7 +91,8 @@ export default function App() {
             )}
             <div className="overlay" id="overlay"></div>
             {booting && (
-                <div id="bootScreen" className="boot-screen">
+                <div id="bootScreen" className="boot-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src="/logo.png" alt="Aura" style={{ width: '80px', height: '80px', marginBottom: '24px', animation: 'pulseGlow 2s infinite', filter: 'drop-shadow(0 0 20px var(--accent-color))' }} />
                     <div className="boot-logo">Hello, {username || 'Guest'}</div>
                 </div>
             )}
