@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/useSettings';
 
 export default React.memo(function () {
     const { clockMode } = useSettings();
@@ -14,7 +14,7 @@ export default React.memo(function () {
                 String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
             );
             setDateStr(
-                now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
             );
         };
         

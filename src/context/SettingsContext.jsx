@@ -1,23 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-
-const SettingsContext = createContext();
-
-const THEMES = {
-    aurora: { timeBased: true,  overlayA: 'rgba(0,0,0,0.6)',    overlayB: 'rgba(0,0,0,0.2)' },
-    nord:   { accent: '#88C0D0', glow: 'rgba(136,192,208,0.25)', overlayA: 'rgba(46,52,64,0.85)',  overlayB: 'rgba(46,52,64,0.3)' },
-    tokyo:  { accent: '#7aa2f7', glow: 'rgba(122,162,247,0.25)', overlayA: 'rgba(26,27,38,0.9)',   overlayB: 'rgba(26,27,38,0.35)' },
-    sunset: { accent: '#f7768e', glow: 'rgba(247,118,142,0.25)', overlayA: 'rgba(70,20,30,0.85)',  overlayB: 'rgba(70,20,30,0.3)' },
-    forest: { accent: '#9ece6a', glow: 'rgba(158,206,106,0.25)', overlayA: 'rgba(15,35,15,0.85)',  overlayB: 'rgba(15,35,15,0.3)' },
-};
-
-const FONTS = {
-    default:   { family: "'Segoe UI',Tahoma,Geneva,Verdana,sans-serif", url: null },
-    raleway:   { family: "'Raleway',sans-serif",         url: 'https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap' },
-    outfit:    { family: "'Outfit',sans-serif",           url: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap' },
-    nunito:    { family: "'Nunito',sans-serif",           url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap' },
-    jetbrains: { family: "'JetBrains Mono',monospace",    url: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap' },
-    playfair:  { family: "'Playfair Display',serif",      url: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap' },
-};
+import React, { useState, useEffect, useMemo } from 'react';
+import { THEMES, FONTS } from './settingsConstants';
+import { SettingsContext } from './Context';
 
 export function SettingsProvider({ children }) {
     const [theme, setTheme] = useState(() => localStorage.getItem('dash_theme') || 'aurora');
@@ -99,6 +82,7 @@ export function SettingsProvider({ children }) {
 
     // Theme setup
     useEffect(() => {
+        let intervalId;
         const t = THEMES[theme] || THEMES.aurora;
         localStorage.setItem('dash_theme', theme);
         
@@ -117,13 +101,17 @@ export function SettingsProvider({ children }) {
             document.documentElement.style.setProperty('--accent-glow', t.glow);
         } else {
             updateTimeAccent();
-            // Need an interval for time-based if it crosses an hour boundary, but for simplicity, calling once is okay.
+            intervalId = setInterval(updateTimeAccent, 60000); // check every minute
         }
 
         const overlay = document.getElementById('overlay');
         if (overlay) {
             overlay.style.background = `linear-gradient(90deg, ${t.overlayA} 0%, ${t.overlayB} 50%, rgba(0,0,0,0) 100%)`;
         }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
     }, [theme]);
 
     // Font setup
@@ -136,7 +124,7 @@ export function SettingsProvider({ children }) {
             l.id = 'gf-' + font; l.rel = 'stylesheet'; l.href = f.url;
             document.head.appendChild(l);
         }
-        document.body.style.fontFamily = f.family;
+        document.documentElement.style.setProperty('--font-family', f.family);
     }, [font]);
 
     // Save simple settings
@@ -181,5 +169,3 @@ export function SettingsProvider({ children }) {
         </SettingsContext.Provider>
     );
 }
-
-export const useSettings = () => useContext(SettingsContext);

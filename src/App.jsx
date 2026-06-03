@@ -8,14 +8,14 @@ import WeatherWidget from './components/WeatherWidget';
 import SettingsPanel from './components/SettingsPanel';
 import AnimeSchedule from './components/AnimeSchedule';
 import LofiPlayer from './components/LofiPlayer';
-import { useSettings } from './context/SettingsContext';
+import { useSettings } from './context/useSettings';
 
 export default function App() {
     const { backgroundUrl, backgroundIsVideo, username } = useSettings();
     const [booting, setBooting] = useState(true);
 
     useEffect(() => {
-        const bootT = setTimeout(() => setBooting(false), 2500);
+        const bootT = setTimeout(() => setBooting(false), 2800);
         let idleT;
         const mainUi = document.getElementById('mainUi');
         

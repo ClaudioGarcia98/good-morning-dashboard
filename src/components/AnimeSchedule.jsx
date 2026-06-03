@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/useSettings';
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const DAY_FILTERS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -17,22 +17,22 @@ const calculateTimeLeft = (broadcast) => {
 
     const [hours, minutes] = broadcast.time.split(':').map(Number);
     
-    // JST is UTC+9
-    const now = new Date();
-    const jstNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+    // JST is UTC+9. Shift real UTC time forward by 9 hours.
+    const nowReal = Date.now();
+    const jstNow = new Date(nowReal + (9 * 60 * 60 * 1000));
     
-    let target = new Date(jstNow);
-    target.setHours(hours, minutes, 0, 0);
+    let target = new Date(jstNow.getTime());
+    target.setUTCHours(hours, minutes, 0, 0);
     
     // If the target day is different or we already passed the time today, move forward
-    while (target.getDay() !== targetDay || target < jstNow) {
-        target.setDate(target.getDate() + 1);
+    while (target.getUTCDay() !== targetDay || target.getTime() < jstNow.getTime()) {
+        target.setUTCDate(target.getUTCDate() + 1);
     }
 
     // Add 1.5 hours for internet sub release
-    target.setMinutes(target.getMinutes() + 90);
+    target.setUTCMinutes(target.getUTCMinutes() + 90);
 
-    const diff = target - jstNow;
+    const diff = target.getTime() - jstNow.getTime();
     if (diff <= 0) return "Out Now!";
     
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -50,7 +50,7 @@ const CountdownBadge = ({ broadcast }) => {
     
     useEffect(() => {
         if (!broadcast) return;
-        const timer = setInterval(() => setTimeLeft(calculateTimeLeft(broadcast)), 1000);
+        const timer = setInterval(() => setTimeLeft(calculateTimeLeft(broadcast)), 60000);
         return () => clearInterval(timer);
     }, [broadcast]);
 
@@ -190,7 +190,10 @@ export default React.memo(function () {
             try {
                 const cached = JSON.parse(localStorage.getItem('dash_anime_watching') || '[]');
                 if (cached.length > 0 && typeof cached[0] === 'object') cachedWatching = cached;
-            } catch(e) {}
+            } catch(e) {
+                console.error('Failed to parse anime watching cache, resetting:', e);
+                localStorage.removeItem('dash_anime_watching');
+            }
             
             if (isMounted) setUserWatching(cachedWatching);
 
@@ -207,7 +210,7 @@ export default React.memo(function () {
             }
         };
 
-        setTimeout(loadInitialData, 1000);
+        const timerId = setTimeout(loadInitialData, 1000);
 
         const handleClickOutside = (e) => {
             if (!document.contains(e.target)) return; // Ignore clicks on elements that were unmounted
@@ -221,6 +224,7 @@ export default React.memo(function () {
         document.addEventListener('click', handleClickOutside);
         return () => {
             isMounted = false;
+            clearTimeout(timerId);
             document.removeEventListener('click', handleClickOutside);
         };
     }, []);
@@ -407,7 +411,7 @@ export default React.memo(function () {
                 args: [Math.round(volume * 100)]
             }), '*');
         }
-    }, [volume]);
+    }, [volume, previewTrailer, trailerMuted]);
 
     const sidebarContent = (
         <>
@@ -539,6 +543,14 @@ export default React.memo(function () {
                                     onClick={() => {
                                         const expand = !isExpanded;
                                         setExpandedAnime(expand ? { id: anime.mal_id, source: 'today' } : null);
+                                        if (expand) {
+                                            setTimeout(() => {
+                                                const el = document.getElementById(`tab-anime-${anime.mal_id}`);
+                                                if (el) {
+                                                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                }
+                                            }, 310);
+                                        }
                                     }}
                                     onMouseEnter={(e) => handleMouseEnter(e, anime)}
                                     onMouseLeave={handleMouseLeave}

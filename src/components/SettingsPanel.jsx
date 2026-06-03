@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/useSettings';
 
 export default React.memo(function () {
     const {
@@ -25,13 +25,13 @@ export default React.memo(function () {
     const [newEngUrl, setNewEngUrl] = useState('');
     
     // Local state for immediate typing before applying
-    const [tempUser, setTempUser] = useState(username);
-    const [tempVolume, setTempVolume] = useState(Math.round(volume * 100));
     const [tempLofi, setTempLofi] = useState(customLofiId);
+    const [prevCustomLofi, setPrevCustomLofi] = useState(customLofiId);
 
-    useEffect(() => {
+    if (customLofiId !== prevCustomLofi) {
+        setPrevCustomLofi(customLofiId);
         setTempLofi(customLofiId);
-    }, [customLofiId]);
+    }
     
     const panelRef = useRef(null);
     const toggleRef = useRef(null);

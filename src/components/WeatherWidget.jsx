@@ -4,6 +4,7 @@ export default React.memo(function () {
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(false);
+    const [isFallback, setIsFallback] = useState(false);
     const widgetRef = useRef(null);
     const panelRef = useRef(null);
 
@@ -27,6 +28,7 @@ export default React.memo(function () {
                         // Fallback to Bombarral, Portugal
                         lat = 39.2667;
                         lon = -9.1667;
+                        setIsFallback(true);
                     }
                     localStorage.setItem('dash_geo', JSON.stringify({ lat, lon }));
                     localStorage.setItem('dash_geo_ts', String(Date.now()));
@@ -85,7 +87,8 @@ export default React.memo(function () {
 
                 window.dispatchEvent(new CustomEvent('weather-update', { detail: c.weather_code }));
             } catch (err) {
-                if (err.code === 1) setError(true);
+                console.error("Weather fetch failed:", err);
+                setError(true);
             }
         };
 
@@ -107,7 +110,14 @@ export default React.memo(function () {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    if (error) return null;
+    if (error) {
+        return (
+            <button className="weather-widget" style={{ opacity: 0.6 }} title="Weather failed to load">
+                <span className="weather-icon-cloud" style={{ display: 'flex', alignItems: 'center' }}>⚠️</span>
+                <span style={{ color: 'var(--text-primary)' }}>Weather Error</span>
+            </button>
+        );
+    }
 
     return (
         <>
@@ -124,6 +134,7 @@ export default React.memo(function () {
                 </span>
                 <span id="weatherTemp" style={{ color: 'var(--text-primary)' }}>{weather ? weather.temp : '--°C'}</span>
                 <span className="weather-chevron" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isFallback && <span title="Location access denied. Showing fallback." style={{ fontSize: '0.8rem', marginRight: '4px' }}>📍</span>}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>

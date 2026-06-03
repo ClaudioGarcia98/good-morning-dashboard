@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSettings } from '../context/SettingsContext';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useSettings } from '../context/useSettings';
 
 const STATIONS = [
     { id: 'lTRiuFIWV54', name: 'Lofi Girl' },
@@ -18,10 +18,30 @@ export default React.memo(function () {
     const [title, setTitle] = useState('Loading...');
     const iframeRef = useRef(null);
 
-    const stationsList = [
+    const stationsList = useMemo(() => [
         { id: customLofiId, name: 'My Saved Station' },
         ...STATIONS.filter(s => s.id !== customLofiId)
-    ];
+    ], [customLofiId]);
+
+    const knownStation = stationsList.find(s => s.id === lofiId);
+    const displayTitle = (knownStation && knownStation.name !== 'My Saved Station') ? knownStation.name : title;
+
+    // Listen for YouTube IFrame state changes
+    useEffect(() => {
+        const handleMessage = (e) => {
+            if (e.origin !== "https://www.youtube.com") return;
+            try {
+                const data = JSON.parse(e.data);
+                if (data.event === 'onStateChange') {
+                    // YouTube states: 1 = Playing, 2 = Paused, 0 = Ended, 3 = Buffering
+                    if (data.info === 1) setIsPlaying(true);
+                    else if (data.info === 2 || data.info === 0) setIsPlaying(false);
+                }
+            } catch (err) {}
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -68,12 +88,9 @@ export default React.memo(function () {
         setIsPlaying(!isPlaying);
     };
 
-    // Update title when lofiId changes
+    // Fetch custom title when lofiId changes (if unknown)
     useEffect(() => {
-        // Fast-path for known stations
-        const knownStation = stationsList.find(s => s.id === lofiId);
         if (knownStation && knownStation.name !== 'My Saved Station') {
-            setTitle(knownStation.name);
             return;
         }
 
@@ -112,7 +129,7 @@ export default React.memo(function () {
             isMounted = false;
             clearTimeout(timeoutId);
         };
-    }, [lofiId]);
+    }, [lofiId, knownStation]);
 
     const handleIframeLoad = () => {
         if (iframeRef.current && iframeRef.current.contentWindow) {
@@ -188,7 +205,7 @@ export default React.memo(function () {
                     
                     <div className="lofi-info" onClick={() => setShowMenu(!showMenu)} style={{ width: '180px', flexShrink: 0, cursor: 'pointer' }} title="Click to change station">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span className="lofi-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', width: '100%' }} title={title}>{title}</span>
+                        <span className="lofi-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', width: '100%' }} title={displayTitle}>{displayTitle}</span>
                     </div>
                     <span className="lofi-status">
                         {isPlaying ? (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../context/useSettings';
 
 const ENGINES = {
     'yt ':    { name:'YouTube',    bg:'#FF0000', fg:'#fff', url: q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}` },
@@ -110,12 +110,23 @@ export default React.memo(function () {
         if (h.length === 0) setShowSuggestions(false);
     };
 
-    const fetchSuggestions = (q) => {
+    const fetchSuggestions = (q, engine = activeEngine) => {
         const old = document.getElementById('gss');
         if (old) old.remove();
+        
+        let src = '';
+        if (!engine || engine.name === 'Google') {
+            src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}&callback=gsCb`;
+        } else if (engine.name === 'YouTube') {
+            src = `https://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q=${encodeURIComponent(q)}&callback=gsCb`;
+        } else {
+            setSuggestions([]);
+            return;
+        }
+
         const s = document.createElement('script');
         s.id = 'gss';
-        s.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}&callback=gsCb`;
+        s.src = src;
         document.body.appendChild(s);
     };
 
@@ -157,7 +168,7 @@ export default React.memo(function () {
                 setSuggestions([]);
                 if (recent.length > 0) setShowSuggestions(true);
             } else {
-                fetchSuggestions(val);
+                fetchSuggestions(val, activeEngine);
                 setShowSuggestions(true);
             }
             return;
@@ -170,7 +181,7 @@ export default React.memo(function () {
                 const rest = val.slice(pfx.length);
                 setQuery(rest);
                 origQueryRef.current = rest;
-                if (rest) fetchSuggestions(rest);
+                if (rest) fetchSuggestions(rest, eng);
                 else setSuggestions([]);
                 setShowSuggestions(true);
                 return;
@@ -185,7 +196,7 @@ export default React.memo(function () {
             return;
         }
         
-        fetchSuggestions(val);
+        fetchSuggestions(val, null);
         setShowSuggestions(true);
     };
 
@@ -254,7 +265,7 @@ export default React.memo(function () {
                 type="text" 
                 id="searchInput"
                 ref={inputRef}
-                placeholder="Lets search something"
+                placeholder="Let's search something"
                 autoComplete="off" 
                 autoFocus
                 value={query}

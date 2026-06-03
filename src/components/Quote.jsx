@@ -25,8 +25,11 @@ const ANIME_QUOTES = [
 ];
 
 export default React.memo(function () {
-    const [quoteObj, setQuoteObj] = useState(null);
-    const [opacity, setOpacity] = useState(0);
+    const [quoteObj, setQuoteObj] = useState(() => {
+        const randomIndex = Math.floor(Math.random() * ANIME_QUOTES.length);
+        return ANIME_QUOTES[randomIndex];
+    });
+    const [opacity, setOpacity] = useState(1);
 
     const generateNewQuote = () => {
         setOpacity(0);
@@ -38,13 +41,7 @@ export default React.memo(function () {
     };
 
     useEffect(() => {
-        generateNewQuote();
-        
-        // Change the quote automatically every 1 hour
-        const intervalId = setInterval(() => {
-            generateNewQuote();
-        }, 60 * 60 * 1000);
-        
+        const intervalId = setInterval(generateNewQuote, 60 * 60 * 1000);
         return () => clearInterval(intervalId);
     }, []);
 
