@@ -479,7 +479,7 @@ export default React.memo(function AnimeSchedule() {
                                             setTimeout(() => {
                                                 const el = document.getElementById(`sidebar-anime-${anime.mal_id}`);
                                                 if (el) {
-                                                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 }
                                             }, 310);
                                         }
@@ -493,7 +493,7 @@ export default React.memo(function AnimeSchedule() {
                                                 setTimeout(() => {
                                                     const el = document.getElementById(`sidebar-anime-${anime.mal_id}`);
                                                     if (el) {
-                                                        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                     }
                                                 }, 310);
                                             }
@@ -568,7 +568,7 @@ export default React.memo(function AnimeSchedule() {
                                             setTimeout(() => {
                                                 const el = document.getElementById(`tab-anime-${anime.mal_id}`);
                                                 if (el) {
-                                                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 }
                                             }, 310);
                                         }
@@ -582,7 +582,7 @@ export default React.memo(function AnimeSchedule() {
                                                 setTimeout(() => {
                                                     const el = document.getElementById(`tab-anime-${anime.mal_id}`);
                                                     if (el) {
-                                                        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                     }
                                                 }, 310);
                                             }
