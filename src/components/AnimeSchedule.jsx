@@ -67,7 +67,7 @@ const CountdownBadge = ({ broadcast }) => {
 export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
-    const { volume, malUsername, setMalError } = useSettings();
+    const { volume, malUsername, setMalError, setMalLoading } = useSettings();
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
@@ -274,6 +274,7 @@ export default React.memo(function AnimeSchedule() {
         }
 
         const refreshWatching = async () => {
+            if (isMounted) setMalLoading(true);
             try {
                 const freshWatching = await fetchUserWatching();
                 if (freshWatching) {
@@ -292,6 +293,8 @@ export default React.memo(function AnimeSchedule() {
                 if (isMounted) {
                     setMalError(true);
                 }
+            } finally {
+                if (isMounted) setMalLoading(false);
             }
         };
 
@@ -303,7 +306,7 @@ export default React.memo(function AnimeSchedule() {
             isMounted = false; 
             clearTimeout(timeoutId);
         };
-    }, [malUsername, fetchUserWatching, setMalError]);
+    }, [malUsername, fetchUserWatching, setMalError, setMalLoading]);
 
     useEffect(() => {
         const loadSidebarData = async () => {
