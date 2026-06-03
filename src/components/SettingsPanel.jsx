@@ -16,7 +16,9 @@ export default React.memo(function SettingsPanel() {
         setBackgroundIsVideo,
         setLofiId,
         customLofiId, setCustomLofiId,
-        fallbackCity, setFallbackCity
+        fallbackCity, setFallbackCity,
+        use24hClock, setUse24hClock,
+        useCelsius, setUseCelsius
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -316,6 +318,24 @@ export default React.memo(function SettingsPanel() {
                 </div>
 
                 <div className="sp-section">
+                    <div className="sp-label">Clock Format</div>
+                    <div className="pill-row">
+                        <button 
+                            className={`pill ${!use24hClock ? 'active' : ''}`}
+                            onClick={() => setUse24hClock(false)}
+                        >
+                            12-Hour (AM/PM)
+                        </button>
+                        <button 
+                            className={`pill ${use24hClock ? 'active' : ''}`}
+                            onClick={() => setUse24hClock(true)}
+                        >
+                            24-Hour
+                        </button>
+                    </div>
+                </div>
+
+                <div className="sp-section">
                     <div className="sp-label">Media Volume</div>
                     <div className="sp-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -458,6 +478,24 @@ export default React.memo(function SettingsPanel() {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+
+                    <div className="sp-section" style={{ marginTop: '15px' }}>
+                        <div className="sp-label">Temperature Unit</div>
+                        <div className="pill-row">
+                            <button 
+                                className={`pill ${useCelsius ? 'active' : ''}`}
+                                onClick={() => setUseCelsius(true)}
+                            >
+                                Celsius (°C)
+                            </button>
+                            <button 
+                                className={`pill ${!useCelsius ? 'active' : ''}`}
+                                onClick={() => setUseCelsius(false)}
+                            >
+                                Fahrenheit (°F)
+                            </button>
+                        </div>
                     </div>
                 </div>
 

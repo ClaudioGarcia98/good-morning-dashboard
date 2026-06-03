@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSettings } from '../context/useSettings';
 
 export default React.memo(function WeatherWidget() {
+    const { useCelsius } = useSettings();
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(false);
@@ -80,10 +82,12 @@ export default React.memo(function WeatherWidget() {
                     localStorage.setItem('dash_geo_ts', String(Date.now()));
                 }
 
+                const unitParam = useCelsius ? '' : '&temperature_unit=fahrenheit';
                 const res = await fetch(
                     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
                     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code` +
-                    `&daily=sunrise,sunset,weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4`
+                    `&daily=sunrise,sunset,weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4` +
+                    unitParam
                 );
                 const d = await res.json();
                 const c = d.current;
@@ -120,10 +124,11 @@ export default React.memo(function WeatherWidget() {
                     }
                 }
 
+                const unitStr = useCelsius ? '°C' : '°F';
                 setWeather({
                     iconInfo: currentIconInfo,
-                    temp: Math.round(c.temperature_2m) + '°C',
-                    feelsLike: Math.round(c.apparent_temperature) + '°C',
+                    temp: Math.round(c.temperature_2m) + unitStr,
+                    feelsLike: Math.round(c.apparent_temperature) + unitStr,
                     humidity: c.relative_humidity_2m + '%',
                     wind: Math.round(c.wind_speed_10m) + ' km/h',
                     sunrise: d.daily ? fmt(d.daily.sunrise[0]) : '--:--',
@@ -141,7 +146,7 @@ export default React.memo(function WeatherWidget() {
         fetchWeather();
         const interval = setInterval(fetchWeather, 600000);
         return () => clearInterval(interval);
-    }, []);
+    }, [useCelsius]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

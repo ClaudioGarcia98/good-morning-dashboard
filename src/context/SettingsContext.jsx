@@ -9,6 +9,8 @@ export function SettingsProvider({ children }) {
     const [clockMode, setClockMode] = useState(() => localStorage.getItem('dash_clock') || 'digital');
     const [username, setUsername] = useState(() => localStorage.getItem('dash_username') || 'Cláudio');
     const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || '');
+    const [use24hClock, setUse24hClock] = useState(() => localStorage.getItem('dash_24h') !== 'false');
+    const [useCelsius, setUseCelsius] = useState(() => localStorage.getItem('dash_celsius') !== 'false');
     const [backgroundUrl, setBackgroundUrl] = useState(null);
     const [backgroundIsVideo, setBackgroundIsVideo] = useState(false);
     const [gifName, setGifName] = useState(() => localStorage.getItem('dash_gif_name') || '');
@@ -141,7 +143,9 @@ export function SettingsProvider({ children }) {
         localStorage.setItem('dash_lofi_id', lofiId);
         localStorage.setItem('dash_custom_lofi', customLofiId);
         localStorage.setItem('dash_fallback_city', fallbackCity);
-    }, [clockMode, username, volume, lofiId, customLofiId, fallbackCity]);
+        localStorage.setItem('dash_24h', use24hClock);
+        localStorage.setItem('dash_celsius', useCelsius);
+    }, [clockMode, username, volume, lofiId, customLofiId, fallbackCity, use24hClock, useCelsius]);
 
     useEffect(() => {
         localStorage.setItem('dash_speed_dials', JSON.stringify(speedDials));
@@ -165,10 +169,13 @@ export function SettingsProvider({ children }) {
         customEngines, setCustomEngines,
         lofiId, setLofiId,
         customLofiId, setCustomLofiId,
-        fallbackCity, setFallbackCity
+        fallbackCity, setFallbackCity,
+        use24hClock, setUse24hClock,
+        useCelsius, setUseCelsius
     }), [
         theme, font, clockMode, username, backgroundUrl, backgroundIsVideo, 
-        gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity
+        gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity,
+        use24hClock, useCelsius
     ]);
 
     return (

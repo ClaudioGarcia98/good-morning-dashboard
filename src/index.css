@@ -167,6 +167,14 @@ body {
     text-shadow: 0 4px 15px rgba(0,0,0,0.6);
     transition: font-size 0.3s ease;
 }
+#ampm {
+    font-size: 2rem; font-weight: 700;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    align-self: flex-end;
+    margin-bottom: 12px;
+}
 
 /* Clock mode: digital = default */
 #analogWrap                         { display: none; flex-shrink: 0; }

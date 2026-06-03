@@ -2,16 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSettings } from '../context/useSettings';
 
 export default React.memo(function Clock() {
-    const { clockMode } = useSettings();
+    const { clockMode, use24hClock } = useSettings();
     const [timeStr, setTimeStr] = useState('00:00');
+    const [ampmStr, setAmpmStr] = useState('');
     const [dateStr, setDateStr] = useState('');
     const canvasRef = useRef(null);
 
     useEffect(() => {
         const updateDigital = () => {
             const now = new Date();
+            let hours = now.getHours();
+            if (!use24hClock) {
+                setAmpmStr(hours >= 12 ? 'PM' : 'AM');
+                hours = hours % 12 || 12;
+            } else {
+                setAmpmStr('');
+            }
             setTimeStr(
-                String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+                String(hours).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
             );
             setDateStr(
                 now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -28,7 +36,7 @@ export default React.memo(function Clock() {
         
         startTimer();
         return () => clearTimeout(timeout);
-    }, []);
+    }, [use24hClock]);
 
     useEffect(() => {
         if (clockMode === 'digital') return;
@@ -109,6 +117,7 @@ export default React.memo(function Clock() {
         <>
             <div className={`clock-row mode-${clockMode}`} id="clockRow">
                 <div id="time">{timeStr}</div>
+                {ampmStr && clockMode === 'digital' && <div id="ampm">{ampmStr}</div>}
                 <div id="analogWrap">
                     <canvas ref={canvasRef} id="analogCanvas" width={analogSize} height={analogSize}></canvas>
                 </div>
