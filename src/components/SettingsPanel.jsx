@@ -219,9 +219,8 @@ export default React.memo(function SettingsPanel() {
                             />
                             <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
                                 {malLoading && !malError && !malSuccess && (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg className="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transformOrigin: 'center' }}>
                                         <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-                                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
                                     </svg>
                                 )}
                                 {malError && !malLoading && (
