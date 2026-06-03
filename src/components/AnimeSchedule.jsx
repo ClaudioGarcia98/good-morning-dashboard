@@ -17,23 +17,34 @@ const calculateTimeLeft = (broadcast) => {
 
     const [hours, minutes] = broadcast.time.split(':').map(Number);
     
-    // JST is UTC+9. Shift real UTC time forward by 9 hours.
     const nowReal = Date.now();
     const jstNow = new Date(nowReal + (9 * 60 * 60 * 1000));
     
-    let target = new Date(jstNow.getTime());
-    target.setUTCHours(hours, minutes, 0, 0);
+    let broadcastTime = new Date(jstNow.getTime());
+    broadcastTime.setUTCHours(hours, minutes, 0, 0);
     
-    // If the target day is different or we already passed the time today, move forward
-    while (target.getUTCDay() !== targetDay || target.getTime() < jstNow.getTime()) {
-        target.setUTCDate(target.getUTCDate() + 1);
+    let daysUntil = (targetDay - broadcastTime.getUTCDay() + 7) % 7;
+    broadcastTime.setUTCDate(broadcastTime.getUTCDate() + daysUntil);
+
+    let nextRelease = new Date(broadcastTime.getTime());
+    nextRelease.setUTCMinutes(nextRelease.getUTCMinutes() + 90); // Add 1.5 hours for internet sub release
+
+    let pastRelease;
+    if (nextRelease.getTime() <= jstNow.getTime()) {
+        pastRelease = new Date(nextRelease.getTime());
+        nextRelease.setUTCDate(nextRelease.getUTCDate() + 7);
+    } else {
+        pastRelease = new Date(nextRelease.getTime());
+        pastRelease.setUTCDate(pastRelease.getUTCDate() - 7);
     }
 
-    // Add 1.5 hours for internet sub release
-    target.setUTCMinutes(target.getUTCMinutes() + 90);
+    const hoursSinceRelease = (jstNow.getTime() - pastRelease.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursSinceRelease < 24) {
+        return "Out Now!";
+    }
 
-    const diff = target.getTime() - jstNow.getTime();
-    if (diff <= 0) return "Out Now!";
+    const diff = nextRelease.getTime() - jstNow.getTime();
     
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
