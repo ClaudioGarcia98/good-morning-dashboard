@@ -11,6 +11,7 @@ const ENGINES = {
     'mdn ':   { name:'MDN',        bg:'#83d0f2', fg:'#000', url: q=>`https://developer.mozilla.org/en-US/search?q=${encodeURIComponent(q)}` },
     'tw ':    { name:'Twitter/X',  bg:'#1DA1F2', fg:'#fff', url: q=>`https://twitter.com/search?q=${encodeURIComponent(q)}` },
     'a ':     { name:'Amazon',     bg:'#FF9900', fg:'#000', url: q=>`https://www.amazon.com/s?k=${encodeURIComponent(q)}` },
+    'mal ':   { name:'MyAnimeList',bg:'#2E51A2', fg:'#fff', url: q=>`https://myanimelist.net/search/all?q=${encodeURIComponent(q)}` },
 };
 
 export default React.memo(function SearchBox() {
