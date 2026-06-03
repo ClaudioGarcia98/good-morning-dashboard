@@ -60,6 +60,7 @@ export default React.memo(function SettingsPanel() {
     const cityInputRef = useRef(null);
     const cityHintRef = useRef(null);
     const fileInputRef = useRef(null);
+    const [popupMessage, setPopupMessage] = useState(null);
 
     const handleExportSettings = () => {
         const settings = {};
@@ -87,7 +88,7 @@ export default React.memo(function SettingsPanel() {
                 const settings = JSON.parse(evt.target.result);
                 const keys = Object.keys(settings);
                 if (keys.length === 0 || !keys.some(k => k.startsWith('dash_'))) {
-                    alert("Invalid backup file format.");
+                    setPopupMessage({ title: 'Import Failed', message: 'Invalid backup file format. Please ensure you are uploading a valid Good Morning backup file.', type: 'error' });
                     return;
                 }
                 keys.forEach(k => {
@@ -95,10 +96,14 @@ export default React.memo(function SettingsPanel() {
                         localStorage.setItem(k, settings[k]);
                     }
                 });
-                alert("Settings imported successfully! The dashboard will now reload.");
-                window.location.reload();
+                setPopupMessage({ 
+                    title: 'Success!', 
+                    message: 'Your settings and customization have been successfully restored. The dashboard needs to reload to apply the changes.', 
+                    type: 'success',
+                    onAction: () => window.location.reload()
+                });
             } catch (err) {
-                alert("Failed to parse the backup file.");
+                setPopupMessage({ title: 'Import Failed', message: 'Failed to parse the backup file. It might be corrupted.', type: 'error' });
             }
         };
         reader.readAsText(file);
@@ -724,6 +729,40 @@ export default React.memo(function SettingsPanel() {
                                 </div>
                             </>
                         )}
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {popupMessage && ReactDOM.createPortal(
+                <div className="reset-overlay" style={{ zIndex: 1000000, animation: 'fadeSlideIn 0.2s ease-out' }}>
+                    <div className="reset-modal" style={{ textAlign: 'center', maxWidth: '350px', padding: '30px 24px', animation: 'pulseGlow 2s infinite' }}>
+                        <div style={{ fontSize: '3.5rem', marginBottom: '15px', lineHeight: 1 }}>
+                            {popupMessage.type === 'success' ? '✨' : '❌'}
+                        </div>
+                        <h3 style={{ margin: '0 0 12px 0', fontSize: '1.4rem', color: popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)' }}>{popupMessage.title}</h3>
+                        <p style={{ fontSize: '0.95rem', opacity: 0.85, marginBottom: '25px', lineHeight: 1.5 }}>{popupMessage.message}</p>
+                        <button 
+                            className="pill" 
+                            style={{ 
+                                width: '100%', 
+                                justifyContent: 'center', 
+                                padding: '12px',
+                                fontSize: '1rem',
+                                background: popupMessage.type === 'error' ? 'rgba(255, 107, 107, 0.15)' : 'var(--accent-glow)', 
+                                color: popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)', 
+                                border: `1px solid ${popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)'}` 
+                            }} 
+                            onClick={() => {
+                                if (popupMessage.onAction) {
+                                    popupMessage.onAction();
+                                } else {
+                                    setPopupMessage(null);
+                                }
+                            }}
+                        >
+                            {popupMessage.onAction ? 'Reload Dashboard' : 'Dismiss'}
+                        </button>
                     </div>
                 </div>,
                 document.body
