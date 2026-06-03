@@ -25,7 +25,7 @@ export default function App() {
     } = useSettings();
     const [booting, setBooting] = useState(true);
 
-    const hasBottomContent = showSearchBox || showSpeedDial || showTop5Anime || showAnimeSidebar;
+    const hasBottomContent = showSearchBox || showSpeedDial || showTop5Anime;
     const isTotallyEmptyBelowClock = !showQuote && !hasBottomContent;
 
     useEffect(() => {
@@ -114,13 +114,14 @@ export default function App() {
                         <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
                             {showSearchBox && <SearchBox />}
                             {showSpeedDial && <SpeedDial />}
-                            {(showTop5Anime || showAnimeSidebar) && (
-                                <div className={showTop5Anime ? "scrollable-section" : "hidden-wrapper"}>
+                            {showTop5Anime && (
+                                <div className="scrollable-section">
                                     <AnimeSchedule />
                                 </div>
                             )}
                         </section>
                     )}
+                    {(!showTop5Anime && showAnimeSidebar) && <AnimeSchedule />}
                 </div>
                 <aside style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <SettingsPanel />
