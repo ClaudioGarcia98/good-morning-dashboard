@@ -280,11 +280,15 @@ export default React.memo(function AnimeSchedule() {
                 console.warn("Failed to update watching list on username change.");
             }
         };
-        // Skip first render since loadInitialData handles it, but since loadInitialData uses setTimeout, 
-        // they might race. Just let them both run safely, or only run this if malUsername was actually changed.
-        // It's safe to run twice on mount.
-        refreshWatching();
-        return () => { isMounted = false; };
+
+        const timeoutId = setTimeout(() => {
+            refreshWatching();
+        }, 800);
+
+        return () => { 
+            isMounted = false; 
+            clearTimeout(timeoutId);
+        };
     }, [malUsername, fetchUserWatching]);
 
     useEffect(() => {
