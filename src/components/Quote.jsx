@@ -31,11 +31,33 @@ export default React.memo(function Quote() {
     });
     const [opacity, setOpacity] = useState(1);
 
-    const generateNewQuote = () => {
+    const generateNewQuote = async () => {
         setOpacity(0);
-        setTimeout(() => {
+        
+        let newQuote = null;
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const res = await fetch('https://animechan.io/api/v1/quotes/random', { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (!res.ok) throw new Error('API down');
+            const data = await res.json();
+            
+            if (data.quote) {
+                newQuote = { text: data.quote, author: data.character, anime: data.anime };
+            } else if (data.data && data.data.content) {
+                newQuote = { text: data.data.content, author: data.data.character.name, anime: data.data.anime.name };
+            } else {
+                throw new Error('Invalid format');
+            }
+        } catch (err) {
             const randomIndex = Math.floor(Math.random() * ANIME_QUOTES.length);
-            setQuoteObj(ANIME_QUOTES[randomIndex]);
+            newQuote = ANIME_QUOTES[randomIndex];
+        }
+
+        setTimeout(() => {
+            setQuoteObj(newQuote);
             setOpacity(1);
         }, 300);
     };
