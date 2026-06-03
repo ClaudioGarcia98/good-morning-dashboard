@@ -25,9 +25,7 @@ export default React.memo(function SettingsPanel() {
     const [editingDialId, setEditingDialId] = useState(null);
     const [editDialName, setEditDialName] = useState('');
     const [editDialUrl, setEditDialUrl] = useState('');
-    const [newEngName, setNewEngName] = useState('');
-    const [newEngPrefix, setNewEngPrefix] = useState('');
-    const [newEngUrl, setNewEngUrl] = useState('');
+
 
     const [citySearchText, setCitySearchText] = useState(fallbackCity);
     const [citySuggestions, setCitySuggestions] = useState([]);
@@ -153,23 +151,9 @@ export default React.memo(function SettingsPanel() {
         setNewDialUrl('');
     };
 
+
     const handleRemoveDial = (id) => {
         setSpeedDials(prev => prev.filter(d => d.id !== id));
-    };
-
-    const handleAddEngine = () => {
-        if (!newEngName.trim() || !newEngPrefix.trim() || !newEngUrl.trim()) return;
-        const prefix = newEngPrefix.trim().toLowerCase() + ' ';
-        const newEng = {
-            id: Date.now(),
-            name: newEngName.trim(),
-            prefix: prefix,
-            url: newEngUrl.trim()
-        };
-        setCustomEngines(prev => [...prev, newEng]);
-        setNewEngName('');
-        setNewEngPrefix('');
-        setNewEngUrl('');
     };
 
     const handleRemoveEngine = (id) => {
@@ -415,9 +399,9 @@ export default React.memo(function SettingsPanel() {
                         </div>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {speedDials.map(dial => (
-                                <li key={dial.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <li key={dial.id} className="sp-list-item" style={{ flexDirection: editingDialId === dial.id ? 'column' : 'row', gap: '8px', fontSize: '0.8rem' }}>
                                     {editingDialId === dial.id ? (
-                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
                                             <input 
                                                 type="text" 
                                                 value={editDialName}
@@ -442,19 +426,19 @@ export default React.memo(function SettingsPanel() {
                                             }}>Save</button>
                                         </div>
                                     ) : (
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <>
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
                                                 <img src={`https://www.google.com/s2/favicons?domain=${new URL(dial.url).hostname}&sz=16`} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display='none'} alt="" />
                                                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{dial.name}</span>
                                             </div>
-                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                                 <button 
                                                     onClick={() => {
                                                         setEditingDialId(dial.id);
                                                         setEditDialName(dial.name);
                                                         setEditDialUrl(dial.url);
                                                     }} 
-                                                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', opacity: 0.8 }}
+                                                    className="sp-action-btn"
                                                     title="Edit"
                                                 >
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -462,54 +446,15 @@ export default React.memo(function SettingsPanel() {
                                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                                                     </svg>
                                                 </button>
-                                                <button onClick={() => handleRemoveDial(dial.id)} style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }} title="Delete">&times;</button>
+                                                <button onClick={() => handleRemoveDial(dial.id)} className="sp-action-btn delete" title="Delete">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
                                             </div>
-                                        </div>
+                                        </>
                                     )}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                <div className="sp-section">
-                    <div className="sp-label">Search Shortcuts</div>
-                    <div className="sp-group">
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Name (e.g. Wiki)" 
-                                value={newEngName}
-                                onChange={e => setNewEngName(e.target.value)}
-                                style={{ flex: 1 }}
-                            />
-                            <input 
-                                type="text" 
-                                placeholder="Prefix (e.g. w)" 
-                                value={newEngPrefix}
-                                onChange={e => setNewEngPrefix(e.target.value)}
-                                style={{ flex: 1 }}
-                            />
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Search URL (use %s for query)" 
-                                value={newEngUrl}
-                                onChange={e => setNewEngUrl(e.target.value)}
-                                style={{ flex: 3 }}
-                                onKeyDown={e => e.key === 'Enter' && handleAddEngine()}
-                            />
-                            <button className="pill" onClick={handleAddEngine}>Add</button>
-                        </div>
-                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                            {customEngines.map(eng => (
-                                <li key={eng.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
-                                        <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 5px', borderRadius: '4px', fontSize: '0.7rem' }}>{eng.prefix.trim()}</kbd>
-                                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{eng.name}</span>
-                                    </div>
-                                    <button onClick={() => handleRemoveEngine(eng.id)} style={{ background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
                                 </li>
                             ))}
                         </ul>

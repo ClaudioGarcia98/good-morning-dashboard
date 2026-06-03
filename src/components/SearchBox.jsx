@@ -194,7 +194,10 @@ export default React.memo(function SearchBox() {
             url: url
         };
         setSpeedDials(prev => [...prev, newDial]);
+        setActiveEngine(null);
+        setQuery('');
         setShowSuggestions(false);
+        inputRef.current?.focus();
     };
 
     const handleInputChange = (e) => {
