@@ -207,13 +207,34 @@ export default React.memo(function SettingsPanel() {
                     </div>
                     <div className="sp-group" style={{ marginTop: '10px' }}>
                         <label htmlFor="malUsernameInput">MyAnimeList Username</label>
-                        <input 
-                            type="text" 
-                            id="malUsernameInput" 
-                            placeholder="MAL username (e.g., claclo98)" 
-                            value={malUsername}
-                            onChange={(e) => setMalUsername(e.target.value)}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <input 
+                                type="text" 
+                                id="malUsernameInput" 
+                                placeholder="MAL username (e.g., claclo98)" 
+                                value={malUsername}
+                                onChange={(e) => setMalUsername(e.target.value)}
+                                style={{
+                                    paddingRight: '30px',
+                                    borderColor: malError ? '#ff6b6b' : (malSuccess ? '#4caf50' : undefined),
+                                    outlineColor: malError ? '#ff6b6b' : (malSuccess ? '#4caf50' : undefined)
+                                }}
+                            />
+                            <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
+                                {malLoading && !malError && !malSuccess && (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                                        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite" />
+                                    </svg>
+                                )}
+                                {malError && !malLoading && (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                )}
+                                {malSuccess && !malLoading && !malError && (
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                )}
+                            </div>
+                        </div>
                         {malLoading && !malError && !malSuccess && (
                             <div style={{ color: '#888', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
                                 Checking username...
