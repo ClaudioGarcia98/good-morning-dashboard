@@ -25,6 +25,9 @@ export default function App() {
     } = useSettings();
     const [booting, setBooting] = useState(true);
 
+    const hasBottomContent = showSearchBox || showSpeedDial || showTop5Anime || showAnimeSidebar;
+    const isTotallyEmptyBelowClock = !showQuote && !hasBottomContent;
+
     useEffect(() => {
         const bootT = setTimeout(() => setBooting(false), 2800);
         let idleT;
@@ -97,23 +100,27 @@ export default function App() {
                 <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     {showWeatherWidget && <WeatherWidget />}
                 </section>
-                <div className="container">
-                    <header className="center-content">
+                <div className="container" style={{ paddingBottom: isTotallyEmptyBelowClock ? '32px' : undefined }}>
+                    <header className="center-content" style={{ marginBottom: isTotallyEmptyBelowClock ? '-32px' : undefined }}>
                         <Greeting />
                         <Clock />
-                        <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', marginBottom: '35px' }}>
-                            {showQuote && <Quote />}
-                        </div>
-                    </header>
-                    <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                        {showSearchBox && <SearchBox />}
-                        {showSpeedDial && <SpeedDial />}
-                        {(showTop5Anime || showAnimeSidebar) && (
-                            <div className={showTop5Anime ? "scrollable-section" : "hidden-wrapper"}>
-                                <AnimeSchedule />
+                        {showQuote && (
+                            <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', marginBottom: hasBottomContent ? '35px' : '0' }}>
+                                <Quote />
                             </div>
                         )}
-                    </section>
+                    </header>
+                    {hasBottomContent && (
+                        <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                            {showSearchBox && <SearchBox />}
+                            {showSpeedDial && <SpeedDial />}
+                            {(showTop5Anime || showAnimeSidebar) && (
+                                <div className={showTop5Anime ? "scrollable-section" : "hidden-wrapper"}>
+                                    <AnimeSchedule />
+                                </div>
+                            )}
+                        </section>
+                    )}
                 </div>
                 <aside style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <SettingsPanel />
