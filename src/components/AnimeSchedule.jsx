@@ -543,12 +543,12 @@ export default React.memo(function AnimeSchedule() {
                         <span className="as-subtitle" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             Daily Airing Episodes
                             <span className="info-badge-container" tabIndex={0} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                                <svg className="info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'help', marginTop: '1px' }}>
+                                <svg className="info-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ cursor: 'help', marginTop: '-1px' }}>
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="16" x2="12" y2="12"></line>
                                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                 </svg>
-                                <span className="info-tooltip" style={{ whiteSpace: 'normal', width: '230px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 400, padding: '12px 14px' }}>
+                                <span className="info-tooltip sidebar-tooltip" style={{ whiteSpace: 'normal', width: '230px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 400, padding: '12px 14px' }}>
                                     Anime schedules are based on <strong>Japan Standard Time (JST)</strong>.
                                     <br/><br/>
                                     Because Japan is ahead in time, some episodes may appear as "Out Now!" even if they aired "tomorrow" in your local time.

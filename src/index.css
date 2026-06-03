@@ -1040,6 +1040,19 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
+.sidebar-tooltip {
+    left: 0;
+    transform: translateX(0) translateY(5px);
+}
+.info-badge-container:hover .sidebar-tooltip,
+.info-badge-container:focus-visible .sidebar-tooltip {
+    transform: translateX(0) translateY(0);
+}
+.sidebar-tooltip::after {
+    left: 15px;
+    transform: none;
+}
+
 .custom-hint-card {
     position: absolute;
     top: calc(100% + 10px);
