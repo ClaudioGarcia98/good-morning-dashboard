@@ -26,17 +26,18 @@ const calculateTimeLeft = (broadcast) => {
     let daysUntil = (targetDay - broadcastTime.getUTCDay() + 7) % 7;
     broadcastTime.setUTCDate(broadcastTime.getUTCDate() + daysUntil);
 
-    let nextRelease = new Date(broadcastTime.getTime());
-    nextRelease.setUTCMinutes(nextRelease.getUTCMinutes() + 90); // Add 1.5 hours for internet sub release
+    let target = new Date(broadcastTime.getTime());
+    target.setUTCMinutes(target.getUTCMinutes() + 90); // Add 1.5 hours for internet sub release
 
-    let pastRelease;
-    if (nextRelease.getTime() <= jstNow.getTime()) {
-        pastRelease = new Date(nextRelease.getTime());
-        nextRelease.setUTCDate(nextRelease.getUTCDate() + 7);
-    } else {
-        pastRelease = new Date(nextRelease.getTime());
+    // Find the most recent past release
+    let pastRelease = new Date(target.getTime());
+    while (pastRelease.getTime() > jstNow.getTime()) {
         pastRelease.setUTCDate(pastRelease.getUTCDate() - 7);
     }
+
+    // The next release is exactly 7 days after the past release
+    let nextRelease = new Date(pastRelease.getTime());
+    nextRelease.setUTCDate(nextRelease.getUTCDate() + 7);
 
     const hoursSinceRelease = (jstNow.getTime() - pastRelease.getTime()) / (1000 * 60 * 60);
     
