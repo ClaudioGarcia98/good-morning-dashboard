@@ -561,6 +561,7 @@ export default React.memo(function SettingsPanel() {
                         <div className="prefix-item"><code>mdn </code><span>MDN</span></div>
                         <div className="prefix-item"><code>tw </code><span>Twitter/X</span></div>
                         <div className="prefix-item"><code>a </code><span>Amazon</span></div>
+                        <div className="prefix-item"><code>mal </code><span>MyAnimeList</span></div>
                     </div>
                 </div>
 
