@@ -324,7 +324,7 @@ export default React.memo(function SettingsPanel() {
                             className={`pill ${!use24hClock ? 'active' : ''}`}
                             onClick={() => setUse24hClock(false)}
                         >
-                            12-Hour (AM/PM)
+                            12-Hour
                         </button>
                         <button 
                             className={`pill ${use24hClock ? 'active' : ''}`}
