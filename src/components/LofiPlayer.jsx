@@ -10,7 +10,7 @@ const STATIONS = [
     { id: 'Gu-g8FRG4Zs', name: 'Anime Lofi' } // Default original
 ];
 
-export default React.memo(function () {
+export default React.memo(function LofiPlayer() {
     const { volume, lofiId, setLofiId, customLofiId } = useSettings();
     const [isPlaying, setIsPlaying] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -37,7 +37,9 @@ export default React.memo(function () {
                     if (data.info === 1) setIsPlaying(true);
                     else if (data.info === 2 || data.info === 0) setIsPlaying(false);
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("YouTube message parse error:", err);
+            }
         };
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
@@ -134,6 +136,9 @@ export default React.memo(function () {
     const handleIframeLoad = () => {
         if (iframeRef.current && iframeRef.current.contentWindow) {
             iframeRef.current.contentWindow.postMessage(JSON.stringify({
+                event: 'listening'
+            }), '*');
+            iframeRef.current.contentWindow.postMessage(JSON.stringify({
                 event: 'command',
                 func: 'setVolume',
                 args: [Math.round(volume * 100)]
@@ -203,7 +208,20 @@ export default React.memo(function () {
                         )}
                     </button>
                     
-                    <div className="lofi-info" onClick={() => setShowMenu(!showMenu)} style={{ width: '180px', flexShrink: 0, cursor: 'pointer' }} title="Click to change station">
+                    <div 
+                        className="lofi-info" 
+                        onClick={() => setShowMenu(!showMenu)} 
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setShowMenu(!showMenu);
+                            }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        style={{ width: '180px', flexShrink: 0, cursor: 'pointer' }} 
+                        title="Click to change station"
+                    >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span className="lofi-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', width: '100%' }} title={displayTitle}>{displayTitle}</span>
                     </div>

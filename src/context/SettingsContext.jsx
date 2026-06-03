@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { THEMES, FONTS } from './settingsConstants';
 import { SettingsContext } from './Context';
 
@@ -79,6 +79,15 @@ export function SettingsProvider({ children }) {
             }
         });
     }, []);
+
+    // Cleanup blob URLs to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (backgroundUrl && backgroundUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(backgroundUrl);
+            }
+        };
+    }, [backgroundUrl]);
 
     // Theme setup
     useEffect(() => {

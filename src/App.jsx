@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Greeting from './components/Greeting';
 import Clock from './components/Clock';
 import SearchBox from './components/SearchBox';

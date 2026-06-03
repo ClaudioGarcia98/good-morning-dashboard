@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default React.memo(function () {
+export default React.memo(function WeatherWidget() {
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(false);
@@ -25,7 +25,8 @@ export default React.memo(function () {
                         lat = pos.coords.latitude;
                         lon = pos.coords.longitude;
                     } catch (geoErr) {
-                        // Fallback to Bombarral, Portugal
+                        console.warn("Geolocation denied or failed, falling back to Bombarral:", geoErr);
+                        // fallback to Bombarral coordinates
                         lat = 39.2667;
                         lon = -9.1667;
                         setIsFallback(true);

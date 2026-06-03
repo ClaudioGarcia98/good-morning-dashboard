@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings } from '../context/useSettings';
 
-export default React.memo(function () {
+export default React.memo(function SpeedDial() {
     const { speedDials, setSpeedDials } = useSettings();
     const [draggedId, setDraggedId] = useState(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });

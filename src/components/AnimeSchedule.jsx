@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings } from '../context/useSettings';
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -38,7 +38,6 @@ const calculateTimeLeft = (broadcast) => {
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const m = Math.floor((diff / 1000 / 60) % 60);
-    const s = Math.floor((diff / 1000) % 60);
     
     const pad = (n) => n.toString().padStart(2, '0');
     if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`;
@@ -63,7 +62,7 @@ const CountdownBadge = ({ broadcast }) => {
     );
 };
 
-export default React.memo(function () {
+export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
     const { volume } = useSettings();
@@ -110,7 +109,7 @@ export default React.memo(function () {
         localStorage.setItem('dash_anime_schedule_v2', JSON.stringify(cache));
     };
 
-    const fetchDaySchedule = async (dayFilter) => {
+    const fetchDaySchedule = useCallback(async (dayFilter) => {
         const cache = getScheduleCache();
         const entry = cache[dayFilter];
         if (entry && Date.now() - entry.ts < 3600000) {
@@ -128,7 +127,7 @@ export default React.memo(function () {
             console.error('Schedule fetch error for ' + dayFilter + ':', e);
             return (entry && entry.data) || [];
         }
-    };
+    }, []);
 
     const parseMALItems = (raw) => {
         return raw.map(a => ({
@@ -141,7 +140,7 @@ export default React.memo(function () {
         }));
     };
 
-    const fetchUserWatching = async () => {
+    const fetchUserWatching = useCallback(async () => {
         const cacheBust = '&_t=' + Date.now();
         const malUrl = 'https://myanimelist.net/animelist/claclo98/load.json?offset=0&status=1' + cacheBust;
         
@@ -180,7 +179,7 @@ export default React.memo(function () {
             console.error('All MAL fetches failed:', e);
             return [];
         }
-    };
+    }, []);
 
     useEffect(() => {
         let isMounted = true;
@@ -269,13 +268,10 @@ export default React.memo(function () {
     const displayList = getDisplayList();
     const userWatchingIds = userWatching.map(u => u.mal_id);
 
-    const [sidebarPortal, setSidebarPortal] = useState(null);
-    const [trailerPortal, setTrailerPortal] = useState(null);
-
-    useEffect(() => {
-        setSidebarPortal(document.getElementById('mainUi'));
-        setTrailerPortal(document.body);
-    }, []);
+    const [isMounted, setIsMounted] = useState(false);
+    useEffect(() => { setIsMounted(true); }, []);
+    const sidebarPortal = isMounted ? document.getElementById('mainUi') : null;
+    const trailerPortal = isMounted ? document.body : null;
 
 
     const [previewTrailer, setPreviewTrailer] = useState(null);
@@ -444,13 +440,21 @@ export default React.memo(function () {
                     {DAY_FILTERS.map((df, i) => {
                         const dayName = DAYS[i].charAt(0).toUpperCase() + DAYS[i].substring(1, 3);
                         return (
-                            <button 
-                                key={df}
-                                className={`as-day-btn ${activeDay === df ? 'active' : ''}`}
+                            <div 
+                                key={df} 
+                                className={`as-tab ${activeDay === df ? 'active' : ''}`}
                                 onClick={() => setActiveDay(df)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        setActiveDay(df);
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
                             >
                                 {dayName}
-                            </button>
+                            </div>
                         );
                     })}
                 </div>
@@ -466,20 +470,37 @@ export default React.memo(function () {
                             return (
                                 <div 
                                     key={anime.mal_id} 
-                                    id={`anime-card-${anime.mal_id}`}
-                                    className={`anime-card ${isExpanded ? 'expanded' : ''}`}
+                                    id={`sidebar-anime-${anime.mal_id}`}
+                                    className={`anime-card ${userWatchingIds.includes(anime.mal_id) ? 'watched-highlight' : ''} ${isExpanded ? 'expanded' : ''}`}
                                     onClick={() => {
                                         const expand = !isExpanded;
                                         setExpandedAnime(expand ? { id: anime.mal_id, source: 'sidebar' } : null);
-                                        if (expand && isLastItem) {
+                                        if (expand) {
                                             setTimeout(() => {
-                                                const container = document.querySelector('.as-content');
-                                                if (container) {
-                                                    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+                                                const el = document.getElementById(`sidebar-anime-${anime.mal_id}`);
+                                                if (el) {
+                                                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                                                 }
-                                            }, 350);
+                                            }, 310);
                                         }
                                     }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            const expand = !isExpanded;
+                                            setExpandedAnime(expand ? { id: anime.mal_id, source: 'sidebar' } : null);
+                                            if (expand) {
+                                                setTimeout(() => {
+                                                    const el = document.getElementById(`sidebar-anime-${anime.mal_id}`);
+                                                    if (el) {
+                                                        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                    }
+                                                }, 310);
+                                            }
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                     onMouseEnter={(e) => handleMouseEnter(e, anime)}
                                     onMouseLeave={handleMouseLeave}
                                 >
@@ -552,6 +573,23 @@ export default React.memo(function () {
                                             }, 310);
                                         }
                                     }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            const expand = !isExpanded;
+                                            setExpandedAnime(expand ? { id: anime.mal_id, source: 'today' } : null);
+                                            if (expand) {
+                                                setTimeout(() => {
+                                                    const el = document.getElementById(`tab-anime-${anime.mal_id}`);
+                                                    if (el) {
+                                                        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                    }
+                                                }, 310);
+                                            }
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                     onMouseEnter={(e) => handleMouseEnter(e, anime)}
                                     onMouseLeave={handleMouseLeave}
                                 >

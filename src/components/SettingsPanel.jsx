@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSettings } from '../context/useSettings';
 
-export default React.memo(function () {
+export default React.memo(function SettingsPanel() {
     const {
         theme, setTheme, THEMES,
         font, setFont, FONTS,
@@ -13,7 +13,7 @@ export default React.memo(function () {
         volume, setVolume,
         customEngines, setCustomEngines,
         setBackgroundIsVideo,
-        lofiId, setLofiId,
+        setLofiId,
         customLofiId, setCustomLofiId
     } = useSettings();
 
@@ -226,7 +226,18 @@ export default React.memo(function () {
 
                 <div className="sp-section">
                     <div className="sp-label">Background</div>
-                    <div className="gif-btn" onClick={() => fileInputRef.current?.click()}>
+                    <div 
+                        className="gif-btn" 
+                        onClick={() => fileInputRef.current?.click()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                fileInputRef.current?.click();
+                            }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                    >
                         <span>🎞</span><span>{gifName ? 'Change GIF…' : 'Choose local GIF…'}</span>
                     </div>
                     <div className="gif-name">{gifName || 'No background set'}</div>

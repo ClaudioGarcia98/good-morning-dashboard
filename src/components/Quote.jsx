@@ -24,7 +24,7 @@ const ANIME_QUOTES = [
     { text: "You can die anytime, but living takes true courage.", author: "Kenshin Himura", anime: "Rurouni Kenshin" }
 ];
 
-export default React.memo(function () {
+export default React.memo(function Quote() {
     const [quoteObj, setQuoteObj] = useState(() => {
         const randomIndex = Math.floor(Math.random() * ANIME_QUOTES.length);
         return ANIME_QUOTES[randomIndex];
