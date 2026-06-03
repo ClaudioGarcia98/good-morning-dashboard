@@ -13,7 +13,8 @@ export default function SettingsPanel() {
         volume, setVolume,
         customEngines, setCustomEngines,
         setBackgroundIsVideo,
-        lofiId, setLofiId
+        lofiId, setLofiId,
+        customLofiId, setCustomLofiId
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -22,11 +23,15 @@ export default function SettingsPanel() {
     const [newEngName, setNewEngName] = useState('');
     const [newEngPrefix, setNewEngPrefix] = useState('');
     const [newEngUrl, setNewEngUrl] = useState('');
-    const [tempLofi, setTempLofi] = useState('');
+    
+    // Local state for immediate typing before applying
+    const [tempUser, setTempUser] = useState(username);
+    const [tempVolume, setTempVolume] = useState(Math.round(volume * 100));
+    const [tempLofi, setTempLofi] = useState(customLofiId);
 
     useEffect(() => {
-        setTempLofi(lofiId);
-    }, [lofiId]);
+        setTempLofi(customLofiId);
+    }, [customLofiId]);
     
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
@@ -115,6 +120,7 @@ export default function SettingsPanel() {
         if (match) {
             val = match[1];
         }
+        setCustomLofiId(val);
         setLofiId(val);
     };
 

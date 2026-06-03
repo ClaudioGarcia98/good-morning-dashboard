@@ -28,6 +28,7 @@ export function SettingsProvider({ children }) {
     const [backgroundIsVideo, setBackgroundIsVideo] = useState(false);
     const [gifName, setGifName] = useState(() => localStorage.getItem('dash_gif_name') || '');
     const [lofiId, setLofiId] = useState(() => localStorage.getItem('dash_lofi_id') || 'Gu-g8FRG4Zs');
+    const [customLofiId, setCustomLofiId] = useState(() => localStorage.getItem('dash_custom_lofi') || localStorage.getItem('dash_lofi_id') || 'Gu-g8FRG4Zs');
     
     const [volume, setVolume] = useState(() => {
         const saved = localStorage.getItem('dash_volume');
@@ -144,7 +145,8 @@ export function SettingsProvider({ children }) {
         localStorage.setItem('dash_username', username);
         localStorage.setItem('dash_volume', volume.toString());
         localStorage.setItem('dash_lofi_id', lofiId);
-    }, [clockMode, username, volume, lofiId]);
+        localStorage.setItem('dash_custom_lofi', customLofiId);
+    }, [clockMode, username, volume, lofiId, customLofiId]);
 
     useEffect(() => {
         localStorage.setItem('dash_speed_dials', JSON.stringify(speedDials));
@@ -166,7 +168,8 @@ export function SettingsProvider({ children }) {
         volume, setVolume,
         hasInteracted,
         customEngines, setCustomEngines,
-        lofiId, setLofiId
+        lofiId, setLofiId,
+        customLofiId, setCustomLofiId
     };
 
     return (

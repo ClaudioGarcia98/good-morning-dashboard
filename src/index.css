@@ -893,23 +893,94 @@ body {
     display: block; line-height: 1.2;
 }
 
-/* EQ Animation */
-.lofi-eq {
-    display: inline-flex; align-items: flex-end; gap: 3px;
-    height: 14px; margin-top: 2px;
+/* Station Menu */
+.lofi-station-menu {
+    position: absolute;
+    bottom: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: menuFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 60;
 }
-.eq-bar {
-    width: 3px; background: var(--accent-color);
-    border-radius: 2px;
-    animation: eqBounce 0.8s infinite ease-in-out alternate;
+@keyframes menuFadeIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
 }
-.eq-bar:nth-child(1) { animation-delay: 0s; }
-.eq-bar:nth-child(2) { animation-delay: 0.3s; }
-.eq-bar:nth-child(3) { animation-delay: 0.6s; }
+.lofi-station-header {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    padding-left: 8px;
+    font-weight: 700;
+}
+.lofi-station-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.lofi-station-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+.lofi-station-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+.lofi-station-btn.active {
+    background: rgba(255, 210, 106, 0.15);
+    color: var(--accent-color);
+}
+.lofi-station-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+}
 
-@keyframes eqBounce {
-    0% { height: 4px; opacity: 0.6; }
-    100% { height: 14px; opacity: 1; }
+/* Audio Visualizer */
+.lofi-visualizer {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 14px;
+    margin-top: 4px;
+}
+.lofi-visualizer .bar {
+    width: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+    animation: soundwave 1s ease-in-out infinite alternate;
+    transform-origin: bottom;
+}
+.lofi-visualizer .bar:nth-child(1) { height: 6px; animation-delay: -0.4s; }
+.lofi-visualizer .bar:nth-child(2) { height: 12px; animation-delay: -0.2s; }
+.lofi-visualizer .bar:nth-child(3) { height: 14px; animation-delay: -0.6s; }
+.lofi-visualizer .bar:nth-child(4) { height: 9px; animation-delay: -0.1s; }
+.lofi-visualizer .bar:nth-child(5) { height: 5px; animation-delay: -0.3s; }
+
+@keyframes soundwave {
+    0% { transform: scaleY(0.2); }
+    100% { transform: scaleY(1); }
 }
 
 @keyframes fadeSlideUp {
