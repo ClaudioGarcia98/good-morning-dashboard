@@ -892,7 +892,7 @@ body {
     text-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 .anime-info {
-    display: flex; flex-direction: column; justify-content: center; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center; min-width: 0;
 }
 .anime-title {
     font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; line-height: 1.3;
