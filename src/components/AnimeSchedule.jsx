@@ -469,8 +469,11 @@ export default function AnimeSchedule() {
                                         setExpandedAnime(expand ? { id: anime.mal_id, source: 'sidebar' } : null);
                                         if (expand && isLastItem) {
                                             setTimeout(() => {
-                                                document.getElementById(`anime-card-${anime.mal_id}`)?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                                            }, 200);
+                                                const container = document.querySelector('.as-content');
+                                                if (container) {
+                                                    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+                                                }
+                                            }, 350);
                                         }
                                     }}
                                     onMouseEnter={(e) => handleMouseEnter(e, anime)}
