@@ -153,7 +153,7 @@ export default React.memo(function LofiPlayer() {
                 ref={iframeRef}
                 width="0" 
                 height="0" 
-                src={`https://www.youtube.com/embed/${lofiId}?enablejsapi=1&autoplay=${isPlaying ? 1 : 0}&controls=0&showinfo=0&rel=0&origin=${window.location.origin}`}
+                src={`https://www.youtube.com/embed/${lofiId}?enablejsapi=1&autoplay=0&controls=0&showinfo=0&rel=0&origin=${window.location.origin}`}
                 frameBorder="0" 
                 allow="autoplay; encrypted-media" 
                 style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
