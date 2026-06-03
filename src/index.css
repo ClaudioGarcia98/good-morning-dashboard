@@ -108,10 +108,33 @@ body {
     box-shadow: var(--shadow-elevated);
     animation: fadeSlideIn 0.55s ease both;
 }
-#greeting, .clock-row, #date, .search-container, .speed-dial, #quote {
+#greeting, .clock-row, #date, .search-container, .speed-dial, #quote-container {
     flex-shrink: 0;
 }
 .container::-webkit-scrollbar { display: none; }
+
+.scrollable-section {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: var(--space-1);
+    margin-right: calc(-1 * var(--space-1));
+    display: flex;
+    flex-direction: column;
+}
+.scrollable-section::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable-section::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+}
+.scrollable-section::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+.scrollable-section::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
 
 /* ── Greeting ──────────────────────────────────────── */
 #greeting {
@@ -348,16 +371,60 @@ body {
     animation: dragShake 0.4s ease-in-out infinite;
 }
 /* ── Quote ─────────────────────────────────────────── */
-#quote {
-    font-size: 1rem; font-style: italic; line-height: var(--line-height-body);
-    color: var(--text-secondary); text-shadow: 0 1px 4px rgba(0,0,0,0.4);
-    border-left: 3px solid var(--accent-color);
-    padding-left: var(--space-2); cursor: pointer; user-select: none;
-    transition: var(--transition-standard);
-    animation: fadeSlideIn 0.5s ease 0.36s both;
-    max-width: 60ch;
+#quote-container {
+    position: relative;
+    margin: 0 auto var(--space-4) auto;
+    background: rgba(15, 15, 20, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+    max-width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    pointer-events: auto;
+    user-select: none;
 }
-#quote:hover { color: var(--text-primary); border-left-width: 4px; }
+
+#quote-container:hover {
+    background: rgba(20, 20, 25, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.quote-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.quote-text {
+    font-size: 1.05rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.4;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-weight: 400;
+}
+
+.quote-author {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.quote-anime {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+}
 
 /* ── Weather Widget ────────────────────────────────── */
 .weather-widget {
@@ -758,7 +825,7 @@ body {
 
 .tab-list {
     display: flex; flex-direction: column; gap: 8px;
-    overflow-y: auto; padding: 8px 10px;
+    overflow-y: auto; padding: 8px 10px 20px 10px;
     flex: 1; min-height: 0;
 }
 .tab-list::-webkit-scrollbar { width: 4px; }
@@ -772,6 +839,7 @@ body {
     background: rgba(255, 255, 255, 0.03); 
     border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    flex-shrink: 0;
 }
 .tab-item-main {
     display: flex; align-items: center; gap: 12px;
@@ -829,11 +897,12 @@ body {
     transition: grid-template-rows 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     background: rgba(0,0,0,0.2); 
     border-radius: 0 0 var(--radius-md) var(--radius-md);
+    border-top: 1px solid transparent;
 }
 .tab-item.expanded .tab-synopsis-wrapper,
 .anime-card.expanded .synopsis-wrapper {
     grid-template-rows: 1fr;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top-color: rgba(255,255,255,0.05);
 }
 .tab-synopsis-panel, .anime-synopsis-panel {
     overflow: hidden;
@@ -1031,8 +1100,24 @@ body {
 
 .anime-genres { display: flex; gap: var(--space-1); flex-wrap: wrap; margin-bottom: var(--space-1); }
 .anime-tag { padding: 4px 8px; background: rgba(255,255,255,0.1); border-radius: 12px; font-size: 0.65rem; white-space: nowrap; }
-.anime-synopsis-text { margin-bottom: var(--space-1); margin-top: 0; }
-.anime-mal-link { color: var(--accent-color); text-decoration: none; font-weight: bold; font-size: 0.75rem;}
+.anime-synopsis-text { 
+    margin-top: 0; 
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+}
+.anime-mal-link {
+    display: inline-block;
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    text-decoration: none;
+}
 .anime-mal-link:hover { text-decoration: underline; }
 
 .anime-countdown {

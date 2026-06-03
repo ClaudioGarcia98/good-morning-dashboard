@@ -500,7 +500,7 @@ export default function AnimeSchedule() {
                                                     ))}
                                                 </div>
                                                 <p className="anime-synopsis-text">
-                                                    {anime.synopsis ? anime.synopsis.substring(0, 200) + '...' : 'No synopsis available.'}
+                                                    {anime.synopsis || 'No synopsis available.'}
                                                 </p>
                                                 <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
                                                     View on MyAnimeList ↗
@@ -562,8 +562,8 @@ export default function AnimeSchedule() {
                                     <div className="tab-synopsis-wrapper">
                                         <div className="tab-synopsis-panel">
                                             <div className="tab-synopsis-inner">
-                                                <p className="anime-synopsis-text" style={{ margin: 0, marginBottom: '8px' }}>
-                                                    {anime.synopsis ? anime.synopsis.substring(0, 120) + '...' : 'No synopsis available.'}
+                                                <p className="anime-synopsis-text">
+                                                    {anime.synopsis || 'No synopsis available.'}
                                                 </p>
                                                 <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
                                                     View on MyAnimeList ↗

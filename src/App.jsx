@@ -94,10 +94,12 @@ export default function App() {
                             <Quote />
                         </div>
                     </header>
-                    <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
+                    <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
                         <SearchBox />
                         <SpeedDial />
-                        <AnimeSchedule />
+                        <div className="scrollable-section">
+                            <AnimeSchedule />
+                        </div>
                     </section>
                 </div>
                 <aside style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
