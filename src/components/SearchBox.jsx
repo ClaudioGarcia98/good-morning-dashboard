@@ -60,11 +60,6 @@ export default React.memo(function () {
     };
 
     useEffect(() => {
-        window.gsCb = (data) => {
-            const sugs = data[1] || [];
-            setSuggestions(sugs.slice(0, 5));
-        };
-
         const handleCtrlSpace = (e) => {
             if (e.ctrlKey && e.code === 'Space') {
                 e.preventDefault();
@@ -88,7 +83,6 @@ export default React.memo(function () {
         return () => {
             document.removeEventListener('keydown', handleCtrlSpace);
             document.removeEventListener('click', handleClickOutside);
-            delete window.gsCb;
         };
     }, []);
 
@@ -110,16 +104,30 @@ export default React.memo(function () {
         if (h.length === 0) setShowSuggestions(false);
     };
 
+    const latestRequestId = useRef(Date.now());
+
     const fetchSuggestions = (q, engine = activeEngine) => {
         const old = document.getElementById('gss');
         if (old) old.remove();
         
+        const reqId = Date.now();
+        latestRequestId.current = reqId;
+        const cbName = `gsCb_${reqId}`;
+
+        window[cbName] = (data) => {
+            delete window[cbName];
+            if (latestRequestId.current !== reqId) return;
+            const sugs = data[1] || [];
+            setSuggestions(sugs.slice(0, 5));
+        };
+
         let src = '';
         if (!engine || engine.name === 'Google') {
-            src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}&callback=gsCb`;
+            src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}&callback=${cbName}`;
         } else if (engine.name === 'YouTube') {
-            src = `https://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q=${encodeURIComponent(q)}&callback=gsCb`;
+            src = `https://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q=${encodeURIComponent(q)}&callback=${cbName}`;
         } else {
+            delete window[cbName];
             setSuggestions([]);
             return;
         }
@@ -282,7 +290,7 @@ export default React.memo(function () {
                 {query.trim() ? (
                     suggestions.map((item, idx) => (
                         <li 
-                            key={idx} 
+                            key={item} 
                             className={idx === focusIdx ? 'selected' : ''}
                             onClick={() => processQuery(item)}
                         >
@@ -295,7 +303,7 @@ export default React.memo(function () {
                         {recent.length > 0 && <li className="sug-group">Recent</li>}
                         {recent.map((item, idx) => (
                             <li 
-                                key={idx}
+                                key={item.query}
                                 className={idx === focusIdx ? 'selected' : ''}
                                 onClick={() => {
                                     const engKey = Object.keys(combinedEngines).find(k => combinedEngines[k].name === item.engineName);

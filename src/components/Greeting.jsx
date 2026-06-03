@@ -21,7 +21,7 @@ export default React.memo(function Greeting() {
                 prefix = 'Good afternoon';
             } else if (hr >= 18 && hr < 22) {
                 prefix = 'Good evening';
-            } else if (hr >= 22 || hr < 4) {
+            } else if (hr >= 22 || hr < 5) {
                 prefix = 'Time to rest';
             }
 
