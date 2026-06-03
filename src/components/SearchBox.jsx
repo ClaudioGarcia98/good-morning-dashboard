@@ -13,7 +13,7 @@ const ENGINES = {
     'a ':     { name:'Amazon',     bg:'#FF9900', fg:'#000', url: q=>`https://www.amazon.com/s?k=${encodeURIComponent(q)}` },
 };
 
-export default function SearchBox() {
+export default React.memo(function () {
     const { customEngines } = useSettings();
     const [query, setQuery] = useState('');
     const [activeEngine, setActiveEngine] = useState(null);
@@ -311,4 +311,4 @@ export default function SearchBox() {
             </ul>
         </form>
     );
-}
+});

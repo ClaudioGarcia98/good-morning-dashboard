@@ -11,7 +11,7 @@ import LofiPlayer from './components/LofiPlayer';
 import { useSettings } from './context/SettingsContext';
 
 export default function App() {
-    const { backgroundUrl, backgroundIsVideo } = useSettings();
+    const { backgroundUrl, backgroundIsVideo, username } = useSettings();
     const [booting, setBooting] = useState(true);
 
     useEffect(() => {
@@ -78,7 +78,7 @@ export default function App() {
             <div className="overlay" id="overlay"></div>
             {booting && (
                 <div id="bootScreen" className="boot-screen">
-                    <div className="boot-logo">Good Morning</div>
+                    <div className="boot-logo">Hello, {username || 'Guest'}</div>
                 </div>
             )}
             

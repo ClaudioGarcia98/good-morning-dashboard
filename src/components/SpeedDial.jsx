@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings } from '../context/SettingsContext';
 
-export default function SpeedDial() {
+export default React.memo(function () {
     const { speedDials, setSpeedDials } = useSettings();
     const [draggedId, setDraggedId] = useState(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -153,4 +153,4 @@ export default function SpeedDial() {
             )}
         </>
     );
-}
+});

@@ -63,7 +63,7 @@ const CountdownBadge = ({ broadcast }) => {
     );
 };
 
-export default function AnimeSchedule() {
+export default React.memo(function () {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
     const { volume } = useSettings();
@@ -652,4 +652,4 @@ export default function AnimeSchedule() {
             , trailerPortal)}
         </>
     );
-}
+});

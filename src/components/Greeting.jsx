@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext';
 
-export default function Greeting() {
+export default React.memo(function Greeting() {
     const { username } = useSettings();
     const [greeting, setGreeting] = useState('');
     const [weatherCode, setWeatherCode] = useState(null);
@@ -41,4 +41,4 @@ export default function Greeting() {
     }, [username, weatherCode]);
 
     return <div id="greeting">{greeting}</div>;
-}
+});

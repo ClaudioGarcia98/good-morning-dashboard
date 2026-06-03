@@ -10,7 +10,7 @@ const STATIONS = [
     { id: 'Gu-g8FRG4Zs', name: 'Anime Lofi' } // Default original
 ];
 
-export default function LofiPlayer() {
+export default React.memo(function () {
     const { volume, lofiId, setLofiId, customLofiId } = useSettings();
     const [isPlaying, setIsPlaying] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -208,4 +208,4 @@ export default function LofiPlayer() {
             </div>
         </div>
     );
-}
+});

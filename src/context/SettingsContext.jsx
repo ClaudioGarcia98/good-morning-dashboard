@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const SettingsContext = createContext();
 
@@ -156,7 +156,7 @@ export function SettingsProvider({ children }) {
         localStorage.setItem('dash_custom_engines', JSON.stringify(customEngines));
     }, [customEngines]);
 
-    const value = {
+    const value = useMemo(() => ({
         theme, setTheme, THEMES,
         font, setFont, FONTS,
         clockMode, setClockMode,
@@ -170,7 +170,10 @@ export function SettingsProvider({ children }) {
         customEngines, setCustomEngines,
         lofiId, setLofiId,
         customLofiId, setCustomLofiId
-    };
+    }), [
+        theme, font, clockMode, username, backgroundUrl, backgroundIsVideo, 
+        gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId
+    ]);
 
     return (
         <SettingsContext.Provider value={value}>

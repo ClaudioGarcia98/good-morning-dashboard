@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
 
 const ANIME_QUOTES = [
@@ -23,7 +24,7 @@ const ANIME_QUOTES = [
     { text: "You can die anytime, but living takes true courage.", author: "Kenshin Himura", anime: "Rurouni Kenshin" }
 ];
 
-export default function Quote() {
+export default React.memo(function () {
     const [quoteObj, setQuoteObj] = useState(null);
     const [opacity, setOpacity] = useState(0);
 
@@ -66,4 +67,4 @@ export default function Quote() {
             </div>
         </div>
     );
-}
+});

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function WeatherWidget() {
+export default React.memo(function () {
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(false);
@@ -162,4 +162,4 @@ export default function WeatherWidget() {
             </div>
         </>
     );
-}
+});

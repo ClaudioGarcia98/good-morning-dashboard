@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSettings } from '../context/SettingsContext';
 
-export default function SettingsPanel() {
+export default React.memo(function () {
     const {
         theme, setTheme, THEMES,
         font, setFont, FONTS,
@@ -361,4 +361,4 @@ export default function SettingsPanel() {
             </section>
         </>
     );
-}
+});

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSettings } from '../context/SettingsContext';
 
-export default function Clock() {
+export default React.memo(function () {
     const { clockMode } = useSettings();
     const [timeStr, setTimeStr] = useState('00:00');
     const [dateStr, setDateStr] = useState('');
@@ -104,4 +104,4 @@ export default function Clock() {
             <div id="date">{dateStr}</div>
         </>
     );
-}
+});
