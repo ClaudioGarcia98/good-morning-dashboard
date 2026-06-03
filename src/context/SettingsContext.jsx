@@ -8,6 +8,7 @@ export function SettingsProvider({ children }) {
     const [font, setFont] = useState(() => localStorage.getItem('dash_font') || 'default');
     const [clockMode, setClockMode] = useState(() => localStorage.getItem('dash_clock') || 'digital');
     const [username, setUsername] = useState(() => localStorage.getItem('dash_username') || 'Cláudio');
+    const [malUsername, setMalUsername] = useState(() => localStorage.getItem('dash_mal_username') || 'claclo98');
     const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || '');
     const [use24hClock, setUse24hClock] = useState(() => localStorage.getItem('dash_24h') !== 'false');
     const [useCelsius, setUseCelsius] = useState(() => localStorage.getItem('dash_celsius') !== 'false');
@@ -145,7 +146,8 @@ export function SettingsProvider({ children }) {
         localStorage.setItem('dash_fallback_city', fallbackCity);
         localStorage.setItem('dash_24h', use24hClock);
         localStorage.setItem('dash_celsius', useCelsius);
-    }, [clockMode, username, volume, lofiId, customLofiId, fallbackCity, use24hClock, useCelsius]);
+        localStorage.setItem('dash_mal_username', malUsername);
+    }, [clockMode, username, volume, lofiId, customLofiId, fallbackCity, use24hClock, useCelsius, malUsername]);
 
     useEffect(() => {
         localStorage.setItem('dash_speed_dials', JSON.stringify(speedDials));
@@ -160,6 +162,7 @@ export function SettingsProvider({ children }) {
         font, setFont, FONTS,
         clockMode, setClockMode,
         username, setUsername,
+        malUsername, setMalUsername,
         backgroundUrl, setBackgroundUrl,
         backgroundIsVideo, setBackgroundIsVideo,
         gifName, setGifName,
@@ -173,7 +176,7 @@ export function SettingsProvider({ children }) {
         use24hClock, setUse24hClock,
         useCelsius, setUseCelsius
     }), [
-        theme, font, clockMode, username, backgroundUrl, backgroundIsVideo, 
+        theme, font, clockMode, username, malUsername, backgroundUrl, backgroundIsVideo, 
         gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity,
         use24hClock, useCelsius
     ]);

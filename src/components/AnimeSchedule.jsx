@@ -67,7 +67,7 @@ const CountdownBadge = ({ broadcast }) => {
 export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
-    const { volume } = useSettings();
+    const { volume, malUsername } = useSettings();
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
@@ -159,8 +159,8 @@ export default React.memo(function AnimeSchedule() {
     };
 
     const fetchUserWatching = useCallback(async () => {
-        const cacheBust = '&_t=' + Date.now();
-        const malUrl = 'https://myanimelist.net/animelist/claclo98/load.json?offset=0&status=1' + cacheBust;
+        const cacheBust = `&_=${Date.now()}`;
+        const malUrl = `https://myanimelist.net/animelist/${malUsername}/load.json?offset=0&status=1${cacheBust}`;
         
         const makeAlloriginsRequest = async () => {
             const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(malUrl), { cache: 'no-store' });
@@ -174,8 +174,8 @@ export default React.memo(function AnimeSchedule() {
             return parseMALItems(await res.json());
         };
         const makeJikanRequest = async () => {
-            const res = await fetch('https://api.jikan.moe/v4/users/claclo98/animelist?status=watching', { cache: 'no-store' });
-            if (!res.ok) throw new Error(res.status);
+            const res = await fetch(`https://api.jikan.moe/v4/users/${malUsername}/animelist?status=watching`, { cache: 'no-store' });
+            if (!res.ok) throw new Error('no data');
             const jikanJson = await res.json();
             if (!jikanJson.data) throw new Error('no data');
             return jikanJson.data.map(item => {
@@ -197,7 +197,7 @@ export default React.memo(function AnimeSchedule() {
             console.error('All MAL fetches failed:', e);
             throw e;
         });
-    }, []);
+    }, [malUsername]);
 
     useEffect(() => {
         let isMounted = true;

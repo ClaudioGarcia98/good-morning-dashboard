@@ -8,6 +8,7 @@ export default React.memo(function SettingsPanel() {
         font, setFont, FONTS,
         clockMode, setClockMode,
         username, setUsername,
+        malUsername, setMalUsername,
         setBackgroundUrl,
         gifName, setGifName,
         speedDials, setSpeedDials,
@@ -199,6 +200,16 @@ export default React.memo(function SettingsPanel() {
                             placeholder="Your name" 
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
+                    <div className="sp-group" style={{ marginTop: '10px' }}>
+                        <label htmlFor="malUsernameInput">MyAnimeList Username</label>
+                        <input 
+                            type="text" 
+                            id="malUsernameInput" 
+                            placeholder="MAL username (e.g., claclo98)" 
+                            value={malUsername}
+                            onChange={(e) => setMalUsername(e.target.value)}
                         />
                     </div>
                 </div>
