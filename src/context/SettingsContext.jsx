@@ -11,6 +11,7 @@ export function SettingsProvider({ children }) {
     const [malUsername, setMalUsername] = useState(() => localStorage.getItem('dash_mal_username') || '');
     const [malError, setMalError] = useState(false);
     const [malLoading, setMalLoading] = useState(false);
+    const [malSuccess, setMalSuccess] = useState(false);
     const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || '');
     const [use24hClock, setUse24hClock] = useState(() => localStorage.getItem('dash_24h') !== 'false');
     const [useCelsius, setUseCelsius] = useState(() => localStorage.getItem('dash_celsius') !== 'false');
@@ -167,6 +168,7 @@ export function SettingsProvider({ children }) {
         malUsername, setMalUsername,
         malError, setMalError,
         malLoading, setMalLoading,
+        malSuccess, setMalSuccess,
         backgroundUrl, setBackgroundUrl,
         backgroundIsVideo, setBackgroundIsVideo,
         gifName, setGifName,
@@ -180,7 +182,7 @@ export function SettingsProvider({ children }) {
         use24hClock, setUse24hClock,
         useCelsius, setUseCelsius
     }), [
-        theme, font, clockMode, username, malUsername, malError, malLoading, backgroundUrl, backgroundIsVideo, 
+        theme, font, clockMode, username, malUsername, malError, malLoading, malSuccess, backgroundUrl, backgroundIsVideo, 
         gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity,
         use24hClock, useCelsius
     ]);

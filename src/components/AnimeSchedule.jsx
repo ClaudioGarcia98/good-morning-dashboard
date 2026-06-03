@@ -67,7 +67,7 @@ const CountdownBadge = ({ broadcast }) => {
 export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
-    const { volume, malUsername, setMalError, setMalLoading } = useSettings();
+    const { volume, malUsername, setMalError, setMalLoading, setMalSuccess } = useSettings();
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
@@ -262,12 +262,13 @@ export default React.memo(function AnimeSchedule() {
         };
     }, []);
 
-    // Re-fetch watching list when malUsername changes
     useEffect(() => {
         let isMounted = true;
+        let successTimeoutId = null;
         
-        // Always clear error when typing starts
+        // Always clear error and success when typing starts
         setMalError(false);
+        setMalSuccess(false);
 
         if (!malUsername || malUsername.trim() === '') {
             return;
@@ -286,12 +287,17 @@ export default React.memo(function AnimeSchedule() {
                     if (isMounted) {
                         setUserWatching(freshWatching);
                         setMalError(false);
+                        setMalSuccess(true);
+                        successTimeoutId = setTimeout(() => {
+                            if (isMounted) setMalSuccess(false);
+                        }, 3000);
                     }
                 }
             } catch(e) {
                 console.warn("Failed to update watching list on username change.");
                 if (isMounted) {
                     setMalError(true);
+                    setMalSuccess(false);
                 }
             } finally {
                 if (isMounted) setMalLoading(false);
@@ -305,8 +311,9 @@ export default React.memo(function AnimeSchedule() {
         return () => { 
             isMounted = false; 
             clearTimeout(timeoutId);
+            if (successTimeoutId) clearTimeout(successTimeoutId);
         };
-    }, [malUsername, fetchUserWatching, setMalError, setMalLoading]);
+    }, [malUsername, fetchUserWatching, setMalError, setMalLoading, setMalSuccess]);
 
     useEffect(() => {
         const loadSidebarData = async () => {

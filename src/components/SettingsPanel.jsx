@@ -11,6 +11,7 @@ export default React.memo(function SettingsPanel() {
         malUsername, setMalUsername,
         malError,
         malLoading,
+        malSuccess,
         setBackgroundUrl,
         gifName, setGifName,
         speedDials, setSpeedDials,
@@ -213,7 +214,7 @@ export default React.memo(function SettingsPanel() {
                             value={malUsername}
                             onChange={(e) => setMalUsername(e.target.value)}
                         />
-                        {malLoading && !malError && (
+                        {malLoading && !malError && !malSuccess && (
                             <div style={{ color: '#888', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
                                 Checking username...
                             </div>
@@ -221,6 +222,12 @@ export default React.memo(function SettingsPanel() {
                         {malError && !malLoading && (
                             <div style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
                                 Username not found or failed to load.
+                            </div>
+                        )}
+                        {malSuccess && !malLoading && !malError && (
+                            <div style={{ color: '#4caf50', fontSize: '11px', marginTop: '4px', paddingLeft: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                Verified
                             </div>
                         )}
                     </div>
