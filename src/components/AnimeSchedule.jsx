@@ -97,8 +97,22 @@ export default React.memo(function AnimeSchedule() {
     const [todayData, setTodayData] = useState([]);
     const [userWatching, setUserWatching] = useState([]);
     const [todayLoading, setTodayLoading] = useState(true);
+    const [todayError, setTodayError] = useState(false);
+    const [sidebarError, setSidebarError] = useState(false);
     const sidebarRef = useRef(null);
     const toggleRef = useRef(null);
+
+    const fetchWithRetry = async (fn, retries = 1, delay = 500) => {
+        try {
+            return await fn();
+        } catch (e) {
+            if (retries > 0) {
+                await new Promise(r => setTimeout(r, delay));
+                return fetchWithRetry(fn, retries - 1, delay);
+            }
+            throw e;
+        }
+    };
 
     const getScheduleCache = () => {
         try { return JSON.parse(localStorage.getItem('dash_anime_schedule_v2') || '{}'); } 
@@ -115,7 +129,8 @@ export default React.memo(function AnimeSchedule() {
         if (entry && Date.now() - entry.ts < 3600000) {
             return entry.data;
         }
-        try {
+        
+        return fetchWithRetry(async () => {
             const res = await fetch('https://api.jikan.moe/v4/schedules?filter=' + dayFilter);
             if (!res.ok) throw new Error(res.status);
             const json = await res.json();
@@ -123,10 +138,11 @@ export default React.memo(function AnimeSchedule() {
             cache[dayFilter] = { data, ts: Date.now() };
             setScheduleCache(cache);
             return data;
-        } catch (e) {
+        }, 1, 1000).catch(e => {
             console.error('Schedule fetch error for ' + dayFilter + ':', e);
-            return (entry && entry.data) || [];
-        }
+            if (entry && entry.data) return entry.data;
+            throw e; // Bubble up so the caller knows it completely failed
+        });
     }, []);
 
     const parseMALItems = (raw) => {
@@ -173,12 +189,12 @@ export default React.memo(function AnimeSchedule() {
             });
         };
 
-        try {
+        return fetchWithRetry(async () => {
             return await Promise.any([makeAlloriginsRequest(), makeCodetabsRequest(), makeJikanRequest()]);
-        } catch (e) {
+        }, 1, 1000).catch(e => {
             console.error('All MAL fetches failed:', e);
-            return [];
-        }
+            throw e;
+        });
     }, []);
 
     useEffect(() => {
@@ -196,16 +212,27 @@ export default React.memo(function AnimeSchedule() {
             
             if (isMounted) setUserWatching(cachedWatching);
 
-            const tData = await fetchDaySchedule(todayFilter);
-            if (isMounted) {
-                setTodayData(tData);
-                setTodayLoading(false);
+            try {
+                const tData = await fetchDaySchedule(todayFilter);
+                if (isMounted) {
+                    setTodayData(tData);
+                    setTodayError(false);
+                }
+            } catch (e) {
+                if (isMounted) setTodayError(true);
+            } finally {
+                if (isMounted) setTodayLoading(false);
             }
 
-            const freshWatching = await fetchUserWatching();
-            if (freshWatching && freshWatching.length > 0 && isMounted) {
-                localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
-                setUserWatching(freshWatching);
+            try {
+                const freshWatching = await fetchUserWatching();
+                if (freshWatching && freshWatching.length > 0 && isMounted) {
+                    localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
+                    setUserWatching(freshWatching);
+                }
+            } catch (e) {
+                // Background fetch failed, fallback to cache is already set
+                console.warn("Could not refresh user watching list.");
             }
         };
 
@@ -231,22 +258,26 @@ export default React.memo(function AnimeSchedule() {
     useEffect(() => {
         const loadSidebarData = async () => {
             setSidebarLoading(true);
-            const data = await fetchDaySchedule(activeDay);
-            
-            // Deduplicate by mal_id and filter out entries without a broadcast time
-            const uniqueData = Array.from(new Map(data.map(item => [item.mal_id, item])).values())
-                .filter(a => a.broadcast && a.broadcast.time);
-                
-            const sorted = uniqueData.sort((a,b) => {
-                return a.broadcast.time.localeCompare(b.broadcast.time);
-            });
-            setSidebarData(sorted);
-            setSidebarLoading(false);
+            setSidebarError(false);
+            try {
+                const data = await fetchDaySchedule(activeDay);
+                const uniqueData = Array.from(new Map(data.map(item => [item.mal_id, item])).values())
+                    .filter(a => a.broadcast && a.broadcast.time);
+                    
+                const sorted = uniqueData.sort((a,b) => {
+                    return a.broadcast.time.localeCompare(b.broadcast.time);
+                });
+                setSidebarData(sorted);
+            } catch (e) {
+                setSidebarError(true);
+            } finally {
+                setSidebarLoading(false);
+            }
         };
         if (isSidebarOpen) {
             loadSidebarData();
         }
-    }, [activeDay, isSidebarOpen]);
+    }, [activeDay, isSidebarOpen, fetchDaySchedule]);
 
     const getDisplayList = () => {
         if (!todayData || todayData.length === 0) return [];
@@ -459,8 +490,22 @@ export default React.memo(function AnimeSchedule() {
                     })}
                 </div>
                 <div className="as-content">
-                    {sidebarLoading ? (
-                        <div style={{ opacity: 0.5, padding: '20px', textAlign: 'center', fontSize: '0.8rem' }}>Loading...</div>
+                    {sidebarError ? (
+                        <div className="error-state">
+                            Couldn't connect to MyAnimeList right now.
+                        </div>
+                    ) : sidebarLoading ? (
+                        <>
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="skeleton-card">
+                                    <div className="skeleton-img"></div>
+                                    <div className="skeleton-lines">
+                                        <div className="skeleton-line medium"></div>
+                                        <div className="skeleton-line short"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
                     ) : sidebarData.length === 0 ? (
                         <div style={{ opacity: 0.5, padding: '20px', textAlign: 'center', fontSize: '0.8rem' }}>No anime scheduled.</div>
                     ) : (
@@ -549,8 +594,22 @@ export default React.memo(function AnimeSchedule() {
                     <span className="tab-title">Today's Launch</span>
                 </div>
                 <div className="tab-list" id="tabList">
-                    {todayLoading ? (
-                        <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>Loading schedule...</div>
+                    {todayError ? (
+                        <div className="error-state">
+                            Couldn't connect to MyAnimeList right now.
+                        </div>
+                    ) : todayLoading ? (
+                        <>
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="skeleton-card">
+                                    <div className="skeleton-img"></div>
+                                    <div className="skeleton-lines">
+                                        <div className="skeleton-line medium"></div>
+                                        <div className="skeleton-line short"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
                     ) : displayList.length === 0 ? (
                         <div style={{ fontSize: '0.8rem', opacity: 0.5 }}>No anime airing today.</div>
                     ) : (
