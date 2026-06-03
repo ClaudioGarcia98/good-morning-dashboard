@@ -551,7 +551,7 @@ export default React.memo(function AnimeSchedule() {
                                 <span className="info-tooltip sidebar-tooltip" style={{ whiteSpace: 'normal', width: '230px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 400, padding: '12px 14px' }}>
                                     Anime schedules are based on <strong>Japan Standard Time (JST)</strong>.
                                     <br/><br/>
-                                    Because Japan is ahead in time, some episodes may appear as "Out Now!" even if they aired "tomorrow" in your local time.
+                                    Depending on your timezone, the listed broadcast day might not match your local day.
                                 </span>
                             </span>
                         </span>
