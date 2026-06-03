@@ -79,7 +79,7 @@ const CountdownBadge = ({ broadcast }) => {
 export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
-    const { volume, malUsername, setMalError, setMalLoading, setMalSuccess } = useSettings();
+    const { volume, malUsername, setMalError, setMalLoading, setMalSuccess, showTop5Anime, showAnimeSidebar } = useSettings();
     const prevMalUsername = useRef(malUsername);
 
     useEffect(() => {
@@ -685,8 +685,9 @@ export default React.memo(function AnimeSchedule() {
 
     return (
         <>
-            <div className="today-anime-box" id="todayAnimeBox">
-                <div className="tab-header">
+            {showTop5Anime && (
+                <div className="today-anime-box" id="todayAnimeBox">
+                    <div className="tab-header">
                     <span className="tab-title" style={{ display: 'flex', alignItems: 'center' }}>
                         Today's Launch
                         <div className="info-badge-container" tabIndex={0} aria-label="Sorting Info">
@@ -796,7 +797,8 @@ export default React.memo(function AnimeSchedule() {
                     )}
                 </div>
             </div>
-            {sidebarPortal && createPortal(sidebarContent, sidebarPortal)}
+            )}
+            {showAnimeSidebar && sidebarPortal && createPortal(sidebarContent, sidebarPortal)}
             {trailerPortal && previewTrailer && createPortal(
                 <div 
                     className="trailer-portal-container"

@@ -27,7 +27,8 @@ export default React.memo(function SettingsPanel() {
         showQuote, setShowQuote,
         showSearchBox, setShowSearchBox,
         showSpeedDial, setShowSpeedDial,
-        showAnimeSchedule, setShowAnimeSchedule,
+        showTop5Anime, setShowTop5Anime,
+        showAnimeSidebar, setShowAnimeSidebar,
         showLofiPlayer, setShowLofiPlayer
     } = useSettings();
 
@@ -260,7 +261,8 @@ export default React.memo(function SettingsPanel() {
                             { label: 'Quote of the Day', state: showQuote, setter: setShowQuote },
                             { label: 'Search Box', state: showSearchBox, setter: setShowSearchBox },
                             { label: 'Speed Dials', state: showSpeedDial, setter: setShowSpeedDial },
-                            { label: 'Anime Schedule', state: showAnimeSchedule, setter: setShowAnimeSchedule },
+                            { label: 'Today\'s Launch (Top 5)', state: showTop5Anime, setter: setShowTop5Anime },
+                            { label: 'Anime Sidebar', state: showAnimeSidebar, setter: setShowAnimeSidebar },
                             { label: 'Lofi Player', state: showLofiPlayer, setter: setShowLofiPlayer },
                         ].map((widget, i) => (
                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

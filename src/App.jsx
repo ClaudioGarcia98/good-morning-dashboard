@@ -19,7 +19,8 @@ export default function App() {
         showQuote,
         showSearchBox,
         showSpeedDial,
-        showAnimeSchedule,
+        showTop5Anime,
+        showAnimeSidebar,
         showLofiPlayer
     } = useSettings();
     const [booting, setBooting] = useState(true);
@@ -107,8 +108,8 @@ export default function App() {
                     <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
                         {showSearchBox && <SearchBox />}
                         {showSpeedDial && <SpeedDial />}
-                        {showAnimeSchedule && (
-                            <div className="scrollable-section">
+                        {(showTop5Anime || showAnimeSidebar) && (
+                            <div className={showTop5Anime ? "scrollable-section" : "hidden-wrapper"}>
                                 <AnimeSchedule />
                             </div>
                         )}

@@ -26,7 +26,8 @@ export function SettingsProvider({ children }) {
     const [showQuote, setShowQuote] = useState(() => localStorage.getItem('dash_show_quote') !== 'false');
     const [showSearchBox, setShowSearchBox] = useState(() => localStorage.getItem('dash_show_search') !== 'false');
     const [showSpeedDial, setShowSpeedDial] = useState(() => localStorage.getItem('dash_show_speeddial') !== 'false');
-    const [showAnimeSchedule, setShowAnimeSchedule] = useState(() => localStorage.getItem('dash_show_anime') !== 'false');
+    const [showTop5Anime, setShowTop5Anime] = useState(() => localStorage.getItem('dash_show_top5') !== 'false');
+    const [showAnimeSidebar, setShowAnimeSidebar] = useState(() => localStorage.getItem('dash_show_anime_sidebar') !== 'false');
     const [showLofiPlayer, setShowLofiPlayer] = useState(() => localStorage.getItem('dash_show_lofi') !== 'false');
     
     
@@ -194,12 +195,13 @@ export function SettingsProvider({ children }) {
         showQuote, setShowQuote: (val) => { setShowQuote(val); localStorage.setItem('dash_show_quote', val); },
         showSearchBox, setShowSearchBox: (val) => { setShowSearchBox(val); localStorage.setItem('dash_show_search', val); },
         showSpeedDial, setShowSpeedDial: (val) => { setShowSpeedDial(val); localStorage.setItem('dash_show_speeddial', val); },
-        showAnimeSchedule, setShowAnimeSchedule: (val) => { setShowAnimeSchedule(val); localStorage.setItem('dash_show_anime', val); },
+        showTop5Anime, setShowTop5Anime: (val) => { setShowTop5Anime(val); localStorage.setItem('dash_show_top5', val); },
+        showAnimeSidebar, setShowAnimeSidebar: (val) => { setShowAnimeSidebar(val); localStorage.setItem('dash_show_anime_sidebar', val); },
         showLofiPlayer, setShowLofiPlayer: (val) => { setShowLofiPlayer(val); localStorage.setItem('dash_show_lofi', val); }
     }), [
         theme, font, clockMode, username, malUsername, malError, malLoading, malSuccess, backgroundUrl, backgroundIsVideo, 
         gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity,
-        use24hClock, useCelsius, showWeatherWidget, showQuote, showSearchBox, showSpeedDial, showAnimeSchedule, showLofiPlayer
+        use24hClock, useCelsius, showWeatherWidget, showQuote, showSearchBox, showSpeedDial, showTop5Anime, showAnimeSidebar, showLofiPlayer
     ]);
 
     return (
