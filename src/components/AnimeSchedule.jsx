@@ -97,7 +97,6 @@ export default function AnimeSchedule() {
     const [todayData, setTodayData] = useState([]);
     const [userWatching, setUserWatching] = useState([]);
     const [todayLoading, setTodayLoading] = useState(true);
-
     const sidebarRef = useRef(null);
     const toggleRef = useRef(null);
 
@@ -425,24 +424,30 @@ export default function AnimeSchedule() {
 
             <aside className={`anime-sidebar ${isSidebarOpen ? 'open' : ''}`} id="animeSidebar" ref={sidebarRef}>
                 <header className="as-header">
-                    <span>Anime Schedule</span>
+                    <div className="as-header-titles">
+                        <h2>Anime Schedule</h2>
+                        <span className="as-subtitle">Daily Airing Episodes</span>
+                    </div>
                     <button className="as-close" onClick={() => setIsSidebarOpen(false)} aria-label="Close Sidebar">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
                 </header>
                 <div className="as-days">
-                    {DAY_FILTERS.map((df, i) => (
-                        <button 
-                            key={df}
-                            className={`as-day-btn ${activeDay === df ? 'active' : ''}`}
-                            onClick={() => setActiveDay(df)}
-                        >
-                            {DAYS[i].charAt(0).toUpperCase() + DAYS[i].slice(1)}
-                        </button>
-                    ))}
+                    {DAY_FILTERS.map((df, i) => {
+                        const dayName = DAYS[i].charAt(0).toUpperCase() + DAYS[i].substring(1, 3);
+                        return (
+                            <button 
+                                key={df}
+                                className={`as-day-btn ${activeDay === df ? 'active' : ''}`}
+                                onClick={() => setActiveDay(df)}
+                            >
+                                {dayName}
+                            </button>
+                        );
+                    })}
                 </div>
                 <div className="as-content">
                     {sidebarLoading ? (
@@ -467,13 +472,13 @@ export default function AnimeSchedule() {
                                             }, 200);
                                         }
                                     }}
+                                    onMouseEnter={(e) => handleMouseEnter(e, anime)}
                                     onMouseLeave={handleMouseLeave}
                                 >
-                                    <div className="anime-card-main" 
-                                        onMouseEnter={(e) => handleMouseEnter(e, anime)}
-                                        onMouseLeave={handleMouseLeave}
-                                    >
-                                        <img src={anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || anime.images?.jpg?.small_image_url} alt="poster" />
+                                    <div className="anime-card-main">
+                                        <div className="anime-img-container">
+                                            <img src={anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || anime.images?.jpg?.small_image_url} alt="poster" />
+                                        </div>
                                         <div className="anime-info">
                                             <div className="anime-title">{anime.title}</div>
                                             <div className="anime-time">
@@ -482,21 +487,23 @@ export default function AnimeSchedule() {
                                             <CountdownBadge broadcast={anime.broadcast} />
                                         </div>
                                     </div>
-                                    {isExpanded && (
-                                        <div className="anime-synopsis-panel" onClick={e => e.stopPropagation()}>
-                                            <div className="anime-genres">
-                                                {(anime.genres || []).slice(0, 3).map(g => (
-                                                    <span key={g.mal_id} className="anime-tag">{g.name}</span>
-                                                ))}
+                                    <div className="synopsis-wrapper">
+                                        <div className="anime-synopsis-panel">
+                                            <div className="synopsis-inner">
+                                                <div className="anime-genres">
+                                                    {(anime.genres || []).slice(0, 3).map(g => (
+                                                        <span key={g.mal_id} className="anime-tag">{g.name}</span>
+                                                    ))}
+                                                </div>
+                                                <p className="anime-synopsis-text">
+                                                    {anime.synopsis ? anime.synopsis.substring(0, 200) + '...' : 'No synopsis available.'}
+                                                </p>
+                                                <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
+                                                    View on MyAnimeList ↗
+                                                </a>
                                             </div>
-                                            <p className="anime-synopsis-text">
-                                                {anime.synopsis ? anime.synopsis.substring(0, 200) + '...' : 'No synopsis available.'}
-                                            </p>
-                                            <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
-                                                View on MyAnimeList ↗
-                                            </a>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             );
                         })
@@ -529,13 +536,13 @@ export default function AnimeSchedule() {
                                         const expand = !isExpanded;
                                         setExpandedAnime(expand ? { id: anime.mal_id, source: 'today' } : null);
                                     }}
+                                    onMouseEnter={(e) => handleMouseEnter(e, anime)}
                                     onMouseLeave={handleMouseLeave}
                                 >
-                                    <div className="tab-item-main"
-                                        onMouseEnter={(e) => handleMouseEnter(e, anime)}
-                                        onMouseLeave={handleMouseLeave}
-                                    >
-                                        <img src={anime.images?.jpg?.small_image_url} alt="poster" />
+                                    <div className="tab-item-main">
+                                        <div className="tab-img-container">
+                                            <img src={anime.images?.jpg?.small_image_url} alt="poster" />
+                                        </div>
                                         <div className="tab-item-info" style={{ flex: 1, minWidth: 0 }}>
                                             <div className="tab-item-title">{anime.title}</div>
                                             <div className="tab-item-meta">
@@ -548,16 +555,18 @@ export default function AnimeSchedule() {
                                             </div>
                                         </div>
                                     </div>
-                                    {isExpanded && (
-                                        <div className="tab-synopsis-panel" onClick={e => e.stopPropagation()}>
-                                            <p className="anime-synopsis-text">
-                                                {anime.synopsis ? anime.synopsis.substring(0, 120) + '...' : 'No synopsis available.'}
-                                            </p>
-                                            <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
-                                                View on MyAnimeList ↗
-                                            </a>
+                                    <div className="tab-synopsis-wrapper">
+                                        <div className="tab-synopsis-panel">
+                                            <div className="tab-synopsis-inner">
+                                                <p className="anime-synopsis-text" style={{ margin: 0, marginBottom: '8px' }}>
+                                                    {anime.synopsis ? anime.synopsis.substring(0, 120) + '...' : 'No synopsis available.'}
+                                                </p>
+                                                <a href={anime.url} target="_blank" rel="noopener noreferrer" className="anime-mal-link">
+                                                    View on MyAnimeList ↗
+                                                </a>
+                                            </div>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             );
                         })

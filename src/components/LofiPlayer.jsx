@@ -46,16 +46,41 @@ export default function LofiPlayer() {
         setIsPlaying(false);
         setTitle('Loading...');
         
+        let isMounted = true;
+        let isResolved = false;
+
+        // Fallback to "Lofi Music" after 15 seconds if still loading
+        const timeoutId = setTimeout(() => {
+            if (isMounted && !isResolved) {
+                setTitle('Lofi Music');
+            }
+        }, 15000);
+
         // Fetch title via oEmbed & CORS proxy
         const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${lofiId}&format=json`;
         fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(oembedUrl)}`)
             .then(res => res.json())
             .then(data => {
-                const parsed = JSON.parse(data.contents);
-                if (parsed && parsed.title) setTitle(parsed.title);
-                else setTitle('Lofi Radio');
+                if (!isMounted) return;
+                isResolved = true;
+                try {
+                    const parsed = JSON.parse(data.contents);
+                    if (parsed && parsed.title) setTitle(parsed.title);
+                    else setTitle('Lofi Music');
+                } catch (e) {
+                    setTitle('Lofi Music');
+                }
             })
-            .catch(() => setTitle('Lofi Radio'));
+            .catch(() => {
+                if (!isMounted) return;
+                isResolved = true;
+                setTitle('Lofi Music');
+            });
+
+        return () => {
+            isMounted = false;
+            clearTimeout(timeoutId);
+        };
     }, [lofiId]);
 
     return (
