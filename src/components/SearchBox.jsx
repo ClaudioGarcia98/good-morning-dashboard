@@ -333,6 +333,7 @@ export default React.memo(function SearchBox() {
                             <span className="sug-icon">🔍</span>
                             <span className="sug-text" style={{ flex: 1 }}>{item}</span>
                             <button 
+                                type="button"
                                 className="sug-add" 
                                 title="Add to Speed Dial" 
                                 onClick={(e) => addToSpeedDial(e, item)}
