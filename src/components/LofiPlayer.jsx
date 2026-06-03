@@ -143,6 +143,17 @@ export default React.memo(function LofiPlayer() {
                 func: 'setVolume',
                 args: [Math.round(volume * 100)]
             }), '*');
+            if (isPlaying) {
+                setTimeout(() => {
+                    if (iframeRef.current && iframeRef.current.contentWindow) {
+                        iframeRef.current.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'playVideo',
+                            args: []
+                        }), '*');
+                    }
+                }, 500); // slight delay to ensure iframe is fully ready to accept commands
+            }
         }
     };
 
@@ -174,6 +185,7 @@ export default React.memo(function LofiPlayer() {
                                     className={`lofi-station-btn ${lofiId === station.id ? 'active' : ''}`}
                                     onClick={() => {
                                         setLofiId(station.id);
+                                        setIsPlaying(true);
                                         setShowMenu(false);
                                     }}
                                 >
