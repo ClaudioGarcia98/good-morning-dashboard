@@ -25,13 +25,25 @@ export default React.memo(function WeatherWidget() {
                         lat = pos.coords.latitude;
                         lon = pos.coords.longitude;
                     } catch (geoErr) {
-                        console.warn("Geolocation denied or failed, falling back to Bombarral:", geoErr);
-                        // fallback to Bombarral coordinates
-                        lat = 39.2667;
-                        lon = -9.1667;
+                        const fbCity = localStorage.getItem('dash_fallback_city') || 'Bombarral';
+                        console.warn(`Geolocation denied or failed, falling back to ${fbCity}:`, geoErr);
+                        try {
+                            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(fbCity)}&count=1`);
+                            const geoData = await geoRes.json();
+                            if (geoData.results && geoData.results.length > 0) {
+                                lat = geoData.results[0].latitude;
+                                lon = geoData.results[0].longitude;
+                            } else {
+                                throw new Error("City not found");
+                            }
+                        } catch (err) {
+                            console.warn("Geocoding failed, falling back to Bombarral coords", err);
+                            lat = 39.2667;
+                            lon = -9.1667;
+                        }
                         setIsFallback(true);
                     }
-                    localStorage.setItem('dash_geo', JSON.stringify({ lat, lon }));
+                    localStorage.setItem('dash_geo', JSON.stringify({ lat, lon, city: localStorage.getItem('dash_fallback_city') }));
                     localStorage.setItem('dash_geo_ts', String(Date.now()));
                 }
 

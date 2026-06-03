@@ -841,6 +841,39 @@ body {
     cursor: help;
     outline: none;
 }
+.prefix-item span {
+    opacity: 0.6;
+}
+
+.city-suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius-md);
+    margin-top: 4px;
+    padding: 0;
+    list-style: none;
+    z-index: 100;
+    max-height: 150px;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+.city-suggestion-item {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.city-suggestion-item:last-child {
+    border-bottom: none;
+}
+.city-suggestion-item:hover {
+    background: rgba(255,255,255,0.1);
+}
 .info-icon {
     opacity: 0.5;
     transition: var(--transition-standard);
@@ -933,6 +966,32 @@ body {
     visibility: visible;
     transform: translateY(0);
 }
+
+.settings-hint-card {
+    position: fixed;
+    width: 250px;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px;
+    z-index: 9999;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    color: var(--text-primary);
+    animation: hintFadeIn 0.2s ease;
+}
+.settings-hint-card p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+@keyframes hintFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .hint-card-icon {
     font-size: 1.2rem;
     line-height: 1;

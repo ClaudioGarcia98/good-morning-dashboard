@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { useSettings } from '../context/useSettings';
 
 export default React.memo(function SettingsPanel() {
@@ -14,7 +15,8 @@ export default React.memo(function SettingsPanel() {
         customEngines, setCustomEngines,
         setBackgroundIsVideo,
         setLofiId,
-        customLofiId, setCustomLofiId
+        customLofiId, setCustomLofiId,
+        fallbackCity, setFallbackCity
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -23,6 +25,11 @@ export default React.memo(function SettingsPanel() {
     const [newEngName, setNewEngName] = useState('');
     const [newEngPrefix, setNewEngPrefix] = useState('');
     const [newEngUrl, setNewEngUrl] = useState('');
+
+    const [citySearchText, setCitySearchText] = useState(fallbackCity);
+    const [citySuggestions, setCitySuggestions] = useState([]);
+    const [isSearchingCity, setIsSearchingCity] = useState(false);
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
     
     // Local state for immediate typing before applying
     const [tempLofi, setTempLofi] = useState(customLofiId);
@@ -36,6 +43,8 @@ export default React.memo(function SettingsPanel() {
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
     const fileInputRef = useRef(null);
+    const cityHintRef = useRef(null);
+    const [cityHintPos, setCityHintPos] = useState(null);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -53,6 +62,33 @@ export default React.memo(function SettingsPanel() {
             window.removeEventListener('app-idle', closeOnIdle);
         };
     }, []);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setCitySearchText(fallbackCity);
+            setShowCityDropdown(false);
+        }
+    }, [isOpen, fallbackCity]);
+
+    useEffect(() => {
+        if (citySearchText === fallbackCity || !showCityDropdown) return;
+        const delayDebounceFn = setTimeout(async () => {
+            if (citySearchText.length > 2) {
+                setIsSearchingCity(true);
+                try {
+                    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(citySearchText)}&count=5`);
+                    const data = await res.json();
+                    setCitySuggestions(data.results || []);
+                } catch (e) {
+                    setCitySuggestions([]);
+                }
+                setIsSearchingCity(false);
+            } else {
+                setCitySuggestions([]);
+            }
+        }, 500);
+        return () => clearTimeout(delayDebounceFn);
+    }, [citySearchText, fallbackCity, showCityDropdown]);
 
     const saveBlob = async (blob) => {
         const db = await new Promise((res, rej) => {
@@ -151,6 +187,73 @@ export default React.memo(function SettingsPanel() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
+                    </div>
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Weather</div>
+                    <div className="sp-group" style={{ position: 'relative' }}>
+                        <label htmlFor="fallbackCityInput" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            Your City
+                            <span 
+                                ref={cityHintRef}
+                                style={{ display: 'inline-flex', alignItems: 'center', cursor: 'help', lineHeight: 1 }}
+                                onMouseEnter={() => {
+                                    if (cityHintRef.current) {
+                                        const rect = cityHintRef.current.getBoundingClientRect();
+                                        setCityHintPos({ top: rect.bottom + 8, left: rect.left });
+                                    }
+                                }}
+                                onMouseLeave={() => setCityHintPos(null)}
+                            >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="info-icon">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </span>
+                            {cityHintPos && ReactDOM.createPortal(
+                                <div className="settings-hint-card" style={{ top: cityHintPos.top, left: cityHintPos.left }}>
+                                    <p>This is only used when your browser's GPS location is unavailable or denied.</p>
+                                </div>,
+                                document.body
+                            )}
+                        </label>
+                        <input 
+                            type="text" 
+                            id="fallbackCityInput" 
+                            placeholder="e.g. London" 
+                            value={citySearchText}
+                            onChange={(e) => {
+                                setCitySearchText(e.target.value);
+                                setShowCityDropdown(true);
+                            }}
+                            onFocus={() => { if (citySearchText) setShowCityDropdown(true); }}
+                        />
+                        {showCityDropdown && (citySuggestions.length > 0 || isSearchingCity) && (
+                            <ul className="city-suggestions-dropdown">
+                                {isSearchingCity ? (
+                                    <li className="city-suggestion-item">Searching...</li>
+                                ) : (
+                                    citySuggestions.map((s, i) => (
+                                        <li 
+                                            key={i} 
+                                            className="city-suggestion-item"
+                                            onClick={() => {
+                                                const fullName = `${s.name}${s.admin1 ? ', ' + s.admin1 : ''}, ${s.country}`;
+                                                setCitySearchText(fullName);
+                                                setFallbackCity(fullName);
+                                                setShowCityDropdown(false);
+                                            }}
+                                        >
+                                            <span style={{ fontWeight: 'bold' }}>{s.name}</span>
+                                            {s.admin1 && <span style={{ opacity: 0.7 }}>, {s.admin1}</span>}
+                                            <span style={{ opacity: 0.5, marginLeft: '4px' }}>({s.country})</span>
+                                        </li>
+                                    ))
+                                )}
+                            </ul>
+                        )}
                     </div>
                 </div>
 

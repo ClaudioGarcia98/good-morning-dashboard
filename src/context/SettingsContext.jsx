@@ -7,6 +7,7 @@ export function SettingsProvider({ children }) {
     const [font, setFont] = useState(() => localStorage.getItem('dash_font') || 'default');
     const [clockMode, setClockMode] = useState(() => localStorage.getItem('dash_clock') || 'digital');
     const [username, setUsername] = useState(() => localStorage.getItem('dash_username') || 'Cláudio');
+    const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || 'Bombarral');
     const [backgroundUrl, setBackgroundUrl] = useState(null);
     const [backgroundIsVideo, setBackgroundIsVideo] = useState(false);
     const [gifName, setGifName] = useState(() => localStorage.getItem('dash_gif_name') || '');
@@ -143,7 +144,8 @@ export function SettingsProvider({ children }) {
         localStorage.setItem('dash_volume', volume.toString());
         localStorage.setItem('dash_lofi_id', lofiId);
         localStorage.setItem('dash_custom_lofi', customLofiId);
-    }, [clockMode, username, volume, lofiId, customLofiId]);
+        localStorage.setItem('dash_fallback_city', fallbackCity);
+    }, [clockMode, username, volume, lofiId, customLofiId, fallbackCity]);
 
     useEffect(() => {
         localStorage.setItem('dash_speed_dials', JSON.stringify(speedDials));
@@ -166,10 +168,11 @@ export function SettingsProvider({ children }) {
         hasInteracted,
         customEngines, setCustomEngines,
         lofiId, setLofiId,
-        customLofiId, setCustomLofiId
+        customLofiId, setCustomLofiId,
+        fallbackCity, setFallbackCity
     }), [
         theme, font, clockMode, username, backgroundUrl, backgroundIsVideo, 
-        gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId
+        gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity
     ]);
 
     return (
