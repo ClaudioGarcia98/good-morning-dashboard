@@ -8,7 +8,7 @@ export function SettingsProvider({ children }) {
     const [font, setFont] = useState(() => localStorage.getItem('dash_font') || 'default');
     const [clockMode, setClockMode] = useState(() => localStorage.getItem('dash_clock') || 'digital');
     const [username, setUsername] = useState(() => localStorage.getItem('dash_username') || 'Cláudio');
-    const [malUsername, setMalUsername] = useState(() => localStorage.getItem('dash_mal_username') || 'claclo98');
+    const [malUsername, setMalUsername] = useState(() => localStorage.getItem('dash_mal_username') || '');
     const [fallbackCity, setFallbackCity] = useState(() => localStorage.getItem('dash_fallback_city') || '');
     const [use24hClock, setUse24hClock] = useState(() => localStorage.getItem('dash_24h') !== 'false');
     const [useCelsius, setUseCelsius] = useState(() => localStorage.getItem('dash_celsius') !== 'false');

@@ -159,6 +159,7 @@ export default React.memo(function AnimeSchedule() {
     };
 
     const fetchUserWatching = useCallback(async () => {
+        if (!malUsername || malUsername.trim() === '') return [];
         const cacheBust = `&_=${Date.now()}`;
         const malUrl = `https://myanimelist.net/animelist/${malUsername}/load.json?offset=0&status=1${cacheBust}`;
         
@@ -228,9 +229,13 @@ export default React.memo(function AnimeSchedule() {
 
             try {
                 const freshWatching = await fetchUserWatching();
-                if (freshWatching && freshWatching.length > 0 && isMounted) {
-                    localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
-                    setUserWatching(freshWatching);
+                if (freshWatching) {
+                    if (freshWatching.length > 0) {
+                        localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
+                    } else if (!malUsername) {
+                        localStorage.removeItem('dash_anime_watching');
+                    }
+                    if (isMounted) setUserWatching(freshWatching);
                 }
             } catch (e) {
                 // Background fetch failed, fallback to cache is already set
@@ -256,6 +261,31 @@ export default React.memo(function AnimeSchedule() {
             document.removeEventListener('click', handleClickOutside);
         };
     }, []);
+
+    // Re-fetch watching list when malUsername changes
+    useEffect(() => {
+        let isMounted = true;
+        const refreshWatching = async () => {
+            try {
+                const freshWatching = await fetchUserWatching();
+                if (freshWatching) {
+                    if (freshWatching.length > 0) {
+                        localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
+                    } else if (!malUsername) {
+                        localStorage.removeItem('dash_anime_watching');
+                    }
+                    if (isMounted) setUserWatching(freshWatching);
+                }
+            } catch(e) {
+                console.warn("Failed to update watching list on username change.");
+            }
+        };
+        // Skip first render since loadInitialData handles it, but since loadInitialData uses setTimeout, 
+        // they might race. Just let them both run safely, or only run this if malUsername was actually changed.
+        // It's safe to run twice on mount.
+        refreshWatching();
+        return () => { isMounted = false; };
+    }, [malUsername, fetchUserWatching]);
 
     useEffect(() => {
         const loadSidebarData = async () => {
