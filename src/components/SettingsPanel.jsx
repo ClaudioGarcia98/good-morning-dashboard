@@ -740,8 +740,10 @@ export default React.memo(function SettingsPanel() {
             {popupMessage && ReactDOM.createPortal(
                 <div className="reset-overlay" style={{ zIndex: 1000000, animation: 'fadeSlideIn 0.2s ease-out' }}>
                     <div className="reset-modal" style={{ textAlign: 'center', maxWidth: '350px', padding: '30px 24px', animation: 'pulseGlow 2s infinite' }}>
-                        <div style={{ fontSize: '3.5rem', marginBottom: '15px', lineHeight: 1 }}>
-                            {popupMessage.type === 'success' ? '✨' : '❌'}
+                        <div style={{ fontSize: '3.5rem', marginBottom: '15px', lineHeight: 1, display: 'flex', justifyContent: 'center' }}>
+                            {popupMessage.type === 'success' ? (
+                                <img src="/logo.png" alt="Success" style={{ width: '64px', height: '64px', filter: 'drop-shadow(0 0 15px var(--accent-color))' }} />
+                            ) : '❌'}
                         </div>
                         <h3 style={{ margin: '0 0 12px 0', fontSize: '1.4rem', color: popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)' }}>{popupMessage.title}</h3>
                         <p style={{ fontSize: '0.95rem', opacity: 0.85, marginBottom: '25px', lineHeight: 1.5 }}>{popupMessage.message}</p>
