@@ -9,6 +9,7 @@ export default React.memo(function SettingsPanel() {
         clockMode, setClockMode,
         username, setUsername,
         malUsername, setMalUsername,
+        malError,
         setBackgroundUrl,
         gifName, setGifName,
         speedDials, setSpeedDials,
@@ -211,6 +212,11 @@ export default React.memo(function SettingsPanel() {
                             value={malUsername}
                             onChange={(e) => setMalUsername(e.target.value)}
                         />
+                        {malError && (
+                            <div style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
+                                Username not found or failed to load.
+                            </div>
+                        )}
                     </div>
                 </div>
 

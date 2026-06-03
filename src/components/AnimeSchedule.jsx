@@ -67,7 +67,7 @@ const CountdownBadge = ({ broadcast }) => {
 export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
-    const { volume, malUsername } = useSettings();
+    const { volume, malUsername, setMalError } = useSettings();
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
@@ -265,6 +265,11 @@ export default React.memo(function AnimeSchedule() {
     // Re-fetch watching list when malUsername changes
     useEffect(() => {
         let isMounted = true;
+        
+        if (!malUsername || malUsername.trim() === '') {
+            setMalError(false);
+        }
+
         const refreshWatching = async () => {
             try {
                 const freshWatching = await fetchUserWatching();
@@ -274,10 +279,16 @@ export default React.memo(function AnimeSchedule() {
                     } else if (!malUsername) {
                         localStorage.removeItem('dash_anime_watching');
                     }
-                    if (isMounted) setUserWatching(freshWatching);
+                    if (isMounted) {
+                        setUserWatching(freshWatching);
+                        setMalError(false);
+                    }
                 }
             } catch(e) {
                 console.warn("Failed to update watching list on username change.");
+                if (isMounted && malUsername && malUsername.trim() !== '') {
+                    setMalError(true);
+                }
             }
         };
 
