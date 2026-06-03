@@ -68,6 +68,7 @@ export default React.memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
     const { volume, malUsername, setMalError, setMalLoading, setMalSuccess } = useSettings();
+    const isInitialMount = useRef(true);
 
     useEffect(() => {
         const closeSidebar = () => setIsSidebarOpen(false);
@@ -267,6 +268,11 @@ export default React.memo(function AnimeSchedule() {
     }, []);
 
     useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
         let isMounted = true;
         let successTimeoutId = null;
         
