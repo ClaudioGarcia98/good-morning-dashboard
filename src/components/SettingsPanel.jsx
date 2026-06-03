@@ -22,7 +22,13 @@ export default React.memo(function SettingsPanel() {
         customLofiId, setCustomLofiId,
         fallbackCity, setFallbackCity,
         use24hClock, setUse24hClock,
-        useCelsius, setUseCelsius
+        useCelsius, setUseCelsius,
+        showWeatherWidget, setShowWeatherWidget,
+        showQuote, setShowQuote,
+        showSearchBox, setShowSearchBox,
+        showSpeedDial, setShowSpeedDial,
+        showAnimeSchedule, setShowAnimeSchedule,
+        showLofiPlayer, setShowLofiPlayer
     } = useSettings();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -243,6 +249,34 @@ export default React.memo(function SettingsPanel() {
                                 Verified
                             </div>
                         )}
+                    </div>
+                </div>
+
+                <div className="sp-section">
+                    <div className="sp-label">Dashboard Layout</div>
+                    <div className="sp-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {[
+                            { label: 'Weather Widget', state: showWeatherWidget, setter: setShowWeatherWidget },
+                            { label: 'Quote of the Day', state: showQuote, setter: setShowQuote },
+                            { label: 'Search Box', state: showSearchBox, setter: setShowSearchBox },
+                            { label: 'Speed Dials', state: showSpeedDial, setter: setShowSpeedDial },
+                            { label: 'Anime Schedule', state: showAnimeSchedule, setter: setShowAnimeSchedule },
+                            { label: 'Lofi Player', state: showLofiPlayer, setter: setShowLofiPlayer },
+                        ].map((widget, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>{widget.label}</span>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                    <button 
+                                        className={`pill ${!widget.state ? 'active' : ''}`}
+                                        onClick={() => widget.setter(false)}
+                                    >Hide</button>
+                                    <button 
+                                        className={`pill ${widget.state ? 'active' : ''}`}
+                                        onClick={() => widget.setter(true)}
+                                    >Show</button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

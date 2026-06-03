@@ -11,7 +11,17 @@ import LofiPlayer from './components/LofiPlayer';
 import { useSettings } from './context/useSettings';
 
 export default function App() {
-    const { backgroundUrl, backgroundIsVideo, username } = useSettings();
+    const { 
+        backgroundUrl, 
+        backgroundIsVideo, 
+        username,
+        showWeatherWidget,
+        showQuote,
+        showSearchBox,
+        showSpeedDial,
+        showAnimeSchedule,
+        showLofiPlayer
+    } = useSettings();
     const [booting, setBooting] = useState(true);
 
     useEffect(() => {
@@ -84,27 +94,29 @@ export default function App() {
             
             <main className={`interactive-ui ${booting ? 'boot-hidden' : ''}`} id="mainUi">
                 <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
-                    <WeatherWidget />
+                    {showWeatherWidget && <WeatherWidget />}
                 </section>
                 <div className="container">
                     <header className="center-content">
                         <Greeting />
                         <Clock />
                         <div style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', marginBottom: '35px' }}>
-                            <Quote />
+                            {showQuote && <Quote />}
                         </div>
                     </header>
                     <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-                        <SearchBox />
-                        <SpeedDial />
-                        <div className="scrollable-section">
-                            <AnimeSchedule />
-                        </div>
+                        {showSearchBox && <SearchBox />}
+                        {showSpeedDial && <SpeedDial />}
+                        {showAnimeSchedule && (
+                            <div className="scrollable-section">
+                                <AnimeSchedule />
+                            </div>
+                        )}
                     </section>
                 </div>
                 <aside style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <SettingsPanel />
-                    <LofiPlayer />
+                    {showLofiPlayer && <LofiPlayer />}
                 </aside>
             </main>
         </>

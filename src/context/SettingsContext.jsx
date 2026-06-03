@@ -20,6 +20,15 @@ export function SettingsProvider({ children }) {
     const [gifName, setGifName] = useState(() => localStorage.getItem('dash_gif_name') || '');
     const [lofiId, setLofiId] = useState(() => localStorage.getItem('dash_lofi_id') || 'Gu-g8FRG4Zs');
     const [customLofiId, setCustomLofiId] = useState(() => localStorage.getItem('dash_custom_lofi') || localStorage.getItem('dash_lofi_id') || 'Gu-g8FRG4Zs');
+
+    // Widget Visibility
+    const [showWeatherWidget, setShowWeatherWidget] = useState(() => localStorage.getItem('dash_show_weather') !== 'false');
+    const [showQuote, setShowQuote] = useState(() => localStorage.getItem('dash_show_quote') !== 'false');
+    const [showSearchBox, setShowSearchBox] = useState(() => localStorage.getItem('dash_show_search') !== 'false');
+    const [showSpeedDial, setShowSpeedDial] = useState(() => localStorage.getItem('dash_show_speeddial') !== 'false');
+    const [showAnimeSchedule, setShowAnimeSchedule] = useState(() => localStorage.getItem('dash_show_anime') !== 'false');
+    const [showLofiPlayer, setShowLofiPlayer] = useState(() => localStorage.getItem('dash_show_lofi') !== 'false');
+    
     
     const [volume, setVolume] = useState(() => {
         const saved = localStorage.getItem('dash_volume');
@@ -180,11 +189,17 @@ export function SettingsProvider({ children }) {
         customLofiId, setCustomLofiId,
         fallbackCity, setFallbackCity,
         use24hClock, setUse24hClock,
-        useCelsius, setUseCelsius
+        useCelsius, setUseCelsius,
+        showWeatherWidget, setShowWeatherWidget: (val) => { setShowWeatherWidget(val); localStorage.setItem('dash_show_weather', val); },
+        showQuote, setShowQuote: (val) => { setShowQuote(val); localStorage.setItem('dash_show_quote', val); },
+        showSearchBox, setShowSearchBox: (val) => { setShowSearchBox(val); localStorage.setItem('dash_show_search', val); },
+        showSpeedDial, setShowSpeedDial: (val) => { setShowSpeedDial(val); localStorage.setItem('dash_show_speeddial', val); },
+        showAnimeSchedule, setShowAnimeSchedule: (val) => { setShowAnimeSchedule(val); localStorage.setItem('dash_show_anime', val); },
+        showLofiPlayer, setShowLofiPlayer: (val) => { setShowLofiPlayer(val); localStorage.setItem('dash_show_lofi', val); }
     }), [
         theme, font, clockMode, username, malUsername, malError, malLoading, malSuccess, backgroundUrl, backgroundIsVideo, 
         gifName, speedDials, volume, hasInteracted, customEngines, lofiId, customLofiId, fallbackCity,
-        use24hClock, useCelsius
+        use24hClock, useCelsius, showWeatherWidget, showQuote, showSearchBox, showSpeedDial, showAnimeSchedule, showLofiPlayer
     ]);
 
     return (
