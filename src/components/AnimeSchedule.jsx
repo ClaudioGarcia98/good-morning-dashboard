@@ -266,8 +266,11 @@ export default React.memo(function AnimeSchedule() {
     useEffect(() => {
         let isMounted = true;
         
+        // Always clear error when typing starts
+        setMalError(false);
+
         if (!malUsername || malUsername.trim() === '') {
-            setMalError(false);
+            return;
         }
 
         const refreshWatching = async () => {
@@ -276,7 +279,7 @@ export default React.memo(function AnimeSchedule() {
                 if (freshWatching) {
                     if (freshWatching.length > 0) {
                         localStorage.setItem('dash_anime_watching', JSON.stringify(freshWatching));
-                    } else if (!malUsername) {
+                    } else {
                         localStorage.removeItem('dash_anime_watching');
                     }
                     if (isMounted) {
@@ -286,7 +289,7 @@ export default React.memo(function AnimeSchedule() {
                 }
             } catch(e) {
                 console.warn("Failed to update watching list on username change.");
-                if (isMounted && malUsername && malUsername.trim() !== '') {
+                if (isMounted) {
                     setMalError(true);
                 }
             }
@@ -300,7 +303,7 @@ export default React.memo(function AnimeSchedule() {
             isMounted = false; 
             clearTimeout(timeoutId);
         };
-    }, [malUsername, fetchUserWatching]);
+    }, [malUsername, fetchUserWatching, setMalError]);
 
     useEffect(() => {
         const loadSidebarData = async () => {
