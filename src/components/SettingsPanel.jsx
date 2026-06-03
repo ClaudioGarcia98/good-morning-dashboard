@@ -239,8 +239,7 @@ export default React.memo(function SettingsPanel() {
                             </div>
                         )}
                         {malSuccess && !malLoading && !malError && (
-                            <div style={{ color: '#4caf50', fontSize: '11px', marginTop: '4px', paddingLeft: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <div style={{ color: '#4caf50', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
                                 Verified
                             </div>
                         )}
