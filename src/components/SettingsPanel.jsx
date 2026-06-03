@@ -211,14 +211,11 @@ export default React.memo(function SettingsPanel() {
                             <input 
                                 type="text" 
                                 id="malUsernameInput" 
+                                className={malError ? 'mal-error' : (malSuccess ? 'mal-success' : '')}
                                 placeholder="MAL username (e.g., claclo98)" 
                                 value={malUsername}
                                 onChange={(e) => setMalUsername(e.target.value)}
-                                style={{
-                                    paddingRight: '30px',
-                                    borderColor: malError ? '#ff6b6b' : (malSuccess ? '#4caf50' : undefined),
-                                    outlineColor: malError ? '#ff6b6b' : (malSuccess ? '#4caf50' : undefined)
-                                }}
+                                style={{ paddingRight: '30px' }}
                             />
                             <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
                                 {malLoading && !malError && !malSuccess && (
@@ -235,11 +232,6 @@ export default React.memo(function SettingsPanel() {
                                 )}
                             </div>
                         </div>
-                        {malLoading && !malError && !malSuccess && (
-                            <div style={{ color: '#888', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
-                                Checking username...
-                            </div>
-                        )}
                         {malError && !malLoading && (
                             <div style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
                                 Username not found or failed to load.

@@ -679,6 +679,12 @@ body {
 }
 .sp-group input[type="text"]:focus { border-color: var(--accent-color); background: var(--surface-hover); }
 
+.sp-group input[type="text"].mal-error { border-color: #ff6b6b !important; }
+.sp-group input[type="text"].mal-error:focus, .sp-group input[type="text"].mal-error:focus-visible { outline: 2px solid #ff6b6b !important; }
+
+.sp-group input[type="text"].mal-success { border-color: #4caf50 !important; }
+.sp-group input[type="text"].mal-success:focus, .sp-group input[type="text"].mal-success:focus-visible { outline: 2px solid #4caf50 !important; }
+
 /* ── Pill Pickers (themes, fonts, clock) ───────────── */
 .pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .pill {
