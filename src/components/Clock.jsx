@@ -18,15 +18,22 @@ export default React.memo(function Clock() {
             );
         };
         
-        updateDigital();
-        const interval = setInterval(updateDigital, 1000);
-        return () => clearInterval(interval);
+        let timeout;
+        const startTimer = () => {
+            updateDigital();
+            const now = new Date();
+            const msToNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+            timeout = setTimeout(startTimer, msToNextMinute);
+        };
+        
+        startTimer();
+        return () => clearTimeout(timeout);
     }, []);
 
     useEffect(() => {
         if (clockMode === 'digital') return;
-        
         let reqId;
+        let timeoutId;
         const renderAnalog = () => {
             const canvas = canvasRef.current;
             if (!canvas) return;
@@ -84,11 +91,16 @@ export default React.memo(function Clock() {
             ctx.fillStyle = accentColor;
             ctx.fill();
 
-            reqId = requestAnimationFrame(renderAnalog);
+            timeoutId = setTimeout(() => {
+                reqId = requestAnimationFrame(renderAnalog);
+            }, 1000);
         };
         
         reqId = requestAnimationFrame(renderAnalog);
-        return () => cancelAnimationFrame(reqId);
+        return () => {
+            cancelAnimationFrame(reqId);
+            clearTimeout(timeoutId);
+        };
     }, [clockMode]);
 
     const analogSize = clockMode === 'analog' ? 150 : 90;
