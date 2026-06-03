@@ -40,8 +40,9 @@ const calculateTimeLeft = (broadcast) => {
     const m = Math.floor((diff / 1000 / 60) % 60);
     const s = Math.floor((diff / 1000) % 60);
     
-    if (d > 0) return `${d}d ${h}h ${m}m`;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    const pad = (n) => n.toString().padStart(2, '0');
+    if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`;
+    return `${pad(h)}h ${pad(m)}m`;
 };
 
 const CountdownBadge = ({ broadcast }) => {
