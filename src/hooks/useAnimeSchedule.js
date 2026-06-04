@@ -80,7 +80,8 @@ export function useAnimeSchedule() {
 
             try {
                 const tData = await fetchDaySchedule(todayFilter);
-                if (isMounted) { setTodayData(tData); setTodayError(false); }
+                const uniqueToday = Array.from(new Map(tData.map(item => [item.mal_id, item])).values());
+                if (isMounted) { setTodayData(uniqueToday); setTodayError(false); }
             } catch {
                 if (isMounted) setTodayError(true);
             } finally {
