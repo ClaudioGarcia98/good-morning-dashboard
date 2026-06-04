@@ -79,31 +79,49 @@ const SunsetIcon = () => (
     </svg>
 );
 
-const getWeatherIcon = (code) => {
-    if (code === 0) {
-        return { component: <SunIcon />, className: 'weather-icon-sun' };
-    } else if (code >= 1 && code <= 3) {
-        return { component: <PartlyCloudyIcon />, className: 'weather-icon-cloud' };
-    } else if (code >= 45 && code <= 48) {
-        return { component: <CloudIcon />, className: 'weather-icon-cloud' };
-    } else if (code >= 51 && code <= 67) {
-        return { component: <RainIcon />, className: 'weather-icon-rain' };
-    } else if (code >= 71 && code <= 77) {
-        return { component: <SnowIcon />, className: 'weather-icon-rain' };
-    } else if (code >= 80 && code <= 82) {
-        return { component: <RainIcon />, className: 'weather-icon-rain' };
-    } else if (code >= 95) {
-        return { component: <StormIcon />, className: 'weather-icon-rain' };
+const getIconType = (code) => {
+    if (code === 0) return 'sun';
+    if (code >= 1 && code <= 3) return 'partly-cloudy';
+    if (code >= 45 && code <= 48) return 'cloud';
+    if (code >= 51 && code <= 67) return 'rain';
+    if (code >= 71 && code <= 77) return 'snow';
+    if (code >= 80 && code <= 82) return 'rain';
+    if (code >= 95) return 'storm';
+    return 'sun';
+};
+
+const getIconClassName = (type) => {
+    if (type === 'sun') return 'weather-icon-sun';
+    if (type === 'partly-cloudy' || type === 'cloud') return 'weather-icon-cloud';
+    return 'weather-icon-rain';
+};
+
+const WeatherIcon = ({ type }) => {
+    switch (type) {
+        case 'sun': return <SunIcon />;
+        case 'partly-cloudy': return <PartlyCloudyIcon />;
+        case 'cloud': return <CloudIcon />;
+        case 'rain': return <RainIcon />;
+        case 'snow': return <SnowIcon />;
+        case 'storm': return <StormIcon />;
+        default: return <SunIcon />;
     }
-    return { component: <SunIcon />, className: 'weather-icon-sun' };
 };
 
 export default memo(function WeatherWidget() {
     const useCelsius = useSettingsStore(s => s.useCelsius);
     const fallbackCity = useSettingsStore(s => s.fallbackCity);
     const [expanded, setExpanded] = useState(false);
-    const [weather, setWeather] = useState(null);
+    const [weather, setWeather] = useState(() => {
+        try {
+            const cached = localStorage.getItem('dash_weather_cache');
+            return cached ? JSON.parse(cached) : null;
+        } catch {
+            return null;
+        }
+    });
     const [error, setError] = useState(false);
+    const [isOffline, setIsOffline] = useState(false);
     const [isFallback, setIsFallback] = useState(false);
     const widgetRef = useRef(null);
     const panelRef = useRef(null);
@@ -179,7 +197,10 @@ export default memo(function WeatherWidget() {
 
                     if (!resolved) {
                         console.error('All location methods failed');
-                        setError(true);
+                        setIsOffline(true);
+                        if (!weather) {
+                            setError(true);
+                        }
                         return;
                     }
 
@@ -199,7 +220,7 @@ export default memo(function WeatherWidget() {
                 const c = d.current;
                 if (!c) return;
 
-                const currentIconInfo = getWeatherIcon(c.weather_code);
+                const iconType = getIconType(c.weather_code);
                 const fmt = iso => {
                     if (!iso) return '--:--';
                     const dObj = new Date(iso);
@@ -218,7 +239,7 @@ export default memo(function WeatherWidget() {
                         const minTemp = Math.round(d.daily.temperature_2m_min[i]);
                         forecast.push({
                             day: dayName,
-                            iconInfo: getWeatherIcon(d.daily.weather_code[i]),
+                            iconType: getIconType(d.daily.weather_code[i]),
                             max: maxTemp,
                             min: minTemp
                         });
@@ -226,27 +247,37 @@ export default memo(function WeatherWidget() {
                 }
 
                 const unitStr = useCelsius ? '°C' : '°F';
-                setWeather({
-                    iconInfo: currentIconInfo,
+                const weatherData = {
+                    iconType,
                     temp: Math.round(c.temperature_2m) + unitStr,
                     feelsLike: Math.round(c.apparent_temperature) + unitStr,
                     humidity: c.relative_humidity_2m + '%',
                     wind: Math.round(c.wind_speed_10m) + ' km/h',
                     sunrise: d.daily && d.daily.sunrise && d.daily.sunrise[0] ? fmt(d.daily.sunrise[0]) : '--:--',
                     sunset: d.daily && d.daily.sunset && d.daily.sunset[0] ? fmt(d.daily.sunset[0]) : '--:--',
-                    forecast
-                });
+                    forecast,
+                    timestamp: Date.now()
+                };
+
+                setWeather(weatherData);
+                localStorage.setItem('dash_weather_cache', JSON.stringify(weatherData));
+                setIsOffline(false);
+                setError(false);
 
                 window.dispatchEvent(new CustomEvent('weather-update', { detail: c.weather_code }));
             } catch (err) {
                 console.error("Weather fetch failed:", err);
-                setError(true);
+                setIsOffline(true);
+                if (!weather) {
+                    setError(true);
+                }
             }
         };
 
         fetchWeather();
         const interval = setInterval(fetchWeather, 600000);
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [useCelsius, fallbackCity]);
 
     useEffect(() => {
@@ -290,12 +321,13 @@ export default memo(function WeatherWidget() {
                 aria-expanded={expanded}
                 aria-label="Toggle Weather Details"
             >
-                <span id="weatherIcon" className={weather?.iconInfo?.className || ''} aria-hidden="true" style={{ display: 'flex', alignItems: 'center' }}>
-                    {weather ? weather.iconInfo.component : null}
+                <span id="weatherIcon" className={weather ? getIconClassName(weather.iconType) : ''} aria-hidden="true" style={{ display: 'flex', alignItems: 'center' }}>
+                    {weather ? <WeatherIcon type={weather.iconType} /> : null}
                 </span>
                 <span id="weatherTemp" style={{ color: 'var(--text-primary)' }}>{weather ? weather.temp : '--°C'}</span>
                 <span className="weather-chevron" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {isFallback && <span title="Location access denied. Showing fallback." style={{ fontSize: '0.8rem', marginRight: '4px' }}>📍</span>}
+                    {isOffline && <span title="Offline. Displaying cached weather." style={{ fontSize: '0.8rem', marginRight: '4px', opacity: 0.8 }}>📡</span>}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -336,8 +368,8 @@ export default memo(function WeatherWidget() {
                             {weather.forecast.map((day, idx) => (
                                 <div key={idx} className="weather-forecast-day">
                                     <span className="weather-forecast-name">{day.day}</span>
-                                    <span className={`weather-forecast-icon ${day.iconInfo.className || ''}`}>
-                                        {day.iconInfo.component}
+                                    <span className={`weather-forecast-icon ${getIconClassName(day.iconType)}`}>
+                                        <WeatherIcon type={day.iconType} />
                                     </span>
                                     <div className="weather-forecast-temps">
                                         <span className="weather-forecast-max">{day.max}°</span>
@@ -346,6 +378,12 @@ export default memo(function WeatherWidget() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {isOffline && weather?.timestamp && (
+                    <div style={{ fontSize: '0.68rem', opacity: 0.5, textAlign: 'center', marginTop: '12px', paddingTop: '8px', borderTop: '1px dashed rgba(255,255,255,0.06)' }}>
+                        Offline. Updated {new Date(weather.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                     </div>
                 )}
             </div>
