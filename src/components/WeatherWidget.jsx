@@ -125,17 +125,33 @@ export default memo(function WeatherWidget() {
     const [isFallback, setIsFallback] = useState(false);
     const widgetRef = useRef(null);
     const panelRef = useRef(null);
+    const prevCelsiusRef = useRef(useCelsius);
     const prevFallbackCityRef = useRef(fallbackCity);
+    const retryTimeoutRef = useRef(null);
+    const retryDelayRef = useRef(60000); // Start at 60s
 
     useEffect(() => {
-        if (prevFallbackCityRef.current !== fallbackCity) {
+        const cityChanged = prevFallbackCityRef.current !== fallbackCity;
+        const celsiusChanged = prevCelsiusRef.current !== useCelsius;
+
+        if (cityChanged) {
             localStorage.removeItem('dash_geo');
             localStorage.removeItem('dash_geo_ts');
             prevFallbackCityRef.current = fallbackCity;
         }
+
+        if (cityChanged || celsiusChanged) {
+            setWeather(null);
+            prevCelsiusRef.current = useCelsius;
+            retryDelayRef.current = 60000; // Reset retry backoff on settings change
+        }
+
         const fetchWeather = async () => {
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+                retryTimeoutRef.current = null;
+            }
             setError(false);
-            setWeather(null); // clear stale value immediately when unit changes
             try {
                 let lat, lon;
                 const cached = localStorage.getItem('dash_geo');
@@ -143,14 +159,28 @@ export default memo(function WeatherWidget() {
                 if (cached && Date.now() - cachedTs < 3600000) {
                     ({ lat, lon } = JSON.parse(cached));
                 } else {
-                    // 1. Try GPS
+                    // 1. Try GPS with strict timeout
                     let resolved = false;
                     let gpsResolved = false;
                     if (navigator.geolocation) {
                         try {
-                            const pos = await new Promise((res, rej) =>
-                                navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
-                            );
+                            const pos = await new Promise((res, rej) => {
+                                const timeoutId = setTimeout(() => {
+                                    rej(new Error('Geolocation promise timed out'));
+                                }, 5000); // 5s absolute timeout
+                                
+                                navigator.geolocation.getCurrentPosition(
+                                    (position) => {
+                                        clearTimeout(timeoutId);
+                                        res(position);
+                                    },
+                                    (error) => {
+                                        clearTimeout(timeoutId);
+                                        rej(error);
+                                    },
+                                    { timeout: 5000, enableHighAccuracy: false }
+                                );
+                            });
                             lat = pos.coords.latitude;
                             lon = pos.coords.longitude;
                             resolved = true;
@@ -160,7 +190,7 @@ export default memo(function WeatherWidget() {
                         }
                     }
 
-                    // 2. Try IP geolocation (HTTPS-compatible)
+                    // 2. Try IP geolocation (HTTPS-compatible) with timeout
                     if (!resolved) {
                         try {
                             const ipRes = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
@@ -182,7 +212,10 @@ export default memo(function WeatherWidget() {
                         if (fbCity) {
                             console.info(`Trying manual fallback city: ${fbCity}`);
                             try {
-                                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(fbCity)}&count=1`);
+                                const geoRes = await fetch(
+                                    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(fbCity)}&count=1`,
+                                    { signal: AbortSignal.timeout(5000) }
+                                );
                                 const geoData = await geoRes.json();
                                 if (geoData.results && geoData.results.length > 0) {
                                     lat = geoData.results[0].latitude;
@@ -214,7 +247,8 @@ export default memo(function WeatherWidget() {
                     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
                     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code` +
                     `&daily=sunrise,sunset,weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4` +
-                    unitParam
+                    unitParam,
+                    { signal: AbortSignal.timeout(5000) }
                 );
                 const d = await res.json();
                 const c = d.current;
@@ -263,6 +297,7 @@ export default memo(function WeatherWidget() {
                 localStorage.setItem('dash_weather_cache', JSON.stringify(weatherData));
                 setIsOffline(false);
                 setError(false);
+                retryDelayRef.current = 60000; // Reset backoff delay on successful fetch
 
                 window.dispatchEvent(new CustomEvent('weather-update', { detail: c.weather_code }));
             } catch (err) {
@@ -271,12 +306,24 @@ export default memo(function WeatherWidget() {
                 if (!weather) {
                     setError(true);
                 }
+                // Retry weather fetch with exponential backoff (double delay up to max 10 minutes)
+                retryTimeoutRef.current = setTimeout(fetchWeather, retryDelayRef.current);
+                retryDelayRef.current = Math.min(retryDelayRef.current * 2, 600000);
             }
         };
 
         fetchWeather();
+        
         const interval = setInterval(fetchWeather, 600000);
-        return () => clearInterval(interval);
+        window.addEventListener('online', fetchWeather);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('online', fetchWeather);
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+            }
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [useCelsius, fallbackCity]);
 
@@ -327,7 +374,7 @@ export default memo(function WeatherWidget() {
                 <span id="weatherTemp" style={{ color: 'var(--text-primary)' }}>{weather ? weather.temp : '--°C'}</span>
                 <span className="weather-chevron" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {isFallback && <span title="Location access denied. Showing fallback." style={{ fontSize: '0.8rem', marginRight: '4px' }}>📍</span>}
-                    {isOffline && <span title="Offline. Displaying cached weather." style={{ fontSize: '0.8rem', marginRight: '4px', opacity: 0.8 }}>📡</span>}
+                    {import.meta.env.DEV && isOffline && <span title="Offline. Displaying cached weather." style={{ fontSize: '0.8rem', marginRight: '4px', opacity: 0.8 }}>📡</span>}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
@@ -381,7 +428,7 @@ export default memo(function WeatherWidget() {
                     </div>
                 )}
 
-                {isOffline && weather?.timestamp && (
+                {import.meta.env.DEV && isOffline && weather?.timestamp && (
                     <div style={{ fontSize: '0.68rem', opacity: 0.5, textAlign: 'center', marginTop: '12px', paddingTop: '8px', borderTop: '1px dashed rgba(255,255,255,0.06)' }}>
                         Offline. Updated {new Date(weather.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                     </div>
