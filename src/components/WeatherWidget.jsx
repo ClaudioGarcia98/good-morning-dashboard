@@ -3,14 +3,22 @@ import { useSettingsStore } from '../stores/useSettingsStore';
 
 export default memo(function WeatherWidget() {
     const useCelsius = useSettingsStore(s => s.useCelsius);
+    const fallbackCity = useSettingsStore(s => s.fallbackCity);
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(false);
     const [isFallback, setIsFallback] = useState(false);
     const widgetRef = useRef(null);
     const panelRef = useRef(null);
+    const prevFallbackCityRef = useRef(fallbackCity);
 
     useEffect(() => {
+        if (prevFallbackCityRef.current !== fallbackCity) {
+            localStorage.removeItem('dash_geo');
+            localStorage.removeItem('dash_geo_ts');
+            prevFallbackCityRef.current = fallbackCity;
+        }
+        setError(false);
         setWeather(null); // clear stale value immediately when unit changes
         const fetchWeather = async () => {
             try {
@@ -53,9 +61,9 @@ export default memo(function WeatherWidget() {
                         }
                     }
 
-                    // 3. Try manual fallback city from settings
+                    // 3. Try manual fallback city from settings (or default to London)
                     if (!resolved) {
-                        const fbCity = localStorage.getItem('dash_fallback_city');
+                        const fbCity = fallbackCity || 'London';
                         if (fbCity) {
                             console.info(`Trying manual fallback city: ${fbCity}`);
                             try {
@@ -105,7 +113,12 @@ export default memo(function WeatherWidget() {
                 };
 
                 const currentIconInfo = getIconInfo(c.weather_code);
-                const fmt = iso => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                const fmt = iso => {
+                    if (!iso) return '--:--';
+                    const dObj = new Date(iso);
+                    if (isNaN(dObj.getTime())) return '--:--';
+                    return dObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                };
 
                 const forecast = [];
                 if (d.daily && d.daily.time) {
@@ -132,8 +145,8 @@ export default memo(function WeatherWidget() {
                     feelsLike: Math.round(c.apparent_temperature) + unitStr,
                     humidity: c.relative_humidity_2m + '%',
                     wind: Math.round(c.wind_speed_10m) + ' km/h',
-                    sunrise: d.daily ? fmt(d.daily.sunrise[0]) : '--:--',
-                    sunset: d.daily ? fmt(d.daily.sunset[0]) : '--:--',
+                    sunrise: d.daily && d.daily.sunrise && d.daily.sunrise[0] ? fmt(d.daily.sunrise[0]) : '--:--',
+                    sunset: d.daily && d.daily.sunset && d.daily.sunset[0] ? fmt(d.daily.sunset[0]) : '--:--',
                     forecast
                 });
 
@@ -147,7 +160,7 @@ export default memo(function WeatherWidget() {
         fetchWeather();
         const interval = setInterval(fetchWeather, 600000);
         return () => clearInterval(interval);
-    }, [useCelsius]);
+    }, [useCelsius, fallbackCity]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

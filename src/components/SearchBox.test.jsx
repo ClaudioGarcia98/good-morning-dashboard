@@ -2,8 +2,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import SearchBox from './SearchBox';
 
-vi.mock('../context/useSettings', () => ({
-  useSettings: () => ({ customEngines: [], setSpeedDials: vi.fn() })
+vi.mock('../stores/useSettingsStore', () => ({
+  useSettingsStore: vi.fn((selector) => {
+    const mockSettings = { customEngines: [], setSpeedDials: vi.fn() };
+    return typeof selector === 'function' ? selector(mockSettings) : mockSettings;
+  }),
 }));
 
 describe('SearchBox', () => {

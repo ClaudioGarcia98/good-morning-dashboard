@@ -2,8 +2,11 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import AnimeSchedule from './index';
 
-vi.mock('../../context/useSettings', () => ({
-  useSettings: () => ({ showTop5Anime: true, showAnimeSidebar: true, volume: 0.5 })
+vi.mock('../../stores/useSettingsStore', () => ({
+  useSettingsStore: vi.fn((selector) => {
+    const mockSettings = { showTop5Anime: true, showAnimeSidebar: true, volume: 0.5 };
+    return typeof selector === 'function' ? selector(mockSettings) : mockSettings;
+  }),
 }));
 
 vi.mock('../../hooks/useAnimeSchedule', () => ({

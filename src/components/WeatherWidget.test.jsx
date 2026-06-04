@@ -2,8 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import WeatherWidget from './WeatherWidget';
 
-vi.mock('../context/useSettings', () => ({
-  useSettings: () => ({ useCelsius: true, fallbackCity: 'London' })
+vi.mock('../stores/useSettingsStore', () => ({
+  useSettingsStore: vi.fn((selector) => {
+    const mockSettings = { useCelsius: true, fallbackCity: 'London' };
+    return typeof selector === 'function' ? selector(mockSettings) : mockSettings;
+  }),
 }));
 
 globalThis.fetch = vi.fn();

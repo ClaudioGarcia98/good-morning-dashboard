@@ -2,9 +2,11 @@ import { render } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Clock from './Clock';
 
-// Mock the useSettings hook
-vi.mock('../context/useSettings', () => ({
-  useSettings: () => ({ clockMode: 'digital', use24hClock: false })
+vi.mock('../stores/useSettingsStore', () => ({
+  useSettingsStore: vi.fn((selector) => {
+    const mockSettings = { clockMode: 'digital', use24hClock: false };
+    return typeof selector === 'function' ? selector(mockSettings) : mockSettings;
+  }),
 }));
 
 describe('Clock Component', () => {
