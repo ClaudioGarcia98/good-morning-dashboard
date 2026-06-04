@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { useSettings } from '../context/useSettings';
 
-export default React.memo(function WeatherWidget() {
+export default memo(function WeatherWidget() {
     const { useCelsius } = useSettings();
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
@@ -36,14 +36,14 @@ export default React.memo(function WeatherWidget() {
                         }
                     }
 
-                    // 2. Try IP geolocation
+                    // 2. Try IP geolocation (HTTPS-compatible)
                     if (!resolved) {
                         try {
-                            const ipRes = await fetch('http://ip-api.com/json/?fields=lat,lon,city,status', { signal: AbortSignal.timeout(4000) });
+                            const ipRes = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
                             const ipData = await ipRes.json();
-                            if (ipData.status === 'success') {
-                                lat = ipData.lat;
-                                lon = ipData.lon;
+                            if (ipData.latitude && ipData.longitude) {
+                                lat = ipData.latitude;
+                                lon = ipData.longitude;
                                 resolved = true;
                                 console.info(`IP geolocation resolved to ${ipData.city}`);
                             }

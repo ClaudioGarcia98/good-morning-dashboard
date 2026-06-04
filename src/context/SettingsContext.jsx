@@ -52,14 +52,18 @@ export function SettingsProvider({ children }) {
     }, []);
 
     const [speedDials, setSpeedDials] = useState(() => {
-        const cached = localStorage.getItem('dash_speed_dials');
-        if (cached) return JSON.parse(cached);
+        try {
+            const cached = localStorage.getItem('dash_speed_dials');
+            if (cached) return JSON.parse(cached);
+        } catch { localStorage.removeItem('dash_speed_dials'); }
         return [];
     });
 
     const [customEngines, setCustomEngines] = useState(() => {
-        const cached = localStorage.getItem('dash_custom_engines');
-        if (cached) return JSON.parse(cached);
+        try {
+            const cached = localStorage.getItem('dash_custom_engines');
+            if (cached) return JSON.parse(cached);
+        } catch { localStorage.removeItem('dash_custom_engines'); }
         return [];
     });
 

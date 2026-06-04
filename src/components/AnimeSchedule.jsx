@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings } from '../context/useSettings';
-const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const DAY_FILTERS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 
@@ -76,7 +75,7 @@ const CountdownBadge = ({ broadcast }) => {
     );
 };
 
-export default React.memo(function AnimeSchedule() {
+export default memo(function AnimeSchedule() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);
     const { volume, malUsername, setMalError, setMalLoading, setMalSuccess, showTop5Anime, showAnimeSidebar } = useSettings();
@@ -565,7 +564,7 @@ export default React.memo(function AnimeSchedule() {
                 </header>
                 <div className="as-days">
                     {DAY_FILTERS.map((df, i) => {
-                        const dayName = DAYS[i].charAt(0).toUpperCase() + DAYS[i].substring(1, 3);
+                        const dayName = DAY_FILTERS[i].charAt(0).toUpperCase() + DAY_FILTERS[i].substring(1, 3);
                         return (
                             <div 
                                 key={df} 
@@ -647,7 +646,7 @@ export default React.memo(function AnimeSchedule() {
                                 >
                                     <div className="anime-card-main">
                                         <div className="anime-img-container">
-                                            <img src={anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || anime.images?.jpg?.small_image_url} alt="poster" />
+                                            <img src={anime.images?.jpg?.image_url || anime.images?.jpg?.large_image_url || anime.images?.jpg?.small_image_url} alt={anime.title} />
                                         </div>
                                         <div className="anime-info">
                                             <div className="anime-title">{anime.title}</div>
@@ -765,7 +764,7 @@ export default React.memo(function AnimeSchedule() {
                                 >
                                     <div className="tab-item-main">
                                         <div className="tab-img-container">
-                                            <img src={anime.images?.jpg?.small_image_url} alt="poster" />
+                                            <img src={anime.images?.jpg?.small_image_url} alt={anime.title} />
                                         </div>
                                         <div className="tab-item-info" style={{ flex: 1, minWidth: 0 }}>
                                             <div className="tab-item-title">{anime.title}</div>

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useSettings } from '../context/useSettings';
 import logoUrl from '../assets/logo.png';
-export default React.memo(function SettingsPanel() {
+export default memo(function SettingsPanel() {
     const {
         theme, setTheme, THEMES,
         font, setFont, FONTS,
@@ -44,7 +44,7 @@ export default React.memo(function SettingsPanel() {
     const [citySuggestions, setCitySuggestions] = useState([]);
     const [isSearchingCity, setIsSearchingCity] = useState(false);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
-    const [confirmReset, setConfirmReset] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(0);
     
     // Local state for immediate typing before applying
     const [tempLofi, setTempLofi] = useState(customLofiId);
@@ -59,7 +59,8 @@ export default React.memo(function SettingsPanel() {
     const toggleRef = useRef(null);
     const cityInputRef = useRef(null);
     const cityHintRef = useRef(null);
-    const fileInputRef = useRef(null);
+    const bgFileInputRef = useRef(null);
+    const importFileInputRef = useRef(null);
     const [popupMessage, setPopupMessage] = useState(null);
 
     const handleExportSettings = () => {
@@ -496,11 +497,11 @@ export default React.memo(function SettingsPanel() {
                     <div className="sp-label">Background</div>
                     <div 
                         className="gif-btn" 
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => bgFileInputRef.current?.click()}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                fileInputRef.current?.click();
+                                bgFileInputRef.current?.click();
                             }
                         }}
                         role="button"
@@ -509,10 +510,10 @@ export default React.memo(function SettingsPanel() {
                         <span>🎞</span><span>{gifName ? 'Change GIF…' : 'Choose local GIF…'}</span>
                     </div>
                     <div className="gif-name">{gifName || 'No background set'}</div>
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        style={{ display: 'none' }} 
+                    <input
+                        type="file"
+                        ref={bgFileInputRef}
+                        style={{ display: 'none' }}
                         accept="image/gif,image/webp,image/png,image/jpeg,video/mp4"
                         onChange={handleFileChange}
                     />
@@ -662,15 +663,15 @@ export default React.memo(function SettingsPanel() {
                         <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={handleExportSettings}>
                             ⬇ Export Settings
                         </button>
-                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={() => fileInputRef.current?.click()}>
+                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={() => importFileInputRef.current?.click()}>
                             ⬆ Import Settings
                         </button>
-                        <input 
-                            type="file" 
-                            accept=".json" 
-                            ref={fileInputRef} 
-                            style={{ display: 'none' }} 
-                            onChange={handleImportSettings} 
+                        <input
+                            type="file"
+                            accept=".json"
+                            ref={importFileInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleImportSettings}
                         />
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '8px', lineHeight: 1.4 }}>
@@ -690,14 +691,14 @@ export default React.memo(function SettingsPanel() {
             </section>
 
             {confirmReset && ReactDOM.createPortal(
-                <div className="reset-overlay" onClick={() => setConfirmReset(false)}>
+                <div className="reset-overlay" onClick={() => setConfirmReset(0)}>
                     <div className="reset-modal" onClick={e => e.stopPropagation()}>
                         {confirmReset === 1 ? (
                             <>
                                 <p>Are you sure you want to reset all settings?</p>
                                 <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>This will clear all your preferences, speed dials, and saved data.</span>
                                 <div className="reset-modal-actions">
-                                    <button className="pill" onClick={() => setConfirmReset(false)}>Cancel</button>
+                                    <button className="pill" onClick={() => setConfirmReset(0)}>Cancel</button>
                                     <button className="reset-confirm-btn" onClick={() => setConfirmReset(2)}>Yes, Reset</button>
                                 </div>
                             </>
@@ -706,7 +707,7 @@ export default React.memo(function SettingsPanel() {
                                 <p>⚠️ This cannot be undone</p>
                                 <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>All settings, cached location, background, and stored data will be permanently erased. The page will reload.</span>
                                 <div className="reset-modal-actions">
-                                    <button className="pill" onClick={() => setConfirmReset(false)}>Go Back</button>
+                                    <button className="pill" onClick={() => setConfirmReset(0)}>Go Back</button>
                                     <button className="reset-confirm-btn" onClick={async () => {
                                         // Clear all storage
                                         localStorage.clear();

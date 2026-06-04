@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import { memo, useState, useEffect } from 'react';
 
 const ANIME_QUOTES = [
     { text: "A lesson without pain is meaningless. For you cannot gain anything without sacrificing something else in return.", author: "Edward Elric", anime: "Fullmetal Alchemist" },
@@ -24,7 +23,7 @@ const ANIME_QUOTES = [
     { text: "You can die anytime, but living takes true courage.", author: "Kenshin Himura", anime: "Rurouni Kenshin" }
 ];
 
-export default React.memo(function Quote() {
+export default memo(function Quote() {
     const [quoteObj, setQuoteObj] = useState(() => {
         const randomIndex = Math.floor(Math.random() * ANIME_QUOTES.length);
         return ANIME_QUOTES[randomIndex];

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { useSettings } from '../context/useSettings';
 
-export default React.memo(function Clock() {
+export default memo(function Clock() {
     const { clockMode, use24hClock } = useSettings();
     const [timeStr, setTimeStr] = useState('00:00');
     const [ampmStr, setAmpmStr] = useState('');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useSettings } from '../context/useSettings';
 
 const ENGINES = {
@@ -14,7 +14,7 @@ const ENGINES = {
     'mal ':   { name:'MyAnimeList',bg:'#2E51A2', fg:'#fff', url: q=>`https://myanimelist.net/search/all?q=${encodeURIComponent(q)}` },
 };
 
-export default React.memo(function SearchBox() {
+export default memo(function SearchBox() {
     const { customEngines, setSpeedDials } = useSettings();
     const [query, setQuery] = useState('');
     const [activeEngine, setActiveEngine] = useState(null);
@@ -41,7 +41,7 @@ export default React.memo(function SearchBox() {
     const formRef = useRef(null);
     const badgeRef = useRef(null);
 
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
         if (activeEngine && badgeRef.current) {
             setBadgeWidth(badgeRef.current.offsetWidth);
         } else {

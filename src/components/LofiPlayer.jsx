@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { memo, useState, useEffect, useRef, useMemo } from 'react';
 import { useSettings } from '../context/useSettings';
 
 const STATIONS = [
@@ -10,7 +10,7 @@ const STATIONS = [
     { id: 'Gu-g8FRG4Zs', name: 'Anime Lofi' } // Default original
 ];
 
-export default React.memo(function LofiPlayer() {
+export default memo(function LofiPlayer() {
     const { volume, lofiId, setLofiId, customLofiId } = useSettings();
     const [isPlaying, setIsPlaying] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -165,9 +165,8 @@ export default React.memo(function LofiPlayer() {
                 width="0" 
                 height="0" 
                 src={`https://www.youtube.com/embed/${lofiId}?enablejsapi=1&autoplay=0&controls=0&showinfo=0&rel=0&origin=${window.location.origin}`}
-                frameBorder="0" 
-                allow="autoplay; encrypted-media" 
-                style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+                allow="autoplay; encrypted-media"
+                style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', border: 'none' }}
                 title="Lofi Background Stream"
                 onLoad={handleIframeLoad}
             />
