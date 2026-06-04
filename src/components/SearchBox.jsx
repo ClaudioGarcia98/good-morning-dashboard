@@ -148,7 +148,7 @@ export default memo(function SearchBox() {
             setSuggestions(sugs.slice(0, 5));
         };
 
-        let src = '';
+        let src;
         if (!engine || engine.name === 'Google') {
             src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}&callback=${cbName}`;
         } else if (engine.name === 'YouTube') {
@@ -210,7 +210,9 @@ export default memo(function SearchBox() {
                 try {
                     const host = new URL(url).hostname.replace('www.', '').split('.')[0];
                     finalName = host.charAt(0).toUpperCase() + host.slice(1);
-                } catch {}
+                } catch {
+                    // ignore parse error
+                }
             } else {
                 url = `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
             }

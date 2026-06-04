@@ -50,7 +50,7 @@ export default memo(function Quote() {
             } else {
                 throw new Error('Invalid format');
             }
-        } catch (err) {
+        } catch {
             const randomIndex = Math.floor(Math.random() * ANIME_QUOTES.length);
             newQuote = ANIME_QUOTES[randomIndex];
         }

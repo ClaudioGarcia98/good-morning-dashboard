@@ -21,7 +21,6 @@ export default memo(function SettingsPanel() {
         gifName, setGifName,
         speedDials, setSpeedDials,
         volume, setVolume,
-        customEngines, setCustomEngines,
         setBackgroundIsVideo,
         setLofiId,
         customLofiId, setCustomLofiId,
@@ -62,7 +61,6 @@ export default memo(function SettingsPanel() {
     
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
-    const cityInputRef = useRef(null);
     const cityHintRef = useRef(null);
     const bgFileInputRef = useRef(null);
     const importFileInputRef = useRef(null);
@@ -108,7 +106,7 @@ export default memo(function SettingsPanel() {
                     type: 'success',
                     onAction: () => window.location.reload()
                 });
-            } catch (err) {
+            } catch {
                 setPopupMessage({ title: 'Import Failed', message: 'Failed to parse the backup file. It might be corrupted.', type: 'error' });
             }
         };
@@ -164,7 +162,7 @@ export default memo(function SettingsPanel() {
                     const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(citySearchText)}&count=5`);
                     const data = await res.json();
                     setCitySuggestions(data.results || []);
-                } catch (e) {
+                } catch {
                     setCitySuggestions([]);
                 }
                 setIsSearchingCity(false);
@@ -225,10 +223,6 @@ export default memo(function SettingsPanel() {
 
     const handleRemoveDial = (id) => {
         setSpeedDials(prev => prev.filter(d => d.id !== id));
-    };
-
-    const handleRemoveEngine = (id) => {
-        setCustomEngines(prev => prev.filter(e => e.id !== id));
     };
 
     const handleSaveLofi = () => {

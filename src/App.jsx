@@ -6,7 +6,7 @@ import SpeedDial from './components/SpeedDial';
 import Quote from './components/Quote';
 import WeatherWidget from './components/WeatherWidget';
 import SettingsPanel from './components/SettingsPanel';
-import AnimeSchedule from './components/AnimeSchedule';
+import AnimeSchedule from './components/AnimeSchedule/index.jsx';
 import LofiPlayer from './components/LofiPlayer';
 import { useSettings } from './context/useSettings';
 import logoUrl from './assets/logo.png';
