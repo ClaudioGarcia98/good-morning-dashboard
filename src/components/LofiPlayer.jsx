@@ -17,6 +17,7 @@ export default memo(function LofiPlayer() {
     const menuRef = useRef(null);
     const [title, setTitle] = useState('Loading...');
     const iframeRef = useRef(null);
+    const shouldAutoPlayRef = useRef(false); // tracks intent across iframe reloads
 
     const stationsList = useMemo(() => [
         { id: customLofiId, name: 'My Saved Station' },
@@ -135,24 +136,19 @@ export default memo(function LofiPlayer() {
 
     const handleIframeLoad = () => {
         if (iframeRef.current && iframeRef.current.contentWindow) {
+            iframeRef.current.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
             iframeRef.current.contentWindow.postMessage(JSON.stringify({
-                event: 'listening'
+                event: 'command', func: 'setVolume', args: [Math.round(volume * 100)]
             }), '*');
-            iframeRef.current.contentWindow.postMessage(JSON.stringify({
-                event: 'command',
-                func: 'setVolume',
-                args: [Math.round(volume * 100)]
-            }), '*');
-            if (isPlaying) {
+            if (isPlaying || shouldAutoPlayRef.current) {
+                shouldAutoPlayRef.current = false;
                 setTimeout(() => {
                     if (iframeRef.current && iframeRef.current.contentWindow) {
                         iframeRef.current.contentWindow.postMessage(JSON.stringify({
-                            event: 'command',
-                            func: 'playVideo',
-                            args: []
+                            event: 'command', func: 'playVideo', args: []
                         }), '*');
                     }
-                }, 500); // slight delay to ensure iframe is fully ready to accept commands
+                }, 500);
             }
         }
     };
@@ -183,8 +179,9 @@ export default memo(function LofiPlayer() {
                                     key={station.id}
                                     className={`lofi-station-btn ${lofiId === station.id ? 'active' : ''}`}
                                     onClick={() => {
+                                        shouldAutoPlayRef.current = isPlaying; // carry play intent across reload
                                         setLofiId(station.id);
-                                        setIsPlaying(true);
+                                        setIsPlaying(false);
                                         setShowMenu(false);
                                     }}
                                 >

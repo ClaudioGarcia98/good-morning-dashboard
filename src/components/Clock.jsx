@@ -45,8 +45,16 @@ export default memo(function Clock() {
         const renderAnalog = () => {
             const canvas = canvasRef.current;
             if (!canvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            const logicalSize = parseInt(canvas.style.width) || canvas.width;
+            // Scale canvas buffer for high-DPI without changing CSS layout size
+            if (canvas.width !== logicalSize * dpr) {
+                canvas.width = logicalSize * dpr;
+                canvas.height = logicalSize * dpr;
+            }
             const ctx = canvas.getContext('2d');
-            const sz = canvas.width;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const sz = logicalSize;
             const cx = sz / 2;
             const cy = sz / 2;
             const r = sz / 2 - 3;
@@ -119,7 +127,13 @@ export default memo(function Clock() {
                 <div id="time">{timeStr}</div>
                 {ampmStr && clockMode === 'digital' && <div id="ampm">{ampmStr}</div>}
                 <div id="analogWrap">
-                    <canvas ref={canvasRef} id="analogCanvas" width={analogSize} height={analogSize}></canvas>
+                    <canvas
+                        ref={canvasRef}
+                        id="analogCanvas"
+                        width={analogSize}
+                        height={analogSize}
+                        style={{ width: analogSize, height: analogSize }}
+                    ></canvas>
                 </div>
             </div>
             <div id="date">{dateStr}</div>

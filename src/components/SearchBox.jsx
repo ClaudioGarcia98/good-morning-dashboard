@@ -116,17 +116,33 @@ export default memo(function SearchBox() {
     };
 
     const latestRequestId = useRef(Date.now());
+    const pendingCbName = useRef(null);
+
+    // Clean up any pending JSONP callback and script on unmount
+    useEffect(() => {
+        return () => {
+            const old = document.getElementById('gss');
+            if (old) old.remove();
+            if (pendingCbName.current) delete window[pendingCbName.current];
+        };
+    }, []);
 
     const fetchSuggestions = (q, engine = activeEngine) => {
         const old = document.getElementById('gss');
         if (old) old.remove();
-        
+        if (pendingCbName.current) {
+            delete window[pendingCbName.current];
+            pendingCbName.current = null;
+        }
+
         const reqId = Date.now();
         latestRequestId.current = reqId;
         const cbName = `gsCb_${reqId}`;
+        pendingCbName.current = cbName;
 
         window[cbName] = (data) => {
             delete window[cbName];
+            pendingCbName.current = null;
             if (latestRequestId.current !== reqId) return;
             const sugs = data[1] || [];
             setSuggestions(sugs.slice(0, 5));
@@ -139,6 +155,7 @@ export default memo(function SearchBox() {
             src = `https://suggestqueries.google.com/complete/search?client=chrome&ds=yt&q=${encodeURIComponent(q)}&callback=${cbName}`;
         } else {
             delete window[cbName];
+            pendingCbName.current = null;
             setSuggestions([]);
             return;
         }

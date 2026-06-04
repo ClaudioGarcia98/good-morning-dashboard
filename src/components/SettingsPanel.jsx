@@ -2,6 +2,11 @@ import { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useSettings } from '../context/useSettings';
 import logoUrl from '../assets/logo.png';
+
+const getFaviconUrl = (url) => {
+    try { return `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=16`; }
+    catch { return ''; }
+};
 export default memo(function SettingsPanel() {
     const {
         theme, setTheme, THEMES,
@@ -583,7 +588,7 @@ export default memo(function SettingsPanel() {
                                     ) : (
                                         <>
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
-                                                <img src={`https://www.google.com/s2/favicons?domain=${new URL(dial.url).hostname}&sz=16`} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display='none'} alt="" />
+                                                <img src={getFaviconUrl(dial.url)} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display='none'} alt="" />
                                                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{dial.name}</span>
                                             </div>
                                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>

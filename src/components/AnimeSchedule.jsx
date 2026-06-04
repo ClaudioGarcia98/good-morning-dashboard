@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef, useCallback } from 'react';
+import { memo, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings } from '../context/useSettings';
 const DAY_FILTERS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -116,7 +116,7 @@ export default memo(function AnimeSchedule() {
     const sidebarRef = useRef(null);
     const toggleRef = useRef(null);
 
-    const fetchWithRetry = async (fn, retries = 1, delay = 500) => {
+    const fetchWithRetry = useCallback(async (fn, retries = 1, delay = 500) => {
         try {
             return await fn();
         } catch (e) {
@@ -126,7 +126,7 @@ export default memo(function AnimeSchedule() {
             }
             throw e;
         }
-    };
+    }, []);
 
     const getScheduleCache = () => {
         try { return JSON.parse(localStorage.getItem('dash_anime_schedule_v2') || '{}'); } 

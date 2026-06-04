@@ -11,6 +11,7 @@ export default memo(function WeatherWidget() {
     const panelRef = useRef(null);
 
     useEffect(() => {
+        setWeather(null); // clear stale value immediately when unit changes
         const fetchWeather = async () => {
             try {
                 let lat, lon;
