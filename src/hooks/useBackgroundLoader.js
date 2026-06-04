@@ -17,7 +17,7 @@ export function useBackgroundLoader() {
                     r.onsuccess = e => res(e.target.result);
                     r.onerror = e => rej(e.target.error);
                 });
-                return new Promise((res, rej) => {
+                return await new Promise((res, rej) => {
                     const r = db.transaction('s', 'readonly').objectStore('s').get('bg');
                     r.onsuccess = e => res(e.target.result || null);
                     r.onerror = e => rej(e.target.error);
