@@ -1,8 +1,8 @@
 import { memo, useState, useEffect, useRef } from 'react';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
 
 export default memo(function WeatherWidget() {
-    const { useCelsius } = useSettings();
+    const useCelsius = useSettingsStore(s => s.useCelsius);
     const [expanded, setExpanded] = useState(false);
     const [weather, setWeather] = useState(null);
     const [error, setError] = useState(false);

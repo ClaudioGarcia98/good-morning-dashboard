@@ -1,9 +1,10 @@
 import { memo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export default memo(function SpeedDial() {
-    const { speedDials, setSpeedDials } = useSettings();
+    const { speedDials, setSpeedDials } = useSettingsStore(useShallow(s => ({ speedDials: s.speedDials, setSpeedDials: s.setSpeedDials })));
     const [draggedId, setDraggedId] = useState(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 

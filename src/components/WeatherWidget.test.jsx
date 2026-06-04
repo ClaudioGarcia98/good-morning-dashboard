@@ -6,7 +6,7 @@ vi.mock('../context/useSettings', () => ({
   useSettings: () => ({ useCelsius: true, fallbackCity: 'London' })
 }));
 
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 const mockGeolocation = {
   getCurrentPosition: vi.fn().mockImplementation((success) => 
     success({ coords: { latitude: 51.5074, longitude: -0.1278 } })
@@ -16,7 +16,7 @@ vi.stubGlobal('navigator', { geolocation: mockGeolocation });
 
 describe('WeatherWidget', () => {
   it('renders weather data after fetching', async () => {
-    global.fetch.mockResolvedValue({
+    globalThis.fetch.mockResolvedValue({
       ok: true,
       json: async () => ({
         current: { temperature_2m: 20, apparent_temperature: 18, relative_humidity_2m: 50, wind_speed_10m: 10, weather_code: 0 },

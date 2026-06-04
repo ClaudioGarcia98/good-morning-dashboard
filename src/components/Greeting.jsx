@@ -1,8 +1,8 @@
 import { memo, useState, useEffect } from 'react';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
 
 export default memo(function Greeting() {
-    const { username } = useSettings();
+    const username = useSettingsStore(s => s.username);
     const [greeting, setGreeting] = useState('');
     const [weatherCode, setWeatherCode] = useState(null);
 

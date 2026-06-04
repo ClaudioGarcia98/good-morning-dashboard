@@ -1,8 +1,9 @@
 import { memo, useState, useEffect, useRef } from 'react';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 
 export default memo(function Clock() {
-    const { clockMode, use24hClock } = useSettings();
+    const { clockMode, use24hClock } = useSettingsStore(useShallow(s => ({ clockMode: s.clockMode, use24hClock: s.use24hClock })));
     const [timeStr, setTimeStr] = useState('00:00');
     const [ampmStr, setAmpmStr] = useState('');
     const [dateStr, setDateStr] = useState('');

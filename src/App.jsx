@@ -8,13 +8,21 @@ import WeatherWidget from './components/WeatherWidget';
 import SettingsPanel from './components/SettingsPanel';
 import AnimeSchedule from './components/AnimeSchedule/index.jsx';
 import LofiPlayer from './components/LofiPlayer';
-import { useSettings } from './context/useSettings';
+import { useSettingsStore } from './stores/useSettingsStore';
+import { useBackgroundLoader } from './hooks/useBackgroundLoader';
+import { useThemeEffect } from './hooks/useThemeEffect';
+import { useFontEffect } from './hooks/useFontEffect';
+import { useShallow } from 'zustand/react/shallow';
 import logoUrl from './assets/logo.png';
 
 export default function App() {
-    const { 
-        backgroundUrl, 
-        backgroundIsVideo, 
+    useBackgroundLoader();
+    useThemeEffect();
+    useFontEffect();
+
+    const {
+        backgroundUrl,
+        backgroundIsVideo,
         username,
         showWeatherWidget,
         showQuote,
@@ -22,8 +30,19 @@ export default function App() {
         showSpeedDial,
         showTop5Anime,
         showAnimeSidebar,
-        showLofiPlayer
-    } = useSettings();
+        showLofiPlayer,
+    } = useSettingsStore(useShallow(s => ({
+        backgroundUrl: s.backgroundUrl,
+        backgroundIsVideo: s.backgroundIsVideo,
+        username: s.username,
+        showWeatherWidget: s.showWeatherWidget,
+        showQuote: s.showQuote,
+        showSearchBox: s.showSearchBox,
+        showSpeedDial: s.showSpeedDial,
+        showTop5Anime: s.showTop5Anime,
+        showAnimeSidebar: s.showAnimeSidebar,
+        showLofiPlayer: s.showLofiPlayer,
+    })));
     const [booting, setBooting] = useState(true);
 
     const hasBottomContent = showSearchBox || showSpeedDial || showTop5Anime;

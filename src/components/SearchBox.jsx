@@ -1,5 +1,6 @@
 import { memo, useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 
 const ENGINES = {
     'yt ':    { name:'YouTube',    bg:'#FF0000', fg:'#fff', url: q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}` },
@@ -15,7 +16,7 @@ const ENGINES = {
 };
 
 export default memo(function SearchBox() {
-    const { customEngines, setSpeedDials } = useSettings();
+    const { customEngines, setSpeedDials } = useSettingsStore(useShallow(s => ({ customEngines: s.customEngines, setSpeedDials: s.setSpeedDials })));
     const [query, setQuery] = useState('');
     const [activeEngine, setActiveEngine] = useState(null);
     const [suggestions, setSuggestions] = useState([]);

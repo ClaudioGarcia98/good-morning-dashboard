@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 import { fetchDaySchedule, fetchUserWatchingList } from '../services/animeService';
 import { WATCHING_CACHE_KEY } from '../services/api';
 
@@ -7,7 +8,7 @@ const DAY_FILTERS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'sa
 const todayFilter = DAY_FILTERS[(new Date().getDay() + 6) % 7];
 
 export function useAnimeSchedule() {
-    const { volume, malUsername, setMalError, setMalLoading, setMalSuccess } = useSettings();
+    const { volume, malUsername, setMalError, setMalLoading, setMalSuccess } = useSettingsStore(useShallow(s => ({ volume: s.volume, malUsername: s.malUsername, setMalError: s.setMalError, setMalLoading: s.setMalLoading, setMalSuccess: s.setMalSuccess })));
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [expandedAnime, setExpandedAnime] = useState(null);

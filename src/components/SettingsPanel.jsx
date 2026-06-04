@@ -1,6 +1,8 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
+import { THEMES, FONTS } from '../context/settingsConstants';
 import logoUrl from '../assets/logo.png';
 
 const getFaviconUrl = (url) => {
@@ -9,19 +11,16 @@ const getFaviconUrl = (url) => {
 };
 export default memo(function SettingsPanel() {
     const {
-        theme, setTheme, THEMES,
-        font, setFont, FONTS,
+        theme, setTheme,
+        font, setFont,
         clockMode, setClockMode,
         username, setUsername,
         malUsername, setMalUsername,
-        malError,
-        malLoading,
-        malSuccess,
-        setBackgroundUrl,
+        malError, malLoading, malSuccess,
+        setBackgroundUrl, setBackgroundIsVideo,
         gifName, setGifName,
         speedDials, setSpeedDials,
         volume, setVolume,
-        setBackgroundIsVideo,
         setLofiId,
         customLofiId, setCustomLofiId,
         fallbackCity, setFallbackCity,
@@ -33,8 +32,31 @@ export default memo(function SettingsPanel() {
         showSpeedDial, setShowSpeedDial,
         showTop5Anime, setShowTop5Anime,
         showAnimeSidebar, setShowAnimeSidebar,
-        showLofiPlayer, setShowLofiPlayer
-    } = useSettings();
+        showLofiPlayer, setShowLofiPlayer,
+    } = useSettingsStore(useShallow(s => ({
+        theme: s.theme, setTheme: s.setTheme,
+        font: s.font, setFont: s.setFont,
+        clockMode: s.clockMode, setClockMode: s.setClockMode,
+        username: s.username, setUsername: s.setUsername,
+        malUsername: s.malUsername, setMalUsername: s.setMalUsername,
+        malError: s.malError, malLoading: s.malLoading, malSuccess: s.malSuccess,
+        setBackgroundUrl: s.setBackgroundUrl, setBackgroundIsVideo: s.setBackgroundIsVideo,
+        gifName: s.gifName, setGifName: s.setGifName,
+        speedDials: s.speedDials, setSpeedDials: s.setSpeedDials,
+        volume: s.volume, setVolume: s.setVolume,
+        setLofiId: s.setLofiId,
+        customLofiId: s.customLofiId, setCustomLofiId: s.setCustomLofiId,
+        fallbackCity: s.fallbackCity, setFallbackCity: s.setFallbackCity,
+        use24hClock: s.use24hClock, setUse24hClock: s.setUse24hClock,
+        useCelsius: s.useCelsius, setUseCelsius: s.setUseCelsius,
+        showWeatherWidget: s.showWeatherWidget, setShowWeatherWidget: s.setShowWeatherWidget,
+        showQuote: s.showQuote, setShowQuote: s.setShowQuote,
+        showSearchBox: s.showSearchBox, setShowSearchBox: s.setShowSearchBox,
+        showSpeedDial: s.showSpeedDial, setShowSpeedDial: s.setShowSpeedDial,
+        showTop5Anime: s.showTop5Anime, setShowTop5Anime: s.setShowTop5Anime,
+        showAnimeSidebar: s.showAnimeSidebar, setShowAnimeSidebar: s.setShowAnimeSidebar,
+        showLofiPlayer: s.showLofiPlayer, setShowLofiPlayer: s.setShowLofiPlayer,
+    })));
 
     const [isOpen, setIsOpen] = useState(false);
     const [newDialUrl, setNewDialUrl] = useState('');

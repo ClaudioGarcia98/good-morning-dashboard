@@ -1,13 +1,14 @@
 import { memo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSettings } from '../../context/useSettings';
+import { useSettingsStore } from '../../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 import { useAnimeSchedule } from '../../hooks/useAnimeSchedule';
 import AnimeCard from './AnimeCard';
 import Sidebar from './Sidebar';
 import TrailerPreview from './TrailerPreview';
 
 export default memo(function AnimeSchedule() {
-    const { showTop5Anime, showAnimeSidebar } = useSettings();
+    const { showTop5Anime, showAnimeSidebar } = useSettingsStore(useShallow(s => ({ showTop5Anime: s.showTop5Anime, showAnimeSidebar: s.showAnimeSidebar })));
     const [isMounted, setIsMounted] = useState(false);
     useEffect(() => { setIsMounted(true); }, []);
 

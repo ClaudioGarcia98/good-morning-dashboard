@@ -6,7 +6,7 @@ vi.mock('../context/useSettings', () => ({
   useSettings: () => ({ malUsername: 'test', setMalError: vi.fn(), setMalLoading: vi.fn(), setMalSuccess: vi.fn() })
 }));
 
-global.fetch = vi.fn().mockResolvedValue({
+globalThis.fetch = vi.fn().mockResolvedValue({
   ok: true,
   json: async () => ({ data: [] })
 });

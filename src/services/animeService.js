@@ -16,6 +16,7 @@ export function setScheduleCache(cache) {
 }
 
 export function parseMALItems(raw) {
+    if (!Array.isArray(raw)) return [];
     return raw.map(a => ({
         mal_id: a.anime_id,
         url: 'https://myanimelist.net' + a.anime_url,

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import Quote from './Quote';
 
 // Mock fetch globally
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 describe('Quote Component', () => {
   it('renders a default quote initially', () => {
@@ -12,7 +12,7 @@ describe('Quote Component', () => {
   });
 
   it('fetches a new quote on click', async () => {
-    global.fetch.mockResolvedValueOnce({
+    globalThis.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ quote: "Test Quote", character: "Test Author", anime: "Test Anime" })
     });

@@ -1,5 +1,6 @@
 import { memo, useState, useEffect, useRef, useMemo } from 'react';
-import { useSettings } from '../context/useSettings';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useShallow } from 'zustand/react/shallow';
 
 const STATIONS = [
     { id: 'lTRiuFIWV54', name: 'Lofi Girl' },
@@ -11,7 +12,7 @@ const STATIONS = [
 ];
 
 export default memo(function LofiPlayer() {
-    const { volume, lofiId, setLofiId, customLofiId } = useSettings();
+    const { volume, lofiId, setLofiId, customLofiId } = useSettingsStore(useShallow(s => ({ volume: s.volume, lofiId: s.lofiId, setLofiId: s.setLofiId, customLofiId: s.customLofiId })));
     const [isPlaying, setIsPlaying] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
