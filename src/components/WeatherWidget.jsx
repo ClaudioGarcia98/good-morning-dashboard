@@ -1,6 +1,103 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
+const SunIcon = () => (
+    <svg className="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="4" fill="var(--accent-color)" opacity="0.3" />
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </svg>
+);
+
+const PartlyCloudyIcon = () => (
+    <svg className="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2v2M4.93 4.93l1.41 1.41M2 12h2" />
+        <circle cx="12" cy="12" r="4" />
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(255,255,255,0.1)" />
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+    </svg>
+);
+
+const CloudIcon = () => (
+    <svg className="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(255,255,255,0.05)" />
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+    </svg>
+);
+
+const RainIcon = () => (
+    <svg className="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(255,255,255,0.05)" />
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+        <path d="M8 22l-1 2M12 22l-1 2M16 22l-1 2" />
+    </svg>
+);
+
+const SnowIcon = () => (
+    <svg className="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(255,255,255,0.05)" />
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+        <path d="M8 22h.01M12 22h.01M16 22h.01" strokeWidth="3" />
+    </svg>
+);
+
+const StormIcon = () => (
+    <svg className="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" fill="rgba(255,255,255,0.05)" />
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+        <path d="M13 22l-2 3h3l-2 3" />
+    </svg>
+);
+
+const FeelsLikeIcon = () => (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+    </svg>
+);
+
+const HumidityIcon = () => (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22a7 7 0 0 0 5-11.97L12 4.1 7 10.03A7 7 0 0 0 12 22z" />
+    </svg>
+);
+
+const WindIcon = () => (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
+    </svg>
+);
+
+const SunriseIcon = () => (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 22H6M12 18V2M12 2l-4 4M12 2l4 4M12 10a4 4 0 0 1 4 4H8a4 4 0 0 1 4-4z" />
+    </svg>
+);
+
+const SunsetIcon = () => (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 22H6M12 2v16M12 18l-4-4M12 18l4-4M12 10a4 4 0 0 1 4 4H8a4 4 0 0 1 4-4z" />
+    </svg>
+);
+
+const getWeatherIcon = (code) => {
+    if (code === 0) {
+        return { component: <SunIcon />, className: 'weather-icon-sun' };
+    } else if (code >= 1 && code <= 3) {
+        return { component: <PartlyCloudyIcon />, className: 'weather-icon-cloud' };
+    } else if (code >= 45 && code <= 48) {
+        return { component: <CloudIcon />, className: 'weather-icon-cloud' };
+    } else if (code >= 51 && code <= 67) {
+        return { component: <RainIcon />, className: 'weather-icon-rain' };
+    } else if (code >= 71 && code <= 77) {
+        return { component: <SnowIcon />, className: 'weather-icon-rain' };
+    } else if (code >= 80 && code <= 82) {
+        return { component: <RainIcon />, className: 'weather-icon-rain' };
+    } else if (code >= 95) {
+        return { component: <StormIcon />, className: 'weather-icon-rain' };
+    }
+    return { component: <SunIcon />, className: 'weather-icon-sun' };
+};
+
 export default memo(function WeatherWidget() {
     const useCelsius = useSettingsStore(s => s.useCelsius);
     const fallbackCity = useSettingsStore(s => s.fallbackCity);
@@ -18,9 +115,9 @@ export default memo(function WeatherWidget() {
             localStorage.removeItem('dash_geo_ts');
             prevFallbackCityRef.current = fallbackCity;
         }
-        setError(false);
-        setWeather(null); // clear stale value immediately when unit changes
         const fetchWeather = async () => {
+            setError(false);
+            setWeather(null); // clear stale value immediately when unit changes
             try {
                 let lat, lon;
                 const cached = localStorage.getItem('dash_geo');
@@ -102,17 +199,7 @@ export default memo(function WeatherWidget() {
                 const c = d.current;
                 if (!c) return;
 
-                const getIconInfo = (code) => {
-                    if      (code >= 1  && code <= 3)  return { icon: '⛅', className: 'weather-icon-cloud' };
-                    else if (code >= 45 && code <= 48) return { icon: '🌫️', className: 'weather-icon-cloud' };
-                    else if (code >= 51 && code <= 67) return { icon: '🌧️', className: 'weather-icon-rain' };
-                    else if (code >= 71 && code <= 77) return { icon: '❄️', className: 'weather-icon-rain' };
-                    else if (code >= 80 && code <= 82) return { icon: '🌦️', className: 'weather-icon-rain' };
-                    else if (code >= 95)               return { icon: '⛈️', className: 'weather-icon-rain' };
-                    return { icon: '☀️', className: 'weather-icon-sun' };
-                };
-
-                const currentIconInfo = getIconInfo(c.weather_code);
+                const currentIconInfo = getWeatherIcon(c.weather_code);
                 const fmt = iso => {
                     if (!iso) return '--:--';
                     const dObj = new Date(iso);
@@ -131,7 +218,7 @@ export default memo(function WeatherWidget() {
                         const minTemp = Math.round(d.daily.temperature_2m_min[i]);
                         forecast.push({
                             day: dayName,
-                            iconInfo: getIconInfo(d.daily.weather_code[i]),
+                            iconInfo: getWeatherIcon(d.daily.weather_code[i]),
                             max: maxTemp,
                             min: minTemp
                         });
@@ -175,6 +262,15 @@ export default memo(function WeatherWidget() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
+    if (!weather && !error) {
+        return (
+            <div className="weather-widget loading" id="weatherWidget" aria-label="Loading weather">
+                <div className="weather-loading-icon" />
+                <div className="weather-loading-temp" />
+            </div>
+        );
+    }
+
     if (error) {
         return (
             <button className="weather-widget" style={{ opacity: 0.6 }} title="Weather failed to load">
@@ -195,7 +291,7 @@ export default memo(function WeatherWidget() {
                 aria-label="Toggle Weather Details"
             >
                 <span id="weatherIcon" className={weather?.iconInfo?.className || ''} aria-hidden="true" style={{ display: 'flex', alignItems: 'center' }}>
-                    {weather ? weather.iconInfo.icon : '☀️'}
+                    {weather ? weather.iconInfo.component : null}
                 </span>
                 <span id="weatherTemp" style={{ color: 'var(--text-primary)' }}>{weather ? weather.temp : '--°C'}</span>
                 <span className="weather-chevron" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -212,23 +308,40 @@ export default memo(function WeatherWidget() {
                 role="region"
                 aria-label="Weather Details"
             >
-                <div className="wd-row"><span>Feels like</span><span id="wFeels">{weather ? weather.feelsLike : '--°C'}</span></div>
-                <div className="wd-row"><span>Humidity</span><span id="wHumidity">{weather ? weather.humidity : '--%'}</span></div>
-                <div className="wd-row"><span>Wind</span><span id="wWind">{weather ? weather.wind : '-- km/h'}</span></div>
-                <div className="wd-row"><span>🌅 Sunrise</span><span id="wSunrise">{weather ? weather.sunrise : '--:--'}</span></div>
-                <div className="wd-row"><span>🌇 Sunset</span><span id="wSunset">{weather ? weather.sunset : '--:--'}</span></div>
+                <div className="wd-row">
+                    <span className="wd-label"><FeelsLikeIcon /> Feels like</span>
+                    <span id="wFeels">{weather ? weather.feelsLike : '--°C'}</span>
+                </div>
+                <div className="wd-row">
+                    <span className="wd-label"><HumidityIcon /> Humidity</span>
+                    <span id="wHumidity">{weather ? weather.humidity : '--%'}</span>
+                </div>
+                <div className="wd-row">
+                    <span className="wd-label"><WindIcon /> Wind</span>
+                    <span id="wWind">{weather ? weather.wind : '-- km/h'}</span>
+                </div>
+                <div className="wd-row">
+                    <span className="wd-label"><SunriseIcon /> Sunrise</span>
+                    <span id="wSunrise">{weather ? weather.sunrise : '--:--'}</span>
+                </div>
+                <div className="wd-row">
+                    <span className="wd-label"><SunsetIcon /> Sunset</span>
+                    <span id="wSunset">{weather ? weather.sunset : '--:--'}</span>
+                </div>
                 
                 {weather?.forecast && weather.forecast.length > 0 && (
-                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: '8px', fontWeight: 'bold' }}>3-Day Forecast</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="weather-forecast">
+                        <div className="weather-forecast-title">3-Day Forecast</div>
+                        <div className="weather-forecast-grid">
                             {weather.forecast.map((day, idx) => (
-                                <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                                    <div style={{ fontSize: '0.75rem', opacity: 0.9 }}>{day.day}</div>
-                                    <div className={day.iconInfo.className} style={{ display: 'inline-block', fontSize: '1.2rem' }}>{day.iconInfo.icon}</div>
-                                    <div style={{ fontSize: '0.75rem' }}>
-                                        <span style={{ fontWeight: 'bold' }}>{day.max}°</span>
-                                        <span style={{ opacity: 0.6, marginLeft: '4px' }}>{day.min}°</span>
+                                <div key={idx} className="weather-forecast-day">
+                                    <span className="weather-forecast-name">{day.day}</span>
+                                    <span className={`weather-forecast-icon ${day.iconInfo.className || ''}`}>
+                                        {day.iconInfo.component}
+                                    </span>
+                                    <div className="weather-forecast-temps">
+                                        <span className="weather-forecast-max">{day.max}°</span>
+                                        <span className="weather-forecast-min">{day.min}°</span>
                                     </div>
                                 </div>
                             ))}
