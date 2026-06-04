@@ -1,100 +1,114 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { useSettingsStore } from '../stores/useSettingsStore';
+import { useSettingsStore } from '../../stores/useSettingsStore';
 import { useShallow } from 'zustand/react/shallow';
-import { THEMES, FONTS } from '../context/settingsConstants';
-import logoUrl from '../assets/logo.png';
+import logoUrl from '../../assets/logo.png';
+import ThemeSettings from './ThemeSettings';
+import WidgetToggles from './WidgetToggles';
+import MediaSettings from './MediaSettings';
 
 const getFaviconUrl = (url) => {
     try { return `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=16`; }
     catch { return ''; }
 };
+
 export default memo(function SettingsPanel() {
     const {
-        theme, setTheme,
-        font, setFont,
-        clockMode, setClockMode,
         username, setUsername,
         malUsername, setMalUsername,
         malError, malLoading, malSuccess,
-        setBackgroundUrl, setBackgroundIsVideo,
-        gifName, setGifName,
         speedDials, setSpeedDials,
-        volume, setVolume,
-        setLofiId,
-        customLofiId, setCustomLofiId,
         fallbackCity, setFallbackCity,
-        use24hClock, setUse24hClock,
         useCelsius, setUseCelsius,
-        showWeatherWidget, setShowWeatherWidget,
-        showQuote, setShowQuote,
-        showSearchBox, setShowSearchBox,
-        showSpeedDial, setShowSpeedDial,
-        showTop5Anime, setShowTop5Anime,
-        showAnimeSidebar, setShowAnimeSidebar,
-        showLofiPlayer, setShowLofiPlayer,
     } = useSettingsStore(useShallow(s => ({
-        theme: s.theme, setTheme: s.setTheme,
-        font: s.font, setFont: s.setFont,
-        clockMode: s.clockMode, setClockMode: s.setClockMode,
         username: s.username, setUsername: s.setUsername,
         malUsername: s.malUsername, setMalUsername: s.setMalUsername,
         malError: s.malError, malLoading: s.malLoading, malSuccess: s.malSuccess,
-        setBackgroundUrl: s.setBackgroundUrl, setBackgroundIsVideo: s.setBackgroundIsVideo,
-        gifName: s.gifName, setGifName: s.setGifName,
         speedDials: s.speedDials, setSpeedDials: s.setSpeedDials,
-        volume: s.volume, setVolume: s.setVolume,
-        setLofiId: s.setLofiId,
-        customLofiId: s.customLofiId, setCustomLofiId: s.setCustomLofiId,
         fallbackCity: s.fallbackCity, setFallbackCity: s.setFallbackCity,
-        use24hClock: s.use24hClock, setUse24hClock: s.setUse24hClock,
         useCelsius: s.useCelsius, setUseCelsius: s.setUseCelsius,
-        showWeatherWidget: s.showWeatherWidget, setShowWeatherWidget: s.setShowWeatherWidget,
-        showQuote: s.showQuote, setShowQuote: s.setShowQuote,
-        showSearchBox: s.showSearchBox, setShowSearchBox: s.setShowSearchBox,
-        showSpeedDial: s.showSpeedDial, setShowSpeedDial: s.setShowSpeedDial,
-        showTop5Anime: s.showTop5Anime, setShowTop5Anime: s.setShowTop5Anime,
-        showAnimeSidebar: s.showAnimeSidebar, setShowAnimeSidebar: s.setShowAnimeSidebar,
-        showLofiPlayer: s.showLofiPlayer, setShowLofiPlayer: s.setShowLofiPlayer,
     })));
 
     const [isOpen, setIsOpen] = useState(false);
     const [newDialUrl, setNewDialUrl] = useState('');
-    
     const [editingDialId, setEditingDialId] = useState(null);
     const [editDialName, setEditDialName] = useState('');
     const [editDialUrl, setEditDialUrl] = useState('');
-
-
     const [citySearchText, setCitySearchText] = useState(fallbackCity);
     const [citySuggestions, setCitySuggestions] = useState([]);
     const [isSearchingCity, setIsSearchingCity] = useState(false);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const [cityHintPos, setCityHintPos] = useState(null);
     const [confirmReset, setConfirmReset] = useState(0);
-    
-    // Local state for immediate typing before applying
-    const [tempLofi, setTempLofi] = useState(customLofiId);
-    const [prevCustomLofi, setPrevCustomLofi] = useState(customLofiId);
+    const [popupMessage, setPopupMessage] = useState(null);
 
-    if (customLofiId !== prevCustomLofi) {
-        setPrevCustomLofi(customLofiId);
-        setTempLofi(customLofiId);
-    }
-    
     const panelRef = useRef(null);
     const toggleRef = useRef(null);
     const cityHintRef = useRef(null);
-    const bgFileInputRef = useRef(null);
     const importFileInputRef = useRef(null);
-    const [popupMessage, setPopupMessage] = useState(null);
+
+    // Panel close-on-click-outside, idle, and open-dials scroll
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (panelRef.current && !panelRef.current.contains(e.target) &&
+                toggleRef.current && !toggleRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
+        };
+        const closeOnIdle = () => setIsOpen(false);
+        const openDials = () => {
+            setIsOpen(true);
+            setTimeout(() => {
+                if (panelRef.current) {
+                    const section = panelRef.current.querySelector('#dials-settings-section');
+                    if (section) section.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 150);
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        window.addEventListener('app-idle', closeOnIdle);
+        window.addEventListener('open-settings-dials', openDials);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener('app-idle', closeOnIdle);
+            window.removeEventListener('open-settings-dials', openDials);
+        };
+    }, []);
+
+    // Sync city input when panel closes
+    useEffect(() => {
+        if (!isOpen) {
+            setCitySearchText(fallbackCity);
+            setShowCityDropdown(false);
+        }
+    }, [isOpen, fallbackCity]);
+
+    // Debounced city geocoding
+    useEffect(() => {
+        if (citySearchText === fallbackCity || !showCityDropdown) return;
+        const delayDebounceFn = setTimeout(async () => {
+            if (citySearchText.length > 2) {
+                setIsSearchingCity(true);
+                try {
+                    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(citySearchText)}&count=5`);
+                    const data = await res.json();
+                    setCitySuggestions(data.results || []);
+                } catch {
+                    setCitySuggestions([]);
+                }
+                setIsSearchingCity(false);
+            } else {
+                setCitySuggestions([]);
+            }
+        }, 500);
+        return () => clearTimeout(delayDebounceFn);
+    }, [citySearchText, fallbackCity, showCityDropdown]);
 
     const handleExportSettings = () => {
         const settings = {};
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key.startsWith('dash_')) {
-                settings[key] = localStorage.getItem(key);
-            }
+            if (key.startsWith('dash_')) settings[key] = localStorage.getItem(key);
         }
         const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -117,152 +131,41 @@ export default memo(function SettingsPanel() {
                     setPopupMessage({ title: 'Import Failed', message: 'Invalid backup file format. Please ensure you are uploading a valid Good Morning backup file.', type: 'error' });
                     return;
                 }
-                keys.forEach(k => {
-                    if (k.startsWith('dash_')) {
-                        localStorage.setItem(k, settings[k]);
-                    }
-                });
-                setPopupMessage({ 
-                    title: 'Success!', 
-                    message: 'Your settings and customization have been successfully restored. The dashboard needs to reload to apply the changes.', 
+                keys.forEach(k => { if (k.startsWith('dash_')) localStorage.setItem(k, settings[k]); });
+                setPopupMessage({
+                    title: 'Success!',
+                    message: 'Your settings and customization have been successfully restored. The dashboard needs to reload to apply the changes.',
                     type: 'success',
-                    onAction: () => window.location.reload()
+                    onAction: () => window.location.reload(),
                 });
             } catch {
                 setPopupMessage({ title: 'Import Failed', message: 'Failed to parse the backup file. It might be corrupted.', type: 'error' });
             }
         };
         reader.readAsText(file);
-        // Reset file input so the same file can be selected again if needed
         e.target.value = '';
-    };
-
-    const [cityHintPos, setCityHintPos] = useState(null);
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (panelRef.current && !panelRef.current.contains(e.target) &&
-                toggleRef.current && !toggleRef.current.contains(e.target)) {
-                setIsOpen(false);
-            }
-        };
-        const closeOnIdle = () => setIsOpen(false);
-        const openDials = () => {
-            setIsOpen(true);
-            setTimeout(() => {
-                if (panelRef.current) {
-                    const section = panelRef.current.querySelector('#dials-settings-section');
-                    if (section) section.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 150);
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        window.addEventListener('app-idle', closeOnIdle);
-        window.addEventListener('open-settings-dials', openDials);
-        
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            window.removeEventListener('app-idle', closeOnIdle);
-            window.removeEventListener('open-settings-dials', openDials);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!isOpen) {
-            setCitySearchText(fallbackCity);
-            setShowCityDropdown(false);
-        }
-    }, [isOpen, fallbackCity]);
-
-    useEffect(() => {
-        if (citySearchText === fallbackCity || !showCityDropdown) return;
-        const delayDebounceFn = setTimeout(async () => {
-            if (citySearchText.length > 2) {
-                setIsSearchingCity(true);
-                try {
-                    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(citySearchText)}&count=5`);
-                    const data = await res.json();
-                    setCitySuggestions(data.results || []);
-                } catch {
-                    setCitySuggestions([]);
-                }
-                setIsSearchingCity(false);
-            } else {
-                setCitySuggestions([]);
-            }
-        }, 500);
-        return () => clearTimeout(delayDebounceFn);
-    }, [citySearchText, fallbackCity, showCityDropdown]);
-
-    const saveBlob = async (blob) => {
-        const db = await new Promise((res, rej) => {
-            const r = indexedDB.open('dashDB', 1);
-            r.onupgradeneeded = e => e.target.result.createObjectStore('s');
-            r.onsuccess = e => res(e.target.result);
-            r.onerror = e => rej(e.target.error);
-        });
-        return new Promise((res, rej) => {
-            const tx = db.transaction('s', 'readwrite');
-            tx.objectStore('s').put(blob, 'bg');
-            tx.oncomplete = res;
-            tx.onerror = e => rej(e.target.error);
-        });
-    };
-
-    const handleFileChange = async (e) => {
-        const f = e.target.files[0];
-        if (!f) return;
-        await saveBlob(f);
-        setBackgroundUrl(URL.createObjectURL(f));
-        setBackgroundIsVideo(f.type && f.type.startsWith('video/'));
-        localStorage.setItem('dash_gif_name', f.name);
-        setGifName(f.name);
     };
 
     const handleAddDial = () => {
         if (!newDialUrl.trim()) return;
         let url = newDialUrl.trim();
         if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-        
         let finalName;
         try {
             const host = new URL(url).hostname.replace('www.', '').split('.')[0];
             finalName = host.charAt(0).toUpperCase() + host.slice(1);
-        } catch {
-            finalName = 'Speed Dial';
-        }
-
-        const newDial = {
-            id: Date.now(),
-            name: finalName,
-            url: url
-        };
-        setSpeedDials(prev => [...prev, newDial]);
+        } catch { finalName = 'Speed Dial'; }
+        setSpeedDials(prev => [...prev, { id: Date.now(), name: finalName, url }]);
         setNewDialUrl('');
     };
 
-
-    const handleRemoveDial = (id) => {
-        setSpeedDials(prev => prev.filter(d => d.id !== id));
-    };
-
-    const handleSaveLofi = () => {
-        let val = tempLofi.trim();
-        // Extract video ID if user pasted a full YouTube URL
-        const match = val.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-        if (match) {
-            val = match[1];
-        }
-        setCustomLofiId(val);
-        setLofiId(val);
-    };
+    const handleRemoveDial = (id) => setSpeedDials(prev => prev.filter(d => d.id !== id));
 
     return (
         <>
-            <button 
+            <button
                 className={`settings-toggle ${isOpen ? 'open' : ''}`}
-                id="settingsToggle" 
+                id="settingsToggle"
                 title="Settings"
                 ref={toggleRef}
                 onClick={() => setIsOpen(!isOpen)}
@@ -271,32 +174,28 @@ export default memo(function SettingsPanel() {
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94zM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
             </button>
+
             <section className={`settings-panel ${isOpen ? 'open' : ''}`} id="settingsPanel" ref={panelRef}>
                 <div className="sp-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <img src={logoUrl} alt="Aura Logo" style={{ width: '28px', height: '28px', filter: 'drop-shadow(0 0 8px var(--accent-color))' }} />
                     Aura Settings
                 </div>
-                
+
+                {/* Profile */}
                 <div className="sp-section">
                     <div className="sp-label">Profile</div>
                     <div className="sp-group">
                         <label htmlFor="usernameInput">Display Name</label>
-                        <input 
-                            type="text" 
-                            id="usernameInput" 
-                            placeholder="Your name" 
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
+                        <input type="text" id="usernameInput" placeholder="Your name" value={username} onChange={(e) => setUsername(e.target.value)} />
                     </div>
                     <div className="sp-group" style={{ marginTop: '10px' }}>
                         <label htmlFor="malUsernameInput">MyAnimeList Username</label>
                         <div style={{ position: 'relative' }}>
-                            <input 
-                                type="text" 
-                                id="malUsernameInput" 
+                            <input
+                                type="text"
+                                id="malUsernameInput"
                                 className={malError ? 'mal-error' : (malSuccess ? 'mal-success' : '')}
-                                placeholder="MAL username (e.g., claclo98)" 
+                                placeholder="MAL username (e.g., claclo98)"
                                 value={malUsername}
                                 onChange={(e) => setMalUsername(e.target.value)}
                                 style={{ paddingRight: '30px' }}
@@ -317,54 +216,20 @@ export default memo(function SettingsPanel() {
                                 )}
                             </div>
                         </div>
-                        {malError && !malLoading && (
-                            <div style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
-                                Username not found or failed to load.
-                            </div>
-                        )}
-                        {malSuccess && !malLoading && !malError && (
-                            <div style={{ color: '#4caf50', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>
-                                Verified
-                            </div>
-                        )}
+                        {malError && !malLoading && <div style={{ color: '#ff6b6b', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>Username not found or failed to load.</div>}
+                        {malSuccess && !malLoading && !malError && <div style={{ color: '#4caf50', fontSize: '11px', marginTop: '4px', paddingLeft: '2px' }}>Verified</div>}
                     </div>
                 </div>
 
-                <div className="sp-section">
-                    <div className="sp-label">Dashboard Layout</div>
-                    <div className="sp-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {[
-                            { label: 'Weather Widget', state: showWeatherWidget, setter: setShowWeatherWidget },
-                            { label: 'Quote of the Day', state: showQuote, setter: setShowQuote },
-                            { label: 'Search Box', state: showSearchBox, setter: setShowSearchBox },
-                            { label: 'Speed Dials', state: showSpeedDial, setter: setShowSpeedDial },
-                            { label: 'Today\'s Launch (Top 5)', state: showTop5Anime, setter: setShowTop5Anime },
-                            { label: 'Anime Sidebar', state: showAnimeSidebar, setter: setShowAnimeSidebar },
-                            { label: 'Lofi Player', state: showLofiPlayer, setter: setShowLofiPlayer },
-                        ].map((widget, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>{widget.label}</span>
-                                <div style={{ display: 'flex', gap: '4px' }}>
-                                    <button 
-                                        className={`pill ${!widget.state ? 'active' : ''}`}
-                                        onClick={() => widget.setter(false)}
-                                    >Hide</button>
-                                    <button 
-                                        className={`pill ${widget.state ? 'active' : ''}`}
-                                        onClick={() => widget.setter(true)}
-                                    >Show</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <WidgetToggles />
 
+                {/* Weather */}
                 <div className="sp-section">
                     <div className="sp-label">Weather</div>
                     <div className="sp-group" style={{ position: 'relative' }}>
                         <label htmlFor="fallbackCityInput" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             Your City
-                            <span 
+                            <span
                                 ref={cityHintRef}
                                 style={{ display: 'inline-flex', alignItems: 'center', cursor: 'help', lineHeight: 1 }}
                                 onMouseEnter={() => {
@@ -388,15 +253,12 @@ export default memo(function SettingsPanel() {
                                 document.body
                             )}
                         </label>
-                        <input 
-                            type="text" 
-                            id="fallbackCityInput" 
-                            placeholder="e.g. London" 
+                        <input
+                            type="text"
+                            id="fallbackCityInput"
+                            placeholder="e.g. London"
                             value={citySearchText}
-                            onChange={(e) => {
-                                setCitySearchText(e.target.value);
-                                setShowCityDropdown(true);
-                            }}
+                            onChange={(e) => { setCitySearchText(e.target.value); setShowCityDropdown(true); }}
                             onFocus={() => { if (citySearchText) setShowCityDropdown(true); }}
                         />
                         {showCityDropdown && (citySuggestions.length > 0 || isSearchingCity) && (
@@ -405,16 +267,12 @@ export default memo(function SettingsPanel() {
                                     <li className="city-suggestion-item">Searching...</li>
                                 ) : (
                                     citySuggestions.map((s, i) => (
-                                        <li 
-                                            key={i} 
-                                            className="city-suggestion-item"
-                                            onClick={() => {
-                                                const fullName = `${s.name}${s.admin1 ? ', ' + s.admin1 : ''}, ${s.country}`;
-                                                setCitySearchText(fullName);
-                                                setFallbackCity(fullName);
-                                                setShowCityDropdown(false);
-                                            }}
-                                        >
+                                        <li key={i} className="city-suggestion-item" onClick={() => {
+                                            const fullName = `${s.name}${s.admin1 ? ', ' + s.admin1 : ''}, ${s.country}`;
+                                            setCitySearchText(fullName);
+                                            setFallbackCity(fullName);
+                                            setShowCityDropdown(false);
+                                        }}>
                                             <span style={{ fontWeight: 'bold' }}>{s.name}</span>
                                             {s.admin1 && <span style={{ opacity: 0.7 }}>, {s.admin1}</span>}
                                             <span style={{ opacity: 0.5, marginLeft: '4px' }}>({s.country})</span>
@@ -426,146 +284,18 @@ export default memo(function SettingsPanel() {
                     </div>
                 </div>
 
-                <div className="sp-section">
-                    <div className="sp-label">Theme</div>
-                    <div className="pill-row">
-                        {Object.keys(THEMES).map(t => (
-                            <button 
-                                key={t}
-                                className={`pill ${theme === t ? 'active' : ''}`}
-                                onClick={() => setTheme(t)}
-                            >
-                                <span className="tdot" style={{ background: THEMES[t].accent || '#FFD26A' }}></span>
-                                {t.charAt(0).toUpperCase() + t.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <ThemeSettings />
 
-                <div className="sp-section">
-                    <div className="sp-label">Font</div>
-                    <div className="pill-row">
-                        {Object.keys(FONTS).map(f => (
-                            <button 
-                                key={f}
-                                className={`pill ${font === f ? 'active' : ''}`}
-                                onClick={() => setFont(f)}
-                                style={{ fontFamily: FONTS[f].family }}
-                            >
-                                {f.charAt(0).toUpperCase() + f.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <MediaSettings />
 
-                <div className="sp-section">
-                    <div className="sp-label">Clock Style</div>
-                    <div className="pill-row">
-                        {['digital', 'analog', 'both'].map(m => (
-                            <button 
-                                key={m}
-                                className={`pill ${clockMode === m ? 'active' : ''}`}
-                                onClick={() => setClockMode(m)}
-                            >
-                                {m.charAt(0).toUpperCase() + m.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="sp-section">
-                    <div className="sp-label">Clock Format</div>
-                    <div className="pill-row">
-                        <button 
-                            className={`pill ${!use24hClock ? 'active' : ''}`}
-                            onClick={() => setUse24hClock(false)}
-                        >
-                            12-Hour
-                        </button>
-                        <button 
-                            className={`pill ${use24hClock ? 'active' : ''}`}
-                            onClick={() => setUse24hClock(true)}
-                        >
-                            24-Hour
-                        </button>
-                    </div>
-                </div>
-
-                <div className="sp-section">
-                    <div className="sp-label">Media Volume</div>
-                    <div className="sp-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                            {volume > 0 && <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>}
-                            {volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>}
-                        </svg>
-                        <input
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.01"
-                            value={volume}
-                            onChange={(e) => setVolume(parseFloat(e.target.value))}
-                            style={{ flex: 1, height: '4px', accentColor: 'var(--accent-color, #00ffcc)', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '0.75rem', opacity: 0.7, width: '32px', textAlign: 'right' }}>
-                            {Math.round(volume * 100)}%
-                        </span>
-                    </div>
-                </div>
-
-                <div className="sp-section">
-                    <div className="sp-label">Background</div>
-                    <div 
-                        className="gif-btn" 
-                        onClick={() => bgFileInputRef.current?.click()}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                bgFileInputRef.current?.click();
-                            }
-                        }}
-                        role="button"
-                        tabIndex={0}
-                    >
-                        <span>🎞</span><span>{gifName ? 'Change GIF…' : 'Choose local GIF…'}</span>
-                    </div>
-                    <div className="gif-name">{gifName || 'No background set'}</div>
-                    <input
-                        type="file"
-                        ref={bgFileInputRef}
-                        style={{ display: 'none' }}
-                        accept="image/gif,image/webp,image/png,image/jpeg,video/mp4"
-                        onChange={handleFileChange}
-                    />
-                </div>
-
-                <div className="sp-section">
-                    <div className="sp-label">Lofi Player</div>
-                    <div className="sp-group">
-                        <label htmlFor="lofiInput">YouTube Video ID or URL</label>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <input 
-                                type="text" 
-                                id="lofiInput" 
-                                placeholder="e.g. jfKfPfyJRdk" 
-                                value={tempLofi}
-                                onChange={(e) => setTempLofi(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleSaveLofi()}
-                                style={{ flex: 1 }}
-                            />
-                            <button className="pill" onClick={handleSaveLofi}>Save</button>
-                        </div>
-                    </div>
-                </div>
-
+                {/* Speed Dials */}
                 <div className="sp-section" id="dials-settings-section">
                     <div className="sp-label">Speed Dials</div>
                     <div className="sp-group">
                         <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Paste URL here..." 
+                            <input
+                                type="text"
+                                placeholder="Paste URL here..."
                                 value={newDialUrl}
                                 onChange={e => setNewDialUrl(e.target.value)}
                                 style={{ flex: 1 }}
@@ -578,14 +308,9 @@ export default memo(function SettingsPanel() {
                                 <li key={dial.id} className="sp-list-item" style={{ flexDirection: editingDialId === dial.id ? 'column' : 'row', gap: '8px', fontSize: '0.8rem' }}>
                                     {editingDialId === dial.id ? (
                                         <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                                            <input 
-                                                type="text" 
-                                                value={editDialName}
-                                                onChange={e => setEditDialName(e.target.value)}
-                                                style={{ flex: 1 }}
-                                            />
-                                            <input 
-                                                type="text" 
+                                            <input type="text" value={editDialName} onChange={e => setEditDialName(e.target.value)} style={{ flex: 1 }} />
+                                            <input
+                                                type="text"
                                                 value={editDialUrl}
                                                 onChange={e => setEditDialUrl(e.target.value)}
                                                 style={{ flex: 2 }}
@@ -604,28 +329,18 @@ export default memo(function SettingsPanel() {
                                     ) : (
                                         <>
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', overflow: 'hidden' }}>
-                                                <img src={getFaviconUrl(dial.url)} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display='none'} alt="" />
+                                                <img src={getFaviconUrl(dial.url)} style={{ width: 16, height: 16, borderRadius: 3 }} onError={e => e.target.style.display = 'none'} alt="" />
                                                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150px' }}>{dial.name}</span>
                                             </div>
                                             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                                <button 
-                                                    onClick={() => {
-                                                        setEditingDialId(dial.id);
-                                                        setEditDialName(dial.name);
-                                                        setEditDialUrl(dial.url);
-                                                    }} 
-                                                    className="sp-action-btn"
-                                                    title="Edit"
-                                                >
+                                                <button onClick={() => { setEditingDialId(dial.id); setEditDialName(dial.name); setEditDialUrl(dial.url); }} className="sp-action-btn" title="Edit">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <path d="M12 20h9"></path>
-                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                                        <path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                                                     </svg>
                                                 </button>
                                                 <button onClick={() => handleRemoveDial(dial.id)} className="sp-action-btn delete" title="Delete">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
                                                     </svg>
                                                 </button>
                                             </div>
@@ -639,22 +354,13 @@ export default memo(function SettingsPanel() {
                     <div className="sp-section" style={{ marginTop: '15px' }}>
                         <div className="sp-label">Temperature Unit</div>
                         <div className="pill-row">
-                            <button 
-                                className={`pill ${useCelsius ? 'active' : ''}`}
-                                onClick={() => setUseCelsius(true)}
-                            >
-                                Celsius (°C)
-                            </button>
-                            <button 
-                                className={`pill ${!useCelsius ? 'active' : ''}`}
-                                onClick={() => setUseCelsius(false)}
-                            >
-                                Fahrenheit (°F)
-                            </button>
+                            <button className={`pill ${useCelsius ? 'active' : ''}`} onClick={() => setUseCelsius(true)}>Celsius (°C)</button>
+                            <button className={`pill ${!useCelsius ? 'active' : ''}`} onClick={() => setUseCelsius(false)}>Fahrenheit (°F)</button>
                         </div>
                     </div>
                 </div>
 
+                {/* Keyboard Shortcuts */}
                 <div className="sp-section">
                     <div className="sp-label">Keyboard Shortcuts</div>
                     <div className="shortcut-list">
@@ -678,40 +384,28 @@ export default memo(function SettingsPanel() {
                     </div>
                 </div>
 
+                {/* Backup & Restore */}
                 <div className="sp-section">
                     <div className="sp-label">Backup & Restore</div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={handleExportSettings}>
-                            ⬇ Export Settings
-                        </button>
-                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={() => importFileInputRef.current?.click()}>
-                            ⬆ Import Settings
-                        </button>
-                        <input
-                            type="file"
-                            accept=".json"
-                            ref={importFileInputRef}
-                            style={{ display: 'none' }}
-                            onChange={handleImportSettings}
-                        />
+                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={handleExportSettings}>⬇ Export Settings</button>
+                        <button className="pill" style={{ flex: 1, justifyContent: 'center' }} onClick={() => importFileInputRef.current?.click()}>⬆ Import Settings</button>
+                        <input type="file" accept=".json" ref={importFileInputRef} style={{ display: 'none' }} onChange={handleImportSettings} />
                     </div>
                     <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '8px', lineHeight: 1.4 }}>
                         Save your configuration, speed dials, and layout preferences to a file.
                     </div>
                 </div>
 
+                {/* Danger Zone */}
                 <div className="sp-section">
                     <div className="sp-label">Danger Zone</div>
-                    <button 
-                        className="reset-btn"
-                        onClick={() => setConfirmReset(1)}
-                    >
-                        🗑 Reset All Settings
-                    </button>
+                    <button className="reset-btn" onClick={() => setConfirmReset(1)}>🗑 Reset All Settings</button>
                 </div>
             </section>
 
-            {confirmReset && ReactDOM.createPortal(
+            {/* Reset confirm modal */}
+            {confirmReset > 0 && ReactDOM.createPortal(
                 <div className="reset-overlay" onClick={() => setConfirmReset(0)}>
                     <div className="reset-modal" onClick={e => e.stopPropagation()}>
                         {confirmReset === 1 ? (
@@ -730,25 +424,17 @@ export default memo(function SettingsPanel() {
                                 <div className="reset-modal-actions">
                                     <button className="pill" onClick={() => setConfirmReset(0)}>Go Back</button>
                                     <button className="reset-confirm-btn" onClick={async () => {
-                                        // Clear all storage
                                         localStorage.clear();
                                         sessionStorage.clear();
-                                        
-                                        // Clear IndexedDB
                                         indexedDB.deleteDatabase('dashDB');
-                                        
-                                        // Clear all caches
                                         if ('caches' in window) {
                                             const names = await caches.keys();
                                             await Promise.all(names.map(n => caches.delete(n)));
                                         }
-                                        
-                                        // Unregister service workers
                                         if ('serviceWorker' in navigator) {
                                             const regs = await navigator.serviceWorker.getRegistrations();
                                             await Promise.all(regs.map(r => r.unregister()));
                                         }
-                                        
                                         window.location.reload();
                                     }}>Yes, Erase Everything</button>
                                 </div>
@@ -759,6 +445,7 @@ export default memo(function SettingsPanel() {
                 document.body
             )}
 
+            {/* Import/Export popup modal */}
             {popupMessage && ReactDOM.createPortal(
                 <div className="reset-overlay" style={{ zIndex: 1000000, animation: 'fadeSlideIn 0.2s ease-out' }}>
                     <div className="reset-modal" style={{ textAlign: 'center', maxWidth: '350px', padding: '30px 24px', animation: 'pulseGlow 2s infinite' }}>
@@ -769,24 +456,10 @@ export default memo(function SettingsPanel() {
                         </div>
                         <h3 style={{ margin: '0 0 12px 0', fontSize: '1.4rem', color: popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)' }}>{popupMessage.title}</h3>
                         <p style={{ fontSize: '0.95rem', opacity: 0.85, marginBottom: '25px', lineHeight: 1.5 }}>{popupMessage.message}</p>
-                        <button 
-                            className="pill" 
-                            style={{ 
-                                width: '100%', 
-                                justifyContent: 'center', 
-                                padding: '12px',
-                                fontSize: '1rem',
-                                background: popupMessage.type === 'error' ? 'rgba(255, 107, 107, 0.15)' : 'var(--accent-glow)', 
-                                color: popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)', 
-                                border: `1px solid ${popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)'}` 
-                            }} 
-                            onClick={() => {
-                                if (popupMessage.onAction) {
-                                    popupMessage.onAction();
-                                } else {
-                                    setPopupMessage(null);
-                                }
-                            }}
+                        <button
+                            className="pill"
+                            style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '1rem', background: popupMessage.type === 'error' ? 'rgba(255, 107, 107, 0.15)' : 'var(--accent-glow)', color: popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)', border: `1px solid ${popupMessage.type === 'error' ? '#ff6b6b' : 'var(--accent-color)'}` }}
+                            onClick={() => { if (popupMessage.onAction) popupMessage.onAction(); else setPopupMessage(null); }}
                         >
                             {popupMessage.onAction ? 'Reload Dashboard' : 'Dismiss'}
                         </button>
