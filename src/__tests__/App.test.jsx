@@ -23,6 +23,7 @@ let mockSettings = {
   showTop5Anime: true,
   showAnimeSidebar: true,
   showLofiPlayer: true,
+  lofiStations: [{ id: 1, videoId: 'testId', name: 'Test Station' }],
 };
 
 vi.mock('../stores/useSettingsStore', () => ({
@@ -55,6 +56,7 @@ describe('App Orchestrator Component', () => {
       showTop5Anime: true,
       showAnimeSidebar: true,
       showLofiPlayer: true,
+      lofiStations: [{ id: 1, videoId: 'testId', name: 'Test Station' }],
     };
   });
 
@@ -93,6 +95,26 @@ describe('App Orchestrator Component', () => {
 
     expect(screen.queryByTestId('weather-widget')).toBeNull();
     expect(screen.queryByTestId('quote')).toBeNull();
+  });
+
+  it('renders LofiPlayer when showLofiPlayer is true and stations exist', () => {
+    render(<App />);
+    act(() => { vi.advanceTimersByTime(2800); });
+    expect(screen.queryByTestId('lofi-player')).toBeTruthy();
+  });
+
+  it('hides LofiPlayer when showLofiPlayer is false even with stations', () => {
+    mockSettings.showLofiPlayer = false;
+    render(<App />);
+    act(() => { vi.advanceTimersByTime(2800); });
+    expect(screen.queryByTestId('lofi-player')).toBeNull();
+  });
+
+  it('hides LofiPlayer when lofiStations is empty even if showLofiPlayer is true', () => {
+    mockSettings.lofiStations = [];
+    render(<App />);
+    act(() => { vi.advanceTimersByTime(2800); });
+    expect(screen.queryByTestId('lofi-player')).toBeNull();
   });
 
   it('manages idle state transitions', () => {

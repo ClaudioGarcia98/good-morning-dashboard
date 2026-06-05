@@ -31,6 +31,7 @@ export default function App() {
         showTop5Anime,
         showAnimeSidebar,
         showLofiPlayer,
+        lofiStations,
     } = useSettingsStore(useShallow(s => ({
         backgroundUrl: s.backgroundUrl,
         backgroundIsVideo: s.backgroundIsVideo,
@@ -42,6 +43,7 @@ export default function App() {
         showTop5Anime: s.showTop5Anime,
         showAnimeSidebar: s.showAnimeSidebar,
         showLofiPlayer: s.showLofiPlayer,
+        lofiStations: s.lofiStations,
     })));
     const [booting, setBooting] = useState(true);
 
@@ -146,7 +148,7 @@ export default function App() {
                 </div>
                 <aside style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out' }}>
                     <SettingsPanel />
-                    {showLofiPlayer && <LofiPlayer />}
+                    {showLofiPlayer && lofiStations.length > 0 && <LofiPlayer />}
                 </aside>
             </main>
         </>

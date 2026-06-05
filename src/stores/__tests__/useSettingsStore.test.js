@@ -17,6 +17,15 @@ Object.defineProperty(globalThis, 'localStorage', { value: localStorageMock, wri
 // Import after mock is in place
 const { useSettingsStore } = await import('../useSettingsStore.js');
 
+const DEFAULT_STATIONS = [
+    { id: 1, videoId: 'lTRiuFIWV54', name: 'Lofi Girl' },
+    { id: 2, videoId: '4xDzrJKXOOY', name: 'Synthwave Radio' },
+    { id: 3, videoId: '5yx6BWlEVcY', name: 'Chillhop Music' },
+    { id: 4, videoId: 'Dx5qFachd3A', name: 'Jazzhop Cafe' },
+    { id: 5, videoId: 'F1B9Fk_SgI0', name: 'Ambient Rain' },
+    { id: 6, videoId: 'Gu-g8FRG4Zs', name: 'Anime Lofi' },
+];
+
 const DEFAULTS = {
     theme: 'aurora',
     font: 'default',
@@ -28,7 +37,7 @@ const DEFAULTS = {
     useCelsius: true,
     gifName: '',
     lofiId: 'Gu-g8FRG4Zs',
-    customLofiId: 'Gu-g8FRG4Zs',
+    lofiStations: DEFAULT_STATIONS,
     volume: 0.2,
     speedDials: [],
     customEngines: [],
@@ -63,7 +72,6 @@ describe('useSettingsStore — initial state', () => {
         expect(s.fallbackCity).toBe('');
         expect(s.gifName).toBe('');
         expect(s.lofiId).toBe('Gu-g8FRG4Zs');
-        expect(s.customLofiId).toBe('Gu-g8FRG4Zs');
     });
 
     it('has correct boolean defaults', () => {
@@ -96,6 +104,29 @@ describe('useSettingsStore — initial state', () => {
         expect(s.malError).toBe(false);
         expect(s.malLoading).toBe(false);
         expect(s.malSuccess).toBe(false);
+    });
+});
+
+describe('useSettingsStore — lofiStations', () => {
+    it('defaults to 6 stations', () => {
+        expect(useSettingsStore.getState().lofiStations).toHaveLength(6);
+    });
+
+    it('contains all expected default station videoIds', () => {
+        const ids = useSettingsStore.getState().lofiStations.map(s => s.videoId);
+        expect(ids).toContain('lTRiuFIWV54'); // Lofi Girl
+        expect(ids).toContain('4xDzrJKXOOY'); // Synthwave Radio
+        expect(ids).toContain('5yx6BWlEVcY'); // Chillhop Music
+        expect(ids).toContain('Dx5qFachd3A'); // Jazzhop Cafe
+        expect(ids).toContain('F1B9Fk_SgI0'); // Ambient Rain
+        expect(ids).toContain('Gu-g8FRG4Zs'); // Anime Lofi
+    });
+
+    it('each station has id, videoId, and name fields', () => {
+        const s = useSettingsStore.getState().lofiStations[0];
+        expect(s).toHaveProperty('id');
+        expect(s).toHaveProperty('videoId');
+        expect(s).toHaveProperty('name');
     });
 });
 
@@ -150,9 +181,15 @@ describe('useSettingsStore — actions', () => {
         expect(useSettingsStore.getState().lofiId).toBe('abc123');
     });
 
-    it('setCustomLofiId updates customLofiId', () => {
-        useSettingsStore.getState().setCustomLofiId('xyz789');
-        expect(useSettingsStore.getState().customLofiId).toBe('xyz789');
+    it('setLofiStations replaces the stations array', () => {
+        const next = [{ id: 99, videoId: 'xyz', name: 'My Station' }];
+        useSettingsStore.getState().setLofiStations(next);
+        expect(useSettingsStore.getState().lofiStations).toEqual(next);
+    });
+
+    it('setLofiStations to empty array works', () => {
+        useSettingsStore.getState().setLofiStations([]);
+        expect(useSettingsStore.getState().lofiStations).toEqual([]);
     });
 
     it('setVolume updates volume', () => {
@@ -228,6 +265,10 @@ describe('useSettingsStore — persist config', () => {
         expect(useSettingsStore.persist.getOptions().name).toBe('dash_settings');
     });
 
+    it('persist version is 1', () => {
+        expect(useSettingsStore.persist.getOptions().version).toBe(1);
+    });
+
     it('partialize excludes ephemeral keys', () => {
         const { partialize } = useSettingsStore.persist.getOptions();
         const partial = partialize(useSettingsStore.getState());
@@ -243,7 +284,7 @@ describe('useSettingsStore — persist config', () => {
         const partial = partialize(useSettingsStore.getState());
         const expected = [
             'theme', 'font', 'clockMode', 'username', 'malUsername', 'fallbackCity',
-            'use24hClock', 'useCelsius', 'gifName', 'lofiId', 'customLofiId', 'volume',
+            'use24hClock', 'useCelsius', 'gifName', 'lofiId', 'lofiStations', 'volume',
             'speedDials', 'customEngines', 'showWeatherWidget', 'showQuote',
             'showSearchBox', 'showSpeedDial', 'showTop5Anime', 'showAnimeSidebar', 'showLofiPlayer',
         ];
@@ -252,12 +293,63 @@ describe('useSettingsStore — persist config', () => {
         }
     });
 
+    it('partialize does not include customLofiId (removed field)', () => {
+        const { partialize } = useSettingsStore.persist.getOptions();
+        const partial = partialize(useSettingsStore.getState());
+        expect(partial).not.toHaveProperty('customLofiId');
+    });
+
     it('state update writes to localStorage via persist middleware', () => {
         useSettingsStore.getState().setTheme('midnight');
         const stored = JSON.parse(localStorageMock.setItem.mock.calls.findLast(
             ([key]) => key === 'dash_settings'
         )?.[1] ?? 'null');
         expect(stored?.state?.theme).toBe('midnight');
+    });
+});
+
+describe('useSettingsStore — persist migration', () => {
+    it('migrate deduplicates lofiStations by videoId, keeping first occurrence', () => {
+        const { migrate } = useSettingsStore.persist.getOptions();
+        const stateWithDupes = {
+            lofiStations: [
+                { id: 100, videoId: 'Gu-g8FRG4Zs', name: 'My Saved Station' },
+                { id: 6,   videoId: 'Gu-g8FRG4Zs', name: 'Anime Lofi' },
+                { id: 1,   videoId: 'lTRiuFIWV54', name: 'Lofi Girl' },
+            ],
+        };
+        const result = migrate(stateWithDupes, 0);
+        expect(result.lofiStations).toHaveLength(2);
+        expect(result.lofiStations[0].name).toBe('My Saved Station');
+        expect(result.lofiStations[1].videoId).toBe('lTRiuFIWV54');
+    });
+
+    it('migrate preserves stations with all unique videoIds unchanged', () => {
+        const { migrate } = useSettingsStore.persist.getOptions();
+        const clean = {
+            lofiStations: [
+                { id: 1, videoId: 'aaa', name: 'A' },
+                { id: 2, videoId: 'bbb', name: 'B' },
+                { id: 3, videoId: 'ccc', name: 'C' },
+            ],
+        };
+        const result = migrate(clean, 0);
+        expect(result.lofiStations).toHaveLength(3);
+    });
+
+    it('migrate passes through other state keys untouched', () => {
+        const { migrate } = useSettingsStore.persist.getOptions();
+        const state = { theme: 'nord', volume: 0.8, lofiStations: [] };
+        const result = migrate(state, 0);
+        expect(result.theme).toBe('nord');
+        expect(result.volume).toBe(0.8);
+    });
+
+    it('migrate handles state where lofiStations is undefined', () => {
+        const { migrate } = useSettingsStore.persist.getOptions();
+        const state = { theme: 'aurora' };
+        const result = migrate(state, 0);
+        expect(result.theme).toBe('aurora');
     });
 });
 
@@ -271,7 +363,6 @@ describe('useSettingsStore — localStorage seed on init', () => {
             if (key === 'dash_celsius') return 'false';
             return null;
         });
-        // Simulate what the store reads at module init time
         expect(localStorage.getItem('dash_theme')).toBe('dracula');
         expect(localStorage.getItem('dash_username')).toBe('Bob');
         expect(parseFloat(localStorage.getItem('dash_volume'))).toBe(0.9);

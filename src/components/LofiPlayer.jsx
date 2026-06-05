@@ -3,17 +3,8 @@ import { memo, useState, useEffect, useRef, useMemo } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useShallow } from 'zustand/react/shallow';
 
-const STATIONS = [
-    { id: 'lTRiuFIWV54', name: 'Lofi Girl' },
-    { id: '4xDzrJKXOOY', name: 'Synthwave Radio' },
-    { id: '5yx6BWlEVcY', name: 'Chillhop Music' },
-    { id: 'Dx5qFachd3A', name: 'Jazzhop Cafe' },
-    { id: 'F1B9Fk_SgI0', name: 'Ambient Rain' },
-    { id: 'Gu-g8FRG4Zs', name: 'Anime Lofi' } // Default original
-];
-
 export default memo(function LofiPlayer() {
-    const { volume, lofiId, setLofiId, customLofiId } = useSettingsStore(useShallow(s => ({ volume: s.volume, lofiId: s.lofiId, setLofiId: s.setLofiId, customLofiId: s.customLofiId })));
+    const { volume, lofiId, setLofiId, lofiStations } = useSettingsStore(useShallow(s => ({ volume: s.volume, lofiId: s.lofiId, setLofiId: s.setLofiId, lofiStations: s.lofiStations })));
     const [isPlaying, setIsPlaying] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
@@ -21,13 +12,18 @@ export default memo(function LofiPlayer() {
     const iframeRef = useRef(null);
     const shouldAutoPlayRef = useRef(false); // tracks intent across iframe reloads
 
-    const stationsList = useMemo(() => [
-        { id: customLofiId, name: 'My Saved Station' },
-        ...STATIONS.filter(s => s.id !== customLofiId)
-    ], [customLofiId]);
+    const stationsList = useMemo(() =>
+        lofiStations.map(s => ({ id: s.videoId, name: s.name || null })),
+    [lofiStations]);
 
+    const hasStations = stationsList.length > 0;
     const knownStation = stationsList.find(s => s.id === lofiId);
-    const displayTitle = (knownStation && knownStation.name !== 'My Saved Station') ? knownStation.name : title;
+    const displayTitle = knownStation?.name ? knownStation.name : title;
+
+    // Close menu if all stations are deleted while it's open
+    useEffect(() => {
+        if (!hasStations) setShowMenu(false);
+    }, [hasStations]);
 
     // Listen for YouTube IFrame state changes
     useEffect(() => {
@@ -95,7 +91,7 @@ export default memo(function LofiPlayer() {
 
     // Fetch custom title when lofiId changes (if unknown)
     useEffect(() => {
-        if (knownStation && knownStation.name !== 'My Saved Station') {
+        if (knownStation?.name) {
             return;
         }
 
@@ -187,7 +183,7 @@ export default memo(function LofiPlayer() {
                                         setShowMenu(false);
                                     }}
                                 >
-                                    <div className="lofi-station-icon">
+                                    <div className="lofi-station-icon" style={{ flexShrink: 0 }}>
                                         {lofiId === station.id ? (
                                             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -198,7 +194,9 @@ export default memo(function LofiPlayer() {
                                             </svg>
                                         )}
                                     </div>
-                                    {station.name}
+                                    <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {station.name}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -220,11 +218,11 @@ export default memo(function LofiPlayer() {
                     
                     <div 
                         className="lofi-info" 
-                        onClick={() => setShowMenu(!showMenu)} 
+                        onClick={() => hasStations && setShowMenu(!showMenu)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                setShowMenu(!showMenu);
+                                if (hasStations) setShowMenu(!showMenu);
                             }
                         }}
                         role="button"

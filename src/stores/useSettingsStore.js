@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const DEFAULT_STATIONS = [
+    { videoId: 'lTRiuFIWV54', name: 'Lofi Girl' },
+    { videoId: '4xDzrJKXOOY', name: 'Synthwave Radio' },
+    { videoId: '5yx6BWlEVcY', name: 'Chillhop Music' },
+    { videoId: 'Dx5qFachd3A', name: 'Jazzhop Cafe' },
+    { videoId: 'F1B9Fk_SgI0', name: 'Ambient Rain' },
+    { videoId: 'Gu-g8FRG4Zs', name: 'Anime Lofi' },
+];
+
 export const useSettingsStore = create(
     persist(
         (set) => ({
@@ -15,7 +24,7 @@ export const useSettingsStore = create(
             useCelsius:       localStorage.getItem('dash_celsius')              !== 'false',
             gifName:          localStorage.getItem('dash_gif_name')             || '',
             lofiId:           localStorage.getItem('dash_lofi_id')              || 'Gu-g8FRG4Zs',
-            customLofiId:     localStorage.getItem('dash_custom_lofi')          || localStorage.getItem('dash_lofi_id') || 'Gu-g8FRG4Zs',
+            lofiStations:     DEFAULT_STATIONS.map((s, i) => ({ id: i + 1, ...s })),
             volume:           parseFloat(localStorage.getItem('dash_volume'))   || 0.2,
             speedDials:       (() => { try { return JSON.parse(localStorage.getItem('dash_speed_dials') || '[]'); } catch { return []; } })(),
             customEngines:    (() => { try { return JSON.parse(localStorage.getItem('dash_custom_engines') || '[]'); } catch { return []; } })(),
@@ -45,7 +54,7 @@ export const useSettingsStore = create(
             setUseCelsius:        (useCelsius)      => set({ useCelsius }),
             setGifName:           (gifName)         => set({ gifName }),
             setLofiId:            (lofiId)          => set({ lofiId }),
-            setCustomLofiId:      (customLofiId)    => set({ customLofiId }),
+            setLofiStations:      (lofiStations)    => set({ lofiStations }),
             setVolume:            (volume)          => set({ volume }),
             setSpeedDials:        (speedDials)      => set({ speedDials }),
             setCustomEngines:     (customEngines)   => set({ customEngines }),
@@ -64,11 +73,23 @@ export const useSettingsStore = create(
         }),
         {
             name: 'dash_settings',
+            version: 1,
+            migrate: (state) => {
+                if (state.lofiStations) {
+                    const seen = new Set();
+                    state.lofiStations = state.lofiStations.filter(s => {
+                        if (seen.has(s.videoId)) return false;
+                        seen.add(s.videoId);
+                        return true;
+                    });
+                }
+                return state;
+            },
             partialize: (s) => ({
                 theme: s.theme, font: s.font, clockMode: s.clockMode,
                 username: s.username, malUsername: s.malUsername, fallbackCity: s.fallbackCity,
                 use24hClock: s.use24hClock, useCelsius: s.useCelsius, gifName: s.gifName,
-                lofiId: s.lofiId, customLofiId: s.customLofiId, volume: s.volume,
+                lofiId: s.lofiId, lofiStations: s.lofiStations, volume: s.volume,
                 speedDials: s.speedDials, customEngines: s.customEngines,
                 showWeatherWidget: s.showWeatherWidget, showQuote: s.showQuote,
                 showSearchBox: s.showSearchBox, showSpeedDial: s.showSpeedDial,

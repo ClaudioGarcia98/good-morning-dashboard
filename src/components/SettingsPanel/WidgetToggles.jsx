@@ -31,6 +31,7 @@ export default memo(function WidgetToggles() {
         showTop5Anime:     s.showTop5Anime,     setShowTop5Anime:     s.setShowTop5Anime,
         showAnimeSidebar:  s.showAnimeSidebar,  setShowAnimeSidebar:  s.setShowAnimeSidebar,
         showLofiPlayer:    s.showLofiPlayer,    setShowLofiPlayer:    s.setShowLofiPlayer,
+        lofiStations:      s.lofiStations,
     })));
 
     return (
@@ -40,12 +41,19 @@ export default memo(function WidgetToggles() {
                 {WIDGETS.map(({ label, key }) => {
                     const setter = state[SETTER_KEYS[key]];
                     const value = state[key];
+                    const showDisabled = key === 'showLofiPlayer' && state.lofiStations.length === 0;
+                    const effectiveValue = showDisabled ? false : value;
                     return (
                         <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>{label}</span>
                             <div style={{ display: 'flex', gap: '4px' }}>
-                                <button className={`pill ${!value ? 'active' : ''}`} onClick={() => setter(false)}>Hide</button>
-                                <button className={`pill ${value ? 'active' : ''}`} onClick={() => setter(true)}>Show</button>
+                                <button className={`pill ${!effectiveValue ? 'active' : ''}`} onClick={() => setter(false)}>Hide</button>
+                                <button
+                                    className={`pill ${effectiveValue ? 'active' : ''}`}
+                                    onClick={() => !showDisabled && setter(true)}
+                                    disabled={showDisabled}
+                                    style={showDisabled ? { opacity: 0.35, cursor: 'not-allowed' } : undefined}
+                                >Show</button>
                             </div>
                         </div>
                     );
