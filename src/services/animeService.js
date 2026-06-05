@@ -107,7 +107,7 @@ export async function fetchUserWatchingList(malUsername) {
     return fetchWithRetry(async () => {
         try {
             return await fetchWithTimeout(makeCorsproxyioRequest(), 2500);
-        } catch (e) {
+        } catch {
             console.warn('Primary MAL proxy failed or timed out, trying fallbacks...');
             return await fetchWithTimeout(
                 Promise.any([makeAlloriginsRequest(), makeCodetabsRequest()]),
