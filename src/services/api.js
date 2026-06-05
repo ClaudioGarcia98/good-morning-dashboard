@@ -1,6 +1,7 @@
 export const JIKAN_BASE = 'https://api.jikan.moe/v4';
 export const ALLORIGINS_BASE = 'https://api.allorigins.win/get?url=';
 export const CODETABS_BASE = 'https://api.codetabs.com/v1/proxy?quest=';
+export const CORSPROXY_IO_BASE = 'https://corsproxy.io/?';
 export const SCHEDULE_CACHE_KEY = 'dash_anime_schedule_v2';
 export const WATCHING_CACHE_KEY = 'dash_anime_watching';
 

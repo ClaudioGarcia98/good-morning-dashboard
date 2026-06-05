@@ -132,7 +132,7 @@ export default function App() {
                         )}
                     </header>
                     {hasBottomContent && (
-                        <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                        <section style={{ opacity: 'var(--ui-opacity)', transition: 'opacity 0.8s ease-in-out', display: 'flex', flexDirection: 'column' }}>
                             {showSearchBox && <SearchBox />}
                             {showSpeedDial && <SpeedDial />}
                             {showTop5Anime && (
