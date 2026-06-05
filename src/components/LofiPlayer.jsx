@@ -1,3 +1,4 @@
+import './LofiPlayer.css';
 import { memo, useState, useEffect, useRef, useMemo } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useShallow } from 'zustand/react/shallow';

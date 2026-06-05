@@ -1,3 +1,4 @@
+import './SettingsPanel.css';
 import { memo, useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useSettingsStore } from '../../stores/useSettingsStore';

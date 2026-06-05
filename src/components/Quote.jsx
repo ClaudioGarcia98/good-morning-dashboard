@@ -1,3 +1,4 @@
+import './Quote.css';
 import { memo, useState, useEffect } from 'react';
 
 const ANIME_QUOTES = [

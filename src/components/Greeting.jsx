@@ -1,3 +1,4 @@
+import './Greeting.css';
 import { memo, useState, useEffect } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 

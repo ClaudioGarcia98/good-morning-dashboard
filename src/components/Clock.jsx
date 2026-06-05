@@ -1,3 +1,4 @@
+import './Clock.css';
 import { memo, useState, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useShallow } from 'zustand/react/shallow';

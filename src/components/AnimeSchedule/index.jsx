@@ -1,3 +1,4 @@
+import './AnimeSchedule.css';
 import { memo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettingsStore } from '../../stores/useSettingsStore';

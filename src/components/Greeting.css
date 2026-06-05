@@ -1,0 +1,9 @@
+/* ── Greeting ──────────────────────────────────────── */
+#greeting {
+    font-size: 1.3rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 4px;
+    margin-bottom: var(--space-1); color: var(--accent-color);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    transition: color 0.5s ease;
+    animation: fadeSlideIn 0.5s ease 0.08s both;
+}

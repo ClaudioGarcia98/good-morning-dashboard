@@ -1,3 +1,4 @@
+import './SearchBox.css';
 import { memo, useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useShallow } from 'zustand/react/shallow';

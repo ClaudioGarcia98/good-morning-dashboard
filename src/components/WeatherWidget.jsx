@@ -1,3 +1,4 @@
+import './WeatherWidget.css';
 import { memo, useState, useEffect, useRef } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
