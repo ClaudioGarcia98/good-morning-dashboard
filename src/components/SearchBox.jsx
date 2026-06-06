@@ -17,7 +17,7 @@ const ENGINES = {
 };
 
 export default memo(function SearchBox() {
-    const { customEngines, setSpeedDials } = useSettingsStore(useShallow(s => ({ customEngines: s.customEngines, setSpeedDials: s.setSpeedDials })));
+    const { customEngines, speedDials, setSpeedDials } = useSettingsStore(useShallow(s => ({ customEngines: s.customEngines, speedDials: s.speedDials, setSpeedDials: s.setSpeedDials })));
     const [query, setQuery] = useState('');
     const [activeEngine, setActiveEngine] = useState(null);
     const [suggestions, setSuggestions] = useState([]);
@@ -225,7 +225,7 @@ export default memo(function SearchBox() {
             name: finalName,
             url: url
         };
-        setSpeedDials(prev => [...prev, newDial]);
+        setSpeedDials([...speedDials, newDial]);
         setActiveEngine(null);
         setQuery('');
         setShowSuggestions(false);
